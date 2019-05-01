@@ -1,1 +1,1 @@
-# courses-backend
+# Courses Backend
