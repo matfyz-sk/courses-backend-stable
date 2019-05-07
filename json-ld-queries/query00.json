@@ -1,0 +1,7 @@
+{
+  "@context": "http://schema.org/",
+  "@graph": [{
+    "@id" : "?id"
+  }],
+  "$limit": 100
+}

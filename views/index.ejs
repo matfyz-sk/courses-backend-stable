@@ -6,20 +6,20 @@
     <label for="graphName"><strong>Graph URI</strong></label>
   </p>
   <p>
-    <input type="text" id="graphName" name="graphName" value="http://example.com" />
+    <input type="text" size="25" id="graphName" name="graphName" value="http://www.courses.matfyz.sk" />
   </p>
   <p>
     <label for="query"><strong>Query</strong></label>
   </p>
   <p>
-    <input type="text" value="SELECT ?subject ?predicate ?object WHERE {?subject ?predicate ?object}" name="query" id="query"
-      size="100">
+    <textarea name="query" id="query" cols="100"
+      rows="15">SELECT ?subject ?predicate ?object WHERE {?subject ?predicate ?object}</textarea>
   </p>
   <p>
     <label for="format"><strong>Response format</strong></label>
     <select name="format" id="format">
       <option value="text/html">HTML</option>
-      <option value="application/sparql-results+json">JSON</option>
+      <option value="application/json" selected>JSON</option>
     </select>
   </p>
   <input type="submit" value="Run query" />

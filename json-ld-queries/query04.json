@@ -1,0 +1,16 @@
+{
+  "@context": "http://schema.org",
+  "@graph": [{
+    "@id": "?id",
+    "@type": "Country",
+    "name": "$rdfs:label$required",
+    "population": "$dbo:populationTotal$required"
+  }],
+  "$where": [
+    "?id a dbo:Country",
+    "?id dbo:populationTotal ?pop"
+  ],
+  "$filter": [
+    "?pop <= 6000000"
+  ]
+}
