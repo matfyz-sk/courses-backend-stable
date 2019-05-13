@@ -1,0 +1,17 @@
+{
+  "@context": {
+    "User": "http://www.courses.matfyz.sk/ontology#User"
+  },
+  "@graph": [{
+    "@id" : "?id",
+    "name": "?teamName"
+  }],
+  "$where": [
+    "?id a courses:Team",
+    "?id courses:name ?teamName"
+  ],
+  "$prefixes": {
+    "courses": "http://www.courses.matfyz.sk/ontology#"
+  },
+  "$limit": 100
+}

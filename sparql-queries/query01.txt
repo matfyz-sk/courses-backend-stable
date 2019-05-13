@@ -1,0 +1,8 @@
+prefix courses: <http://www.courses.matfyz.sk/ontology#>
+
+SELECT ?teamID ?teamName 
+
+WHERE {
+ ?teamID courses:course <http://www.courses.matfyz.sk/course-instance/1> .
+ ?teamID courses:name ?teamName
+}

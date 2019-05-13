@@ -18,6 +18,7 @@ router.post('/local', (req, res) => {
   const query = req.body.query;
   const format = req.body.format;
   localClient = new Client('http://matfyz.sk:8890/sparql');
+  //localClient = new Client('http://localhost:8890/sparql');
   localClient.setQueryFormat(format);
   localClient.setQueryGraph(graphName);
 
@@ -40,9 +41,16 @@ router.get('/transformer', (req, res) => {
 });
 
 router.post('/transformer-run', async (req, res) => {
+  const options = {
+    context: "http://schema.org",
+    endpoint: "http://matfyz.sk:8890/sparql",
+    //endpoint: "http://dbpedia.org/sparql",
+    //endpoint: "http://127.0.0.1:8890/sparql",
+    debug: true
+  };
   const fileName = req.body.queryFile;
   const q = JSON.parse(fs.readFileSync(`${JSONLD_QUERIES}/${fileName}`, 'utf8'));
-  const out = await sparqlTransformer.default(q);
+  const out = await sparqlTransformer.default(q, options);
   res.render('results', {
     results: out,
     format: 'application/json'
