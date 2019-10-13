@@ -1,17 +1,22 @@
 const initialState = {
-    foo: "initFoo",
-    bar: "initBar"
+  foo: "initFoo",
+  bar: "initBar"
 };
 
 export function main(state = initialState, action) {
-    switch (action.type) {
-        case 'CLASSIC_ACTION':
-            return {
-                ...state,
-                foo: action.foo,
-                bar: action.bar
-            };
-        default:
-            return state;
-    }
+  switch (action.type) {
+    case "CLASSIC_ACTION":
+      return {
+        ...state,
+        foo: action.foo,
+        bar: action.bar
+      };
+    case "SET_TEAMS":
+      return {
+        ...state,
+        teams: action.teams
+      };
+    default:
+      return state;
+  }
 }

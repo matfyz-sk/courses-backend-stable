@@ -1,46 +1,44 @@
-
-const sparqlTransformer = require('sparql-transformer');
-const fs = require('fs');
-const express = require('express');
+const sparqlTransformer = require("sparql-transformer");
+const fs = require("fs");
+const express = require("express");
 const router = express.Router();
-const {
-  Client
-} = require('virtuoso-sparql-client');
+const { Client } = require("virtuoso-sparql-client");
 
-const JSONLD_QUERIES = './json-ld-queries/';
+const JSONLD_QUERIES = "./json-ld-queries/";
 
-router.get('/', (req, res) => {
-  res.render('index');
+router.get("/", (req, res) => {
+  res.render("index");
 });
 
-router.post('/local', (req, res) => {
+router.post("/local", (req, res) => {
   const graphName = req.body.graphName;
   const query = req.body.query;
   const format = req.body.format;
-  localClient = new Client('http://matfyz.sk:8890/sparql');
+  localClient = new Client("http://matfyz.sk:8890/sparql");
   //localClient = new Client('http://localhost:8890/sparql');
   localClient.setQueryFormat(format);
   localClient.setQueryGraph(graphName);
 
-  localClient.query(query)
-    .then((results) => {
-      res.render('results', {
+  localClient
+    .query(query)
+    .then(results => {
+      res.render("results", {
         results: results,
         format: format
       });
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
-      res.send('Error!');
+      res.send("Error!");
     });
 });
 
-router.get('/transformer', (req, res) => {
+router.get("/transformer", (req, res) => {
   var queries = fs.readdirSync(JSONLD_QUERIES);
-  res.render('transformer', {files: queries});
+  res.render("transformer", { files: queries });
 });
 
-router.post('/transformer-run', async (req, res) => {
+router.post("/transformer-run", async (req, res) => {
   const options = {
     context: "http://schema.org",
     endpoint: "http://matfyz.sk:8890/sparql",
@@ -49,12 +47,26 @@ router.post('/transformer-run', async (req, res) => {
     debug: true
   };
   const fileName = req.body.queryFile;
-  const q = JSON.parse(fs.readFileSync(`${JSONLD_QUERIES}/${fileName}`, 'utf8'));
+  const q = JSON.parse(
+    fs.readFileSync(`${JSONLD_QUERIES}/${fileName}`, "utf8")
+  );
   const out = await sparqlTransformer.default(q, options);
-  res.render('results', {
+  res.render("results", {
     results: out,
-    format: 'application/json'
+    format: "application/json"
   });
+});
+
+router.get("/teams", async (req, res, next) => {
+  const options = {
+    context: "http://schema.org",
+    endpoint: "http://matfyz.sk:8890/sparql",
+    debug: true
+  };
+  console.log("Request: ", req.query.data);
+  const q = JSON.parse(req.query.data);
+  const out = await sparqlTransformer.default(q, options);
+  res.send(out);
 });
 
 module.exports = router;
