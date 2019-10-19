@@ -1,21 +1,15 @@
 const path = require("path");
 const express = require("express");
-const layout = require("express-layout");
 const bodyParser = require("body-parser");
 
-const routes = require("./routes");
+const teams = require("./resources/teams");
+const users = require("./resources/users");
+
 const app = express();
 const port = 3001;
 
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "ejs");
-
-const middlewares = [
-  layout(),
-  express.static(path.join(__dirname, "public")),
-  bodyParser.urlencoded()
-];
-app.use(middlewares);
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -26,6 +20,7 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.use("/", routes);
+app.use("/teams", teams);
+app.use("/users", users);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
