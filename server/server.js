@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 
 const teams = require("./resources/teams");
 const users = require("./resources/users");
+const courses = require("./resources/courses");
 
 const app = express();
 const port = 3001;
@@ -20,7 +21,8 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.use("/teams", teams);
-app.use("/users", users);
+app.use("/api/teams", teams);
+app.use("/api/users", users);
+app.use("/api/courses", courses);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
