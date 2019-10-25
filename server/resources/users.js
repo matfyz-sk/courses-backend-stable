@@ -22,38 +22,45 @@ const transformerOptions = {
   debug: true
 };
 
+import Query from "../query/Query";
+
 router.get("/", async (req, res) => {
-  var query = {
-    "@context": {
-      //User: "http://www.courses.matfyz.sk/ontology#User"
-    },
-    "@graph": [
-      {
-        "@id": "?userId",
-        name: "?name",
-        surname: "?surname",
-        email: "?email",
-        about: "?about",
-        nickname: "?nickname"
-      }
-    ],
-    $where: [
-      "?userId a courses:User",
-      "?userId courses:name ?name",
-      "?userId courses:surname ?surname",
-      "?userId courses:email ?email",
-      "?userId courses:about ?about",
-      "?userId courses:nickname ?nickname"
-    ],
-    $prefixes: {
-      courses: "http://www.courses.matfyz.sk/ontology#"
-    }
-  };
-  var out = {};
-  await sparqlTransformer
-    .default(query, transformerOptions)
-    .then(res => (out = res));
-  res.send(out);
+  const q = new Query();
+  q.setProto({
+    id: "?userId",
+    name: "$courses:name",
+    surname: "$courses:surname",
+    email: "$courses:email",
+    about: "$courses:about",
+    nickname: "$courses:nickname"
+  });
+  q.setWhere(["?userId a courses:User"]);
+  q.setPrefixes({
+    courses: "http://www.courses.matfyz.sk/ontology#"
+  });
+  res.status(200).send(await q.run());
+});
+
+router.get("/:id", async (req, res) => {
+  const resourceUri = `<${graphURI}/${resourceName}/${req.params.id}>`;
+  const q = new Query();
+  q.setProto({
+    id: resourceUri,
+    name: "$courses:name$required",
+    surname: "$courses:surname$required",
+    email: "$courses:email$required",
+    about: "$courses:about$required",
+    nickname: "$courses:nickname$required"
+  });
+  q.setWhere([`${resourceUri} a courses:User`]);
+  q.setPrefixes({ courses: "http://www.courses.matfyz.sk/ontology#" });
+  const data = await q.run();
+  console.log(data);
+  if (JSON.stringify(data) == "{}") {
+    res.status(404).send({});
+  } else {
+    res.status(200).send(data);
+  }
 });
 
 router.post("/", async (req, res) => {
@@ -89,41 +96,6 @@ router.post("/:id/requestTeam/:teamId", (req, res) => {});
 router.delete("/:id", async (req, res) => {
   const userId = `http://www.courses.matfyz.sk/user/${req.params.id}`;
   res.status(200).send(req.params);
-});
-
-router.get("/:id", async (req, res) => {
-  const resourceUri =
-    "<" + graphURI + "/" + resourceName + "/" + req.params.id + ">";
-  const query = {
-    "@context": "http://schema.org",
-    "@graph": [
-      {
-        "@type": "User",
-        "@id": resourceUri,
-        name: "$courses:name$required",
-        surname: "$courses:surname$required",
-        email: "$courses:email$required",
-        about: "$courses:about$required",
-        nickname: "$courses:nickname$required"
-      }
-    ],
-    $where: [resourceUri + " a courses:User"],
-    $prefixes: {
-      courses: "http://www.courses.matfyz.sk/ontology#"
-    }
-  };
-  const options = {
-    context: "http://schema.org",
-    endpoint: virtuosoEndpoint,
-    debug: true
-  };
-  var out = {};
-  await sparqlTransformer
-    .default(query, options)
-    .then(res => (out = res))
-    .catch(err => {});
-  console.log(out);
-  res.send(out);
 });
 
 async function getNewId() {
