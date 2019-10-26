@@ -1,113 +1,53 @@
-const sparqlTransformer = require("sparql-transformer");
-const fs = require("fs");
-const express = require("express");
+import * as Constants from "../constants";
+import { buildUri, getNewNode } from "../helpers";
+import Query from "../query/Query";
+import { Client, Node, Text, Data, Triple } from "virtuoso-sparql-client";
+import express from "express";
+
 const router = express.Router();
-const { Client } = require("virtuoso-sparql-client");
 
-router.post("/local", (req, res) => {
-  const graphName = req.body.graphName;
-  const query = req.body.query;
-  const format = req.body.format;
-  localClient = new Client("http://matfyz.sk:8890/sparql");
-  localClient.setQueryFormat(format);
-  localClient.setQueryGraph(graphName);
-  localClient
-    .query(query)
-    .then(results => {
-      res.send(results);
-    })
-    .catch(err => {
-      res.send("Error!");
-    });
-});
-
-router.get("/", async (req, res, next) => {
-  var query = {
-    "@context": {
-      User: "http://www.courses.matfyz.sk/ontology#User"
+router.get("/", async (req, res) => {
+  const q = new Query();
+  q.setProto({
+    id: "?teamId",
+    name: "$courses:name$required",
+    course: {
+      id: "?courseId"
     },
-    "@graph": [
-      {
-        "@id": "?teamId",
-        name: "?name",
-        course: {
-          "@id": "?courseId"
-        },
-        members: {
-          "@id": "?userId",
-          name: "?userName",
-          surname: "?surName",
-          email: "?email"
-        }
-      }
-    ],
-    $where: [
-      "?teamId a courses:Team",
-      "?teamId courses:name ?name",
-      "?teamId courses:course ?courseId",
-      "?teamId courses:hasMember ?userId",
-      "?userId courses:name ?userName",
-      "?userId courses:surname ?surName",
-      "?userId courses:email ?email"
-    ],
-    $prefixes: {
-      courses: "http://www.courses.matfyz.sk/ontology#"
+    members: {
+      id: "?userId",
+      name: "$courses:name$required",
+      surname: "$courses:surname$required",
+      email: "$courses:email$required"
     }
-  };
-
-  const options = {
-    context: "http://schema.org",
-    endpoint: "http://matfyz.sk:8890/sparql",
-    debug: true
-  };
-
-  const out = await sparqlTransformer.default(query, options);
-  res.send(out);
+  });
+  q.setWhere(["?teamId a courses:Team", "?teamId courses:course ?courseId", "OPTIONAL { ?teamId courses:hasMember ?userId }"]);
+  res.status(200).send(await q.run());
 });
 
 router.get("/:id", async (req, res) => {
-  const teamId = `<http://www.courses.matfyz.sk/team/${req.params.id}>`;
-
-  var query = {
-    "@context": {
-      User: "http://www.courses.matfyz.sk/ontology#User"
+  const resourceUri = buildUri(Constants.teamsURI, req.params.id);
+  const q = new Query();
+  q.setProto({
+    id: resourceUri,
+    name: "$courses:name$required",
+    course: {
+      id: "?courseId"
     },
-    "@graph": [
-      {
-        "@id": teamId,
-        name: "?name",
-        course: {
-          "@id": "?courseId"
-        },
-        members: {
-          "@id": "?userId",
-          name: "?userName",
-          surname: "?surName",
-          email: "?email"
-        }
-      }
-    ],
-    $where: [
-      teamId + " a courses:Team",
-      teamId + " courses:name ?name",
-      teamId + " courses:course ?courseId",
-      teamId + " courses:hasMember ?userId",
-      "?userId courses:name ?userName",
-      "?userId courses:surname ?surName",
-      "?userId courses:email ?email"
-    ],
-    $prefixes: {
-      courses: "http://www.courses.matfyz.sk/ontology#"
+    members: {
+      id: "?userId",
+      name: "$courses:name$required",
+      surname: "$courses:surname$required",
+      email: "$courses:email$required"
     }
-  };
-  const options = {
-    context: "http://schema.org",
-    endpoint: "http://matfyz.sk:8890/sparql",
-    debug: true
-  };
-
-  const out = await sparqlTransformer.default(query, options);
-  res.send(out);
+  });
+  q.setWhere([`${resourceUri} a courses:Team`, `${resourceUri} courses:course ?courseId`, `${resourceUri} courses:hasMember ?userId`]);
+  const data = await q.run();
+  if (JSON.stringify(data) == "{}") {
+    res.status(404).send({});
+  } else {
+    res.status(200).send(data);
+  }
 });
 
 module.exports = router;

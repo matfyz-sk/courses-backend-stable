@@ -1,4 +1,5 @@
 import lib from "sparql-transformer";
+import { ontologyURI } from "../constants";
 
 const defaultOptions = {
   context: "http://schema.org",
@@ -11,6 +12,9 @@ class Query {
     this.q = {};
     this.options = options;
     this.sparqlTransformer = lib.default;
+    this.q["$prefixes"] = {
+      courses: ontologyURI
+    };
   }
 
   setProto(proto) {

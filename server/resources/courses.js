@@ -1,21 +1,17 @@
+import * as Constants from "../constants";
+import { buildUri, getNewNode } from "../helpers";
 import Query from "../query/Query";
+import { Client, Node, Text, Data, Triple } from "virtuoso-sparql-client";
+import express from "express";
 
-const { Client, Node, Text, Data, Triple } = require("virtuoso-sparql-client");
-const ID = require("virtuoso-uid");
-const express = require("express");
 const router = express.Router();
 
-const ontologyURI = "http://www.courses.matfyz.sk/ontology#";
-const graphURI = "http://www.courses.matfyz.sk";
-const resourceName = "courses";
-const virtuosoEndpoint = "http://matfyz.sk:8890/sparql";
-
-const db = new Client(virtuosoEndpoint);
+const db = new Client(Constants.virtuosoEndpoint);
 db.addPrefixes({
-  courses: ontologyURI
+  courses: Constants.ontologyURI
 });
 db.setQueryFormat("application/json");
-db.setQueryGraph(graphURI);
+db.setQueryGraph(Constants.graphURI);
 
 router.get("/", async (req, res) => {
   const q = new Query();
@@ -40,14 +36,11 @@ router.get("/", async (req, res) => {
     "OPTIONAL { ?courseId courses:mentions ?mentionsTopicId }",
     "OPTIONAL { ?courseId courses:covers ?coversTopicId }"
   ]);
-  q.setPrefixes({
-    courses: "http://www.courses.matfyz.sk/ontology#"
-  });
   res.status(200).send(await q.run());
 });
 
-router.post("/", (req, res) => {
-  const newCourse = new Node(`${graphURI}/${resourceName}/${req.body.id}`);
+router.post("/", async (req, res) => {
+  const newCourse = await getNewNode(Constants.coursesURI);
   var triples = [
     new Triple(newCourse, "rdf:type", "courses:Course"),
     new Triple(newCourse, "courses:name", new Text(req.body.name)),
@@ -61,12 +54,12 @@ router.post("/", (req, res) => {
   }
   if (req.body.mentions != null) {
     for (var p of req.body.mentions) {
-      triples.push(new Triple(newCourse, "courses:mentions", p));
+      triples.push(new Triple(newCourse, "courses:mentions", new Node(p)));
     }
   }
   if (req.body.covers != null) {
     for (var p of req.body.covers) {
-      triples.push(new Triple(newCourse, "courses:covers", p));
+      triples.push(new Triple(newCourse, "courses:covers", new Node(p)));
     }
   }
   db.getLocalStore().bulk(triples);
@@ -75,40 +68,33 @@ router.post("/", (req, res) => {
     .catch(err => res.status(500).json(err));
 });
 
-function getUri(resourceName, id, f = true) {
-  return `${f ? "<" : ""}${graphURI}/${resourceName}/${id}${f ? ">" : ""}`;
-}
-
 router.post("/createInstance", async (req, res) => {
   var { courseId, year, instructors } = req.body;
-
+  const courseURI = buildUri(Constants.coursesURI, courseId);
   const q = new Query();
   q.setProto({
-    id: getUri("courses", courseId),
+    id: courseURI,
     name: "$courses:name$required"
   });
-  q.setWhere([`${getUri("courses", courseId)} a courses:Course`]);
-  q.setPrefixes({ courses: ontologyURI });
+  q.setWhere([`${courseURI} a courses:Course`]);
   const data = await q.run();
   if (JSON.stringify(data) == "{}") {
     res.status(404).send({});
     return;
   }
 
-  const courseInstanceNode = await getNewNode("courseInstance");
+  const newCourseInstance = await getNewNode(Constants.courseInstancesURI);
 
   var triples = [
-    new Triple(courseInstanceNode, "rdf:type", "courses:CourseInstance"),
-    new Triple(courseInstanceNode, "courses:year", new Text(year)),
-    new Triple(courseInstanceNode, "courses:instanceOf", new Node(getUri("courses", courseId, false)))
+    new Triple(newCourseInstance, "rdf:type", "courses:CourseInstance"),
+    new Triple(newCourseInstance, "courses:year", new Text(year)),
+    new Triple(newCourseInstance, "courses:instanceOf", courseURI)
   ];
-
   if (instructors) {
     for (var uri of instructors) {
-      triples.push(new Triple(courseInstanceNode, "courses:hasInstructor", new Node(uri)));
+      triples.push(new Triple(newCourseInstance, "courses:hasInstructor", new Node(uri)));
     }
   }
-
   db.getLocalStore().bulk(triples);
 
   db.store(true)
@@ -120,8 +106,6 @@ router.get("/instances", async (req, res) => {
   const year = req.query.year != null && req.query.year.length > 0 ? req.query.year : "";
   const courseId = req.query.courseId != null && req.query.courseId.length > 0 ? req.query.courseId : "";
 
-  console.log(year, courseId);
-
   const q = new Query();
   q.setProto({
     id: "?instanceId",
@@ -132,16 +116,15 @@ router.get("/instances", async (req, res) => {
     }
   });
   q.setWhere(["?instanceId a courses:CourseInstance", "OPTIONAL { ?instanceId courses:hasInstructor ?insId }"]);
+
   if (year.length > 0) q.appendWhere(`?instanceId courses:year "${year}"`);
-  if (courseId.length > 0) q.appendWhere(`?instanceId courses:instanceOf ${getUri("courses", courseId)}`);
-  q.setPrefixes({
-    courses: "http://www.courses.matfyz.sk/ontology#"
-  });
+  if (courseId.length > 0) q.appendWhere(`?instanceId courses:instanceOf ${buildUri(Constants.coursesURI, courseId)}`);
+
   res.status(200).send(await q.run());
 });
 
 router.get("/:id", async (req, res) => {
-  const resourceUri = `<${graphURI}/${resourceName}/${req.params.id}>`;
+  const resourceUri = buildUri(Constants.coursesURI, req.params.id);
   const q = new Query();
   q.setProto({
     id: resourceUri,
@@ -164,7 +147,6 @@ router.get("/:id", async (req, res) => {
     `OPTIONAL { ${resourceUri} courses:mentions ?mentionsTopicId }`,
     `OPTIONAL { ${resourceUri} courses:covers ?coversTopicId }`
   ]);
-  q.setPrefixes({ courses: "http://www.courses.matfyz.sk/ontology#" });
   const data = await q.run();
   if (JSON.stringify(data) == "{}") {
     res.status(404).send({});
@@ -172,20 +154,5 @@ router.get("/:id", async (req, res) => {
     res.status(200).send(data);
   }
 });
-
-async function getNewNode(resourceName) {
-  ID.config({
-    endpoint: virtuosoEndpoint,
-    graph: graphURI,
-    prefix: graphURI + "/" + resourceName + "/"
-  });
-  let newNode;
-  await ID.create()
-    .then(commentIdTmp => {
-      newNode = new Node(commentIdTmp);
-    })
-    .catch(console.log);
-  return newNode;
-}
 
 module.exports = router;

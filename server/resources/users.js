@@ -1,28 +1,17 @@
-const { Client, Node, Text, Data, Triple } = require("virtuoso-sparql-client");
-const ID = require("virtuoso-uid");
-const sparqlTransformer = require("sparql-transformer");
-const express = require("express");
+import * as Constants from "../constants";
+import * as Helpers from "../helpers";
+import Query from "../query/Query";
+import { Client, Node, Text, Data, Triple } from "virtuoso-sparql-client";
+import express from "express";
+
 const router = express.Router();
 
-const ontologyURI = "http://www.courses.matfyz.sk/ontology#";
-const graphURI = "http://www.courses.matfyz.sk";
-const resourceName = "users";
-const virtuosoEndpoint = "http://matfyz.sk:8890/sparql";
-
-const db = new Client(virtuosoEndpoint);
+const db = new Client(Constants.virtuosoEndpoint);
 db.addPrefixes({
-  courses: ontologyURI
+  courses: Constants.ontologyURI
 });
 db.setQueryFormat("application/json");
-db.setQueryGraph(graphURI);
-
-const transformerOptions = {
-  context: "http://schema.org",
-  endpoint: virtuosoEndpoint,
-  debug: true
-};
-
-import Query from "../query/Query";
+db.setQueryGraph(Constants.graphURI);
 
 router.get("/", async (req, res) => {
   const q = new Query();
@@ -35,14 +24,11 @@ router.get("/", async (req, res) => {
     nickname: "$courses:nickname"
   });
   q.setWhere(["?userId a courses:User"]);
-  q.setPrefixes({
-    courses: "http://www.courses.matfyz.sk/ontology#"
-  });
   res.status(200).send(await q.run());
 });
 
 router.get("/:id", async (req, res) => {
-  const resourceUri = `<${graphURI}/${resourceName}/${req.params.id}>`;
+  const resourceUri = Helpers.buildUri(Constants.usersURI, req.params.id);
   const q = new Query();
   q.setProto({
     id: resourceUri,
@@ -53,9 +39,7 @@ router.get("/:id", async (req, res) => {
     nickname: "$courses:nickname$required"
   });
   q.setWhere([`${resourceUri} a courses:User`]);
-  q.setPrefixes({ courses: "http://www.courses.matfyz.sk/ontology#" });
   const data = await q.run();
-  console.log(data);
   if (JSON.stringify(data) == "{}") {
     res.status(404).send({});
   } else {
@@ -64,8 +48,7 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  //const data = req.body;
-  var newUser = new Node(graphURI + "/" + resourceName + "/2000");
+  var newUser = await Helpers.getNewNode(Constants.usersURI);
   var triples = [
     new Triple(newUser, "rdf:type", "courses:User"),
     new Triple(newUser, "courses:name", new Text(req.body.name)),
@@ -74,43 +57,17 @@ router.post("/", async (req, res) => {
     new Triple(newUser, "courses:about", new Text(req.body.about)),
     new Triple(newUser, "courses:nickname", new Text(req.body.nickname))
   ];
+
   db.getLocalStore().bulk(triples);
-  await db
-    .store(true)
-    .then(res => {
-      console.log("Success");
-      console.log(res);
-    })
-    .catch(err => {
-      console.log("Error");
-      console.log(err);
-    });
-  //var id = await getNewId();
-  res.status(200).send(req.body);
+  db.store(true)
+    .then(result => res.status(200).json(result))
+    .catch(err => res.status(500).json(err));
 });
 
 router.post("/:id/requestCourse/:courseId", (req, res) => {});
 
 router.post("/:id/requestTeam/:teamId", (req, res) => {});
 
-router.delete("/:id", async (req, res) => {
-  const userId = `http://www.courses.matfyz.sk/user/${req.params.id}`;
-  res.status(200).send(req.params);
-});
-
-async function getNewId() {
-  ID.config({
-    endpoint: virtuosoEndpoint,
-    graph: graphURI,
-    prefix: graphURI + "/" + resourceName + "/"
-  });
-  var newID;
-  await ID.create()
-    .then(id => {
-      newID = id;
-    })
-    .catch(console.log);
-  return newID;
-}
+router.delete("/:id", async (req, res) => {});
 
 module.exports = router;
