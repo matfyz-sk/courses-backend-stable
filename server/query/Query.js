@@ -21,6 +21,11 @@ class Query {
     this.q["$where"] = where;
   }
 
+  appendWhere(where) {
+    if (this.q.$where == null) this.q["$where"] = [];
+    this.q.$where.push(where);
+  }
+
   setFilter(filter) {
     this.q["$filter"] = filter;
   }
