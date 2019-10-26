@@ -7,7 +7,7 @@ const users = require("./resources/users");
 const courses = require("./resources/courses");
 
 const app = express();
-const port = 3001;
+const port = 3000;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
