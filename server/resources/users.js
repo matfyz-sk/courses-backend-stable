@@ -1,5 +1,5 @@
 import * as Constants from "../constants";
-import * as Helpers from "../helpers";
+import { buildUri, getNewNode } from "../helpers";
 import Query from "../query/Query";
 import { Client, Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import express from "express";
@@ -28,7 +28,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-    const resourceUri = Helpers.buildUri(Constants.usersURI, req.params.id);
+    const resourceUri = buildUri(Constants.usersURI, req.params.id);
     const q = new Query();
     q.setProto({
         id: resourceUri,
@@ -48,7 +48,7 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    var newUser = await Helpers.getNewNode(Constants.usersURI);
+    var newUser = await getNewNode(Constants.usersURI);
     var triples = [
         new Triple(newUser, "rdf:type", "courses:User"),
         new Triple(newUser, "courses:name", new Text(req.body.name)),
@@ -70,4 +70,4 @@ router.post("/:id/requestTeam/:teamId", (req, res) => {});
 
 router.delete("/:id", async (req, res) => {});
 
-module.exports = router;
+exports.userRouter = router;
