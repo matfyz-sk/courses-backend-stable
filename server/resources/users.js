@@ -1,5 +1,6 @@
 import * as Constants from "../constants";
-import { buildUri, getNewNode } from "../helpers";
+import { buildUri, getNewNode, validateRequestBody } from "../helpers";
+import { createUserRequest } from "../constants/schemas";
 import Query from "../query/Query";
 import { Client, Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import express from "express";
@@ -48,6 +49,15 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+    const validationResult = validateRequestBody(req.body, createUserRequest);
+    if (validationResult.length > 0) {
+        res.status(400).json({
+            errorType: "BAD_REQUEST",
+            errorMessages: validationResult
+        });
+        return;
+    }
+
     var newUser = await getNewNode(Constants.usersURI);
     var triples = [
         new Triple(newUser, "rdf:type", "courses:User"),
@@ -57,7 +67,7 @@ router.post("/", async (req, res) => {
         new Triple(newUser, "courses:about", new Text(req.body.about)),
         new Triple(newUser, "courses:nickname", new Text(req.body.nickname))
     ];
-
+    db.setQueryGraph(Constants.graphURI);
     db.getLocalStore().bulk(triples);
     db.store(true)
         .then(result => res.status(200).json(result))

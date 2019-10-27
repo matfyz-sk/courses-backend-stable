@@ -1,5 +1,6 @@
 import * as Constants from "../constants";
-import { buildUri, getNewNode } from "../helpers";
+import { buildUri, getNewNode, validateRequestBody } from "../helpers";
+import { createCourseRequest } from "../constants/schemas";
 import Query from "../query/Query";
 import { Client, Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import express from "express";
@@ -40,6 +41,15 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+    const validationResult = validateRequestBody(req.body, createCourseRequest);
+    if (validationResult.length > 0) {
+        res.status(400).json({
+            errorType: "BAD_REQUEST",
+            errorMessages: validationResult
+        });
+        return;
+    }
+
     const newCourse = await getNewNode(Constants.coursesURI);
     var triples = [
         new Triple(newCourse, "rdf:type", "courses:Course"),
