@@ -6,3 +6,4 @@ export const usersURI = graphURI + "/user/";
 export const teamsURI = graphURI + "/team/";
 export const coursesURI = graphURI + "/course/";
 export const courseInstancesURI = graphURI + "/courseInstance/";
+export const questionURI = graphURI + "/question/";

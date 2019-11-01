@@ -11,5 +11,6 @@ app.use(bodyParser.json());
 app.use("/api/teams", resources.teams);
 app.use("/api/users", resources.users);
 app.use("/api/courses", resources.courses);
+app.use("/api/quizzes", resources.quizzes);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
