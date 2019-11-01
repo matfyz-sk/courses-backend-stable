@@ -46,6 +46,10 @@ class Query {
         this.q["$offset"] = offset;
     }
 
+    setOrderBy(orderBy) {
+        this.q["$orderBy"] = orderBy;
+    }
+
     async run() {
         console.log(this.q);
         var out = {};
