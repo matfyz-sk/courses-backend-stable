@@ -14,6 +14,23 @@ db.addPrefixes({
 db.setQueryFormat("application/json");
 db.setQueryGraph(Constants.graphURI);
 
+router.get("/", async (req, res) => {
+    const q = new Query();
+    q.setProto({
+        id: "?topicId",
+        name: "$rdfs:label",
+        description: "$courses:description",
+        hasPrerequisite: {
+            id: "?prereqId"
+        },
+        subtopicOf: {
+            id: "?subtopicId"
+        }
+    });
+    q.setWhere(["?topicId a courses:Topic", "OPTIONAL {?topicId courses:hasPrerequisite ?prereqId}", "OPTIONAL {?topicId courses:subtopicOf ?subtopicId}"]);
+    res.status(200).send(await q.run());
+});
+
 router.post("/", async (req, res) => {
     const name = req.body.name;
     const description = req.body.description;
