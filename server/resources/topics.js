@@ -27,8 +27,8 @@ router.post("/", async (req, res) => {
         new Triple(topicNode, "rdfs:label", new Text(name)),
         new Triple(topicNode, "courses:description", new Text(description))
     ];
-    if (hasPrerequisite) triples.push(topicNode, "courses:hasPrerequisite", new Node(hasPrerequisite));
-    if (subtopicOf) triples.push(topicNode, "courses:subtopicOf", new Node(subtopicOf));
+    if (hasPrerequisite) triples.push(new Triple(topicNode, "courses:hasPrerequisite", new Node(hasPrerequisite)));
+    if (subtopicOf) triples.push(new Triple(topicNode, "courses:subtopicOf", new Node(subtopicOf)));
 
     db.getLocalStore().bulk(triples);
     db.store(true)
