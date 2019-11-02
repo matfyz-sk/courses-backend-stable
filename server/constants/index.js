@@ -7,3 +7,4 @@ export const teamsURI = graphURI + "/team/";
 export const coursesURI = graphURI + "/course/";
 export const courseInstancesURI = graphURI + "/courseInstance/";
 export const questionURI = graphURI + "/question/";
+export const topicURI = graphURI + "/topic/";
