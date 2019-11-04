@@ -1,5 +1,5 @@
 import * as Constants from "../constants";
-import { buildUri, getNewNode, validateRequestBody } from "../helpers";
+import { buildUri, getNewNode, validateRequestBody, predicate } from "../helpers";
 import { createUserRequest } from "../constants/schemas";
 import * as Predicates from "../constants/predicates";
 import Query from "../query/Query";
@@ -19,8 +19,8 @@ router.get("/", async (req, res) => {
     const q = new Query();
     q.setProto({
         id: "?topicId",
-        name: "$rdfs:label",
-        description: "$courses:description",
+        name: predicate(Predicates.label),
+        description: predicate(Predicates.description),
         hasPrerequisite: {
             id: "?prereqId"
         },
@@ -58,4 +58,35 @@ router.post("/", async (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
+async function findById(topicId) {
+    const uri = buildUri(Constants.topicURI, topicId);
+    const q = new Query();
+    q.setProto({
+        id: uri,
+        name: predicate(Predicates.label),
+        description: predicate(Predicates.description),
+        hasPrerequisite: {
+            id: "?prereqId"
+        },
+        subtopicOf: {
+            id: "?subtopicId"
+        }
+    });
+    q.setWhere([
+        `${uri} ${Predicates.type} courses:Topic`,
+        `OPTIONAL {${uri} ${Predicates.hasPrerequisite} ?prereqId}`,
+        `OPTIONAL {${uri} ${Predicates.subtopicOf} ?subtopicId}`
+    ]);
+    const data = await q.run();
+    return data;
+}
+
+router.get("/:id", async (req, res) => {
+    const data = await findById(req.params.id);
+    if (JSON.stringify(data) == "{}") {
+        res.status(404).json({});
+        return;
+    }
+    res.status(200).send(data[0]);
+});
 exports.topicsRouter = router;

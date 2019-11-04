@@ -45,3 +45,7 @@ export function validateRequestBody(requestBody, schema) {
     }
     return [];
 }
+
+export function predicate(predicate, required = true) {
+    return "$" + predicate + (required ? "$required" : "");
+}
