@@ -14,6 +14,7 @@ db.addPrefixes({
 });
 db.setQueryFormat("application/json");
 db.setQueryGraph(Constants.graphURI);
+db.setDefaultGraph(Constants.graphURI);
 
 router.get("/", async (req, res) => {
     const q = new Query();
@@ -49,7 +50,11 @@ router.post("/", async (req, res) => {
         new Triple(topicNode, Predicates.label, new Text(name)),
         new Triple(topicNode, Predicates.description, new Text(desc))
     ];
-    if (hasPrereq) triples.push(new Triple(topicNode, Predicates.hasPrerequisite, new Node(hasPrereq)));
+    if (hasPrereq) {
+        for (var p of hasPrereq) {
+            triples.push(new Triple(topicNode, Predicates.hasPrerequisite, new Node(p)));
+        }
+    }
     if (subtopicOf) triples.push(new Triple(topicNode, Predicates.subtopicOf, new Node(subtopicOf)));
 
     db.getLocalStore().bulk(triples);
@@ -90,7 +95,66 @@ router.get("/:id", async (req, res) => {
     res.status(200).send(data[0]);
 });
 
-router.patch("/:id", async (req, res) => {});
+router.delete("/:id", async (req, res) => {
+    const data = await findById(req.params.id);
+    if (JSON.stringify(data) == "{}") {
+        res.status(404).json({});
+        return;
+    }
+    const uri = buildUri(Constants.topicURI, req.params.id);
+    var triples = [];
+    triples.push(new Triple(uri, Predicates.label, new Text(data[0].name), Triple.REMOVE));
+    triples.push(new Triple(uri, Predicates.description, new Text(data[0].description), Triple.REMOVE));
+    if (Array.isArray(data[0].hasPrerequisite)) {
+        for (var p of data[0].hasPrerequisite) {
+            triples.push(new Triple(uri, Predicates.hasPrerequisite, new Node(p.id), Triple.REMOVE));
+        }
+    } else if (data[0].hasPrerequisite.id) {
+        triples.push(new Triple(uri, Predicates.hasPrerequisite, new Node(data[0].hasPrerequisite.id), Triple.REMOVE));
+    }
+    if (data[0].subtopicOf.id) {
+        triples.push(new Triple(uri, Predicates.subtopicOf, new Node(data[0].subtopicOf.id), Triple.REMOVE));
+    }
+    db.getLocalStore().bulk(triples);
+    db.store(true)
+        .then(result => res.status(200).json(result))
+        .catch(err => res.status(500).json(err));
+});
+
+router.patch("/:id", async (req, res) => {
+    const data = await findById(req.params.id);
+    if (JSON.stringify(data) == "{}") {
+        res.status(404).json({});
+        return;
+    }
+    const uri = buildUri(Constants.topicURI, req.params.id);
+    var triples = [];
+    var tmp;
+    if (req.body.name) {
+        tmp = new Triple(uri, Predicates.label, new Text(data[0].name));
+        tmp.updateObject(new Text(req.body.name));
+        triples.push(tmp);
+    }
+    if (req.body.description) {
+        tmp = new Triple(uri, Predicates.description, new Text(data[0].description));
+        tmp.updateObject(new Text(req.body.description));
+        triples.push(tmp);
+    }
+    if (req.body.hasPrerequisite) {
+        for (var p of req.body.hasPrerequisite) {
+            tmp = new Triple(uri, Predicates.hasPrerequisite, new Text(data[0].description));
+            tmp.updateObject(new Text(req.body.description));
+        }
+    }
+    if (triples.length == 0) {
+        res.status(200).send("OK");
+        return;
+    }
+    db.getLocalStore().bulk(triples);
+    db.store(true)
+        .then(result => res.status(201).json(result))
+        .catch(err => res.status(500).json(err));
+});
 
 router.put("/:id", async (req, res) => {});
 
