@@ -1,6 +1,7 @@
 import * as Constants from "../constants";
 import { buildUri, getNewNode, validateRequestBody } from "../helpers";
 import { createUserRequest } from "../constants/schemas";
+import { type, hasPrerequisite, subtopicOf, label, description } from "../constants/predicates";
 import Query from "../query/Query";
 import { Client, Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import express from "express";
@@ -27,25 +28,29 @@ router.get("/", async (req, res) => {
             id: "?subtopicId"
         }
     });
-    q.setWhere(["?topicId a courses:Topic", "OPTIONAL {?topicId courses:hasPrerequisite ?prereqId}", "OPTIONAL {?topicId courses:subtopicOf ?subtopicId}"]);
+    q.setWhere([
+        `?topicId ${type} courses:Topic`,
+        `OPTIONAL {?topicId ${hasPrerequisite} ?prereqId}`,
+        `OPTIONAL {?topicId ${subtopicOf} ?subtopicId}`
+    ]);
     res.status(200).send(await q.run());
 });
 
 router.post("/", async (req, res) => {
     const name = req.body.name;
-    const description = req.body.description;
-    const hasPrerequisite = req.body.hasPrerequisite;
+    const desc = req.body.description;
+    const hasPrereq = req.body.hasPrerequisite;
     const subtopicOf = req.body.subtopicOf;
 
     const topicNode = await getNewNode(Constants.topicURI);
 
     var triples = [
-        new Triple(topicNode, "rdf:type", "courses:Topic"),
-        new Triple(topicNode, "rdfs:label", new Text(name)),
-        new Triple(topicNode, "courses:description", new Text(description))
+        new Triple(topicNode, type, "courses:Topic"),
+        new Triple(topicNode, label, new Text(name)),
+        new Triple(topicNode, description, new Text(desc))
     ];
-    if (hasPrerequisite) triples.push(new Triple(topicNode, "courses:hasPrerequisite", new Node(hasPrerequisite)));
-    if (subtopicOf) triples.push(new Triple(topicNode, "courses:subtopicOf", new Node(subtopicOf)));
+    if (hasPrereq) triples.push(new Triple(topicNode, hasPrerequisite, new Node(hasPrereq)));
+    if (subtopicOf) triples.push(new Triple(topicNode, subtopicOf, new Node(subtopicOf)));
 
     db.getLocalStore().bulk(triples);
     db.store(true)
