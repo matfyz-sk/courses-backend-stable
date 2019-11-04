@@ -1,13 +1,13 @@
-import { userRouter } from "./users";
-import { coursesRouter } from "./courses";
-import { teamsRouter } from "./teams";
-import { quizRouter } from "./quizzes";
-import { topicsRouter } from "./topics";
+import { userRouter } from "./user";
+import { coursesRouter } from "./course";
+import { teamsRouter } from "./team";
+import { quizRouter } from "./quiz";
+import { topicsRouter } from "./topic";
 
 module.exports = {
-    users: userRouter,
-    courses: coursesRouter,
-    teams: teamsRouter,
-    quizzes: quizRouter,
-    topics: topicsRouter,
+    user: userRouter,
+    course: coursesRouter,
+    team: teamsRouter,
+    quiz: quizRouter,
+    topic: topicsRouter,
 };

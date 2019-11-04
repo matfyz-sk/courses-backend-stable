@@ -89,4 +89,9 @@ router.get("/:id", async (req, res) => {
     }
     res.status(200).send(data[0]);
 });
+
+router.patch("/:id", async (req, res) => {});
+
+router.put("/:id", async (req, res) => {});
+
 exports.topicsRouter = router;

@@ -94,4 +94,5 @@ router.get("/questionTypes", async (req, res) => {
     res.status(200).send(await q.run());
 });
 
+
 exports.quizRouter = router;
