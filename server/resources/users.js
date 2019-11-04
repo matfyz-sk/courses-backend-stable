@@ -1,4 +1,5 @@
 import * as Constants from "../constants";
+import * as Predicates from "../constants/predicates";
 import { buildUri, getNewNode, validateRequestBody } from "../helpers";
 import { createUserRequest } from "../constants/schemas";
 import Query from "../query/Query";
@@ -24,7 +25,7 @@ router.get("/", async (req, res) => {
         about: "$courses:about",
         nickname: "$courses:nickname"
     });
-    q.setWhere(["?userId a courses:User"]);
+    q.setWhere([`?userId ${Predicates.type} courses:User`]);
     res.status(200).send(await q.run());
 });
 
@@ -39,7 +40,7 @@ router.get("/:id", async (req, res) => {
         about: "$courses:about$required",
         nickname: "$courses:nickname$required"
     });
-    q.setWhere([`${resourceUri} a courses:User`]);
+    q.setWhere([`${resourceUri} ${Predicates.type} courses:User`]);
     const data = await q.run();
     if (JSON.stringify(data) == "{}") {
         res.status(404).send({});
@@ -60,12 +61,12 @@ router.post("/", async (req, res) => {
 
     var newUser = await getNewNode(Constants.usersURI);
     var triples = [
-        new Triple(newUser, "rdf:type", "courses:User"),
-        new Triple(newUser, "courses:name", new Text(req.body.name)),
-        new Triple(newUser, "courses:surname", new Text(req.body.surname)),
-        new Triple(newUser, "courses:email", new Text(req.body.email)),
-        new Triple(newUser, "courses:about", new Text(req.body.about)),
-        new Triple(newUser, "courses:nickname", new Text(req.body.nickname))
+        new Triple(newUser, Predicates.type, "courses:User"),
+        new Triple(newUser, Predicates.name, new Text(req.body.name)),
+        new Triple(newUser, Predicates.surname, new Text(req.body.surname)),
+        new Triple(newUser, Predicates.email, new Text(req.body.email)),
+        new Triple(newUser, Predicates.description, new Text(req.body.about)),
+        new Triple(newUser, Predicates.nickname, new Text(req.body.nickname))
     ];
     db.setQueryGraph(Constants.graphURI);
     db.getLocalStore().bulk(triples);

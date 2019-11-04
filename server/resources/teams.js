@@ -1,4 +1,5 @@
 import * as Constants from "../constants";
+import * as Predicates from "../constants/predicates";
 import { buildUri, getNewNode } from "../helpers";
 import Query from "../query/Query";
 import { Client, Node, Text, Data, Triple } from "virtuoso-sparql-client";
@@ -21,7 +22,11 @@ router.get("/", async (req, res) => {
             email: "$courses:email$required"
         }
     });
-    q.setWhere(["?teamId a courses:Team", "?teamId courses:course ?courseId", "OPTIONAL { ?teamId courses:hasMember ?userId }"]);
+    q.setWhere([
+        `?teamId ${Predicates.type} courses:Team`,
+        `?teamId ${Predicates.course} ?courseId`,
+        `OPTIONAL { ?teamId ${Predicates.hasMember} ?userId }`
+    ]);
     res.status(200).send(await q.run());
 });
 
@@ -41,7 +46,11 @@ router.get("/:id", async (req, res) => {
             email: "$courses:email$required"
         }
     });
-    q.setWhere([`${resourceUri} a courses:Team`, `${resourceUri} courses:course ?courseId`, `${resourceUri} courses:hasMember ?userId`]);
+    q.setWhere([
+        `${resourceUri} ${Predicates.type} courses:Team`,
+        `${resourceUri} ${Predicates.course} ?courseId`,
+        `${resourceUri} ${Predicates.hasMember} ?userId`
+    ]);
     const data = await q.run();
     if (JSON.stringify(data) == "{}") {
         res.status(404).send({});

@@ -1,4 +1,5 @@
 import * as Constants from "../constants";
+import * as Predicates from "../constants/predicates";
 import { buildUri, getNewNode, validateRequestBody } from "../helpers";
 import { createCourseRequest } from "../constants/schemas";
 import Query from "../query/Query";
@@ -32,10 +33,10 @@ router.get("/", async (req, res) => {
         }
     });
     q.setWhere([
-        "?courseId a courses:Course",
-        "OPTIONAL { ?courseId courses:hasPrerequisite ?prereqId }",
-        "OPTIONAL { ?courseId courses:mentions ?mentionsTopicId }",
-        "OPTIONAL { ?courseId courses:covers ?coversTopicId }"
+        `?courseId ${Predicates.type} courses:Course`,
+        `OPTIONAL { ?courseId ${Predicates.hasPrerequisite} ?prereqId }`,
+        `OPTIONAL { ?courseId ${Predicates.mentions} ?mentionsTopicId }`,
+        `OPTIONAL { ?courseId ${Predicates.covers} ?coversTopicId }`
     ]);
     res.status(200).send(await q.run());
 });
@@ -52,24 +53,24 @@ router.post("/", async (req, res) => {
 
     const newCourse = await getNewNode(Constants.coursesURI);
     var triples = [
-        new Triple(newCourse, "rdf:type", "courses:Course"),
-        new Triple(newCourse, "courses:name", new Text(req.body.name)),
-        new Triple(newCourse, "courses:about", new Text(req.body.about)),
-        new Triple(newCourse, "courses:abbreviation", new Text(req.body.abbreviation))
+        new Triple(newCourse, Predicates.type, "courses:Course"),
+        new Triple(newCourse, Predicates.label, new Text(req.body.name)),
+        new Triple(newCourse, Predicates.description, new Text(req.body.about)),
+        new Triple(newCourse, Predicates.abbreviation, new Text(req.body.abbreviation))
     ];
     if (req.body.hasPrerequisite != null) {
         for (var p of req.body.hasPrerequisite) {
-            triples.push(new Triple(newCourse, "courses:hasPrerequisite", new Node(p)));
+            triples.push(new Triple(newCourse, Predicates.hasPrerequisite, new Node(p)));
         }
     }
     if (req.body.mentions != null) {
         for (var p of req.body.mentions) {
-            triples.push(new Triple(newCourse, "courses:mentions", new Node(p)));
+            triples.push(new Triple(newCourse, Predicates.mentions, new Node(p)));
         }
     }
     if (req.body.covers != null) {
         for (var p of req.body.covers) {
-            triples.push(new Triple(newCourse, "courses:covers", new Node(p)));
+            triples.push(new Triple(newCourse, Predicates.covers, new Node(p)));
         }
     }
     db.getLocalStore().bulk(triples);
@@ -86,7 +87,7 @@ router.post("/createInstance", async (req, res) => {
         id: courseURI,
         name: "$courses:name$required"
     });
-    q.setWhere([`${courseURI} a courses:Course`]);
+    q.setWhere([`${courseURI} ${Predicates.type} courses:Course`]);
     const data = await q.run();
     if (JSON.stringify(data) == "{}") {
         res.status(404).send({});
@@ -96,13 +97,13 @@ router.post("/createInstance", async (req, res) => {
     const newCourseInstance = await getNewNode(Constants.courseInstancesURI);
 
     var triples = [
-        new Triple(newCourseInstance, "rdf:type", "courses:CourseInstance"),
-        new Triple(newCourseInstance, "courses:year", new Text(year)),
-        new Triple(newCourseInstance, "courses:instanceOf", courseURI)
+        new Triple(newCourseInstance, Predicates.type, "courses:CourseInstance"),
+        new Triple(newCourseInstance, Predicates.year, new Text(year)),
+        new Triple(newCourseInstance, Predicates.instanceOf, courseURI)
     ];
     if (instructors) {
         for (var uri of instructors) {
-            triples.push(new Triple(newCourseInstance, "courses:hasInstructor", new Node(uri)));
+            triples.push(new Triple(newCourseInstance, Predicates.hasInstructor, new Node(uri)));
         }
     }
     db.getLocalStore().bulk(triples);
@@ -125,10 +126,10 @@ router.get("/instances", async (req, res) => {
             id: "?insId"
         }
     });
-    q.setWhere(["?instanceId a courses:CourseInstance", "OPTIONAL { ?instanceId courses:hasInstructor ?insId }"]);
+    q.setWhere([`?instanceId ${Predicates.type} courses:CourseInstance`, `OPTIONAL { ?instanceId ${Predicates.hasInstructor} ?insId }`]);
 
-    if (year.length > 0) q.appendWhere(`?instanceId courses:year "${year}"`);
-    if (courseId.length > 0) q.appendWhere(`?instanceId courses:instanceOf ${buildUri(Constants.coursesURI, courseId)}`);
+    if (year.length > 0) q.appendWhere(`?instanceId ${Predicates.year} "${year}"`);
+    if (courseId.length > 0) q.appendWhere(`?instanceId ${Predicates.instanceOf} ${buildUri(Constants.coursesURI, courseId)}`);
 
     res.status(200).send(await q.run());
 });
@@ -152,10 +153,10 @@ router.get("/:id", async (req, res) => {
         }
     });
     q.setWhere([
-        `${resourceUri} a courses:Course`,
-        `OPTIONAL { ${resourceUri} courses:hasPrerequisite ?prereqId }`,
-        `OPTIONAL { ${resourceUri} courses:mentions ?mentionsTopicId }`,
-        `OPTIONAL { ${resourceUri} courses:covers ?coversTopicId }`
+        `${resourceUri} ${Predicates.type} courses:Course`,
+        `OPTIONAL { ${resourceUri} ${Predicates.hasPrerequisite} ?prereqId }`,
+        `OPTIONAL { ${resourceUri} ${Predicates.mentions} ?mentionsTopicId }`,
+        `OPTIONAL { ${resourceUri} ${Predicates.covers} ?coversTopicId }`
     ]);
     const data = await q.run();
     if (JSON.stringify(data) == "{}") {

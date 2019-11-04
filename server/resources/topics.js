@@ -1,7 +1,7 @@
 import * as Constants from "../constants";
 import { buildUri, getNewNode, validateRequestBody } from "../helpers";
 import { createUserRequest } from "../constants/schemas";
-import { type, hasPrerequisite, subtopicOf, label, description } from "../constants/predicates";
+import * as Predicates from "../constants/predicates";
 import Query from "../query/Query";
 import { Client, Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import express from "express";
@@ -29,9 +29,9 @@ router.get("/", async (req, res) => {
         }
     });
     q.setWhere([
-        `?topicId ${type} courses:Topic`,
-        `OPTIONAL {?topicId ${hasPrerequisite} ?prereqId}`,
-        `OPTIONAL {?topicId ${subtopicOf} ?subtopicId}`
+        `?topicId ${Predicates.type} courses:Topic`,
+        `OPTIONAL {?topicId ${Predicates.hasPrerequisite} ?prereqId}`,
+        `OPTIONAL {?topicId ${Predicates.subtopicOf} ?subtopicId}`
     ]);
     res.status(200).send(await q.run());
 });
@@ -45,12 +45,12 @@ router.post("/", async (req, res) => {
     const topicNode = await getNewNode(Constants.topicURI);
 
     var triples = [
-        new Triple(topicNode, type, "courses:Topic"),
-        new Triple(topicNode, label, new Text(name)),
-        new Triple(topicNode, description, new Text(desc))
+        new Triple(topicNode, Predicates.type, "courses:Topic"),
+        new Triple(topicNode, Predicates.label, new Text(name)),
+        new Triple(topicNode, Predicates.description, new Text(desc))
     ];
-    if (hasPrereq) triples.push(new Triple(topicNode, hasPrerequisite, new Node(hasPrereq)));
-    if (subtopicOf) triples.push(new Triple(topicNode, subtopicOf, new Node(subtopicOf)));
+    if (hasPrereq) triples.push(new Triple(topicNode, Predicates.hasPrerequisite, new Node(hasPrereq)));
+    if (subtopicOf) triples.push(new Triple(topicNode, Predicates.subtopicOf, new Node(subtopicOf)));
 
     db.getLocalStore().bulk(triples);
     db.store(true)
