@@ -1,4 +1,5 @@
 import * as Constants from "../constants";
+import * as Classes from "../constants/classes";
 import { buildUri, getNewNode, validateRequestBody, predicate } from "../helpers";
 import { createUserRequest } from "../constants/schemas";
 import * as Predicates from "../constants/predicates";
@@ -30,7 +31,7 @@ router.get("/", async (req, res) => {
         }
     });
     q.setWhere([
-        `?topicId ${Predicates.type} courses:Topic`,
+        `?topicId ${Predicates.type} ${Classes.Topic}`,
         `OPTIONAL {?topicId ${Predicates.hasPrerequisite} ?prereqId}`,
         `OPTIONAL {?topicId ${Predicates.subtopicOf} ?subtopicId}`
     ]);
@@ -46,7 +47,7 @@ router.post("/", async (req, res) => {
     const topicNode = await getNewNode(Constants.topicURI);
 
     var triples = [
-        new Triple(topicNode, Predicates.type, "courses:Topic"),
+        new Triple(topicNode, Predicates.type, Classes.Topic),
         new Triple(topicNode, Predicates.label, new Text(name)),
         new Triple(topicNode, Predicates.description, new Text(desc))
     ];
@@ -78,7 +79,7 @@ async function findById(topicId) {
         }
     });
     q.setWhere([
-        `${uri} ${Predicates.type} courses:Topic`,
+        `${uri} ${Predicates.type} ${Classes.Topic}`,
         `OPTIONAL {${uri} ${Predicates.hasPrerequisite} ?prereqId}`,
         `OPTIONAL {${uri} ${Predicates.subtopicOf} ?subtopicId}`
     ]);

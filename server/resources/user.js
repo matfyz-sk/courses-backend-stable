@@ -1,6 +1,7 @@
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
-import { buildUri, getNewNode, validateRequestBody } from "../helpers";
+import * as Classes from "../constants/classes";
+import { buildUri, getNewNode, validateRequestBody, predicate } from "../helpers";
 import { createUserRequest } from "../constants/schemas";
 import Query from "../query/Query";
 import { Client, Node, Text, Data, Triple } from "virtuoso-sparql-client";
@@ -19,13 +20,13 @@ router.get("/", async (req, res) => {
     const q = new Query();
     q.setProto({
         id: "?userId",
-        name: "$courses:name",
-        surname: "$courses:surname",
-        email: "$courses:email",
-        about: "$courses:about",
-        nickname: "$courses:nickname"
+        name: predicate(Predicates.name),
+        surname: predicate(Predicates.surname),
+        email: predicate(Predicates.email),
+        about: predicate(Predicates.description),
+        nickname: predicate(Predicates.nickname)
     });
-    q.setWhere([`?userId ${Predicates.type} courses:User`]);
+    q.setWhere([`?userId ${Predicates.type} ${Classes.User}`]);
     res.status(200).send(await q.run());
 });
 
@@ -34,13 +35,13 @@ router.get("/:id", async (req, res) => {
     const q = new Query();
     q.setProto({
         id: resourceUri,
-        name: "$courses:name$required",
-        surname: "$courses:surname$required",
-        email: "$courses:email$required",
-        about: "$courses:about$required",
-        nickname: "$courses:nickname$required"
+        name: predicate(Predicates.name),
+        surname: predicate(Predicates.surname),
+        email: predicate(Predicates.email),
+        about: predicate(Predicates.description),
+        nickname: predicate(Predicates.nickname)
     });
-    q.setWhere([`${resourceUri} ${Predicates.type} courses:User`]);
+    q.setWhere([`${resourceUri} ${Predicates.type} ${Classes.User}`]);
     const data = await q.run();
     if (JSON.stringify(data) == "{}") {
         res.status(404).send({});
@@ -61,7 +62,7 @@ router.post("/", async (req, res) => {
 
     var newUser = await getNewNode(Constants.usersURI);
     var triples = [
-        new Triple(newUser, Predicates.type, "courses:User"),
+        new Triple(newUser, Predicates.type, Classes.User),
         new Triple(newUser, Predicates.name, new Text(req.body.name)),
         new Triple(newUser, Predicates.surname, new Text(req.body.surname)),
         new Triple(newUser, Predicates.email, new Text(req.body.email)),
