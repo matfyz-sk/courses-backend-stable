@@ -12,6 +12,7 @@ app.use("/api/team", resources.team);
 app.use("/api/user", resources.user);
 app.use("/api/course", resources.course);
 app.use("/api/quiz", resources.quiz);
+app.use("/api/sessions", resources.sessions);
 app.use("/api/topic", resources.topic);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

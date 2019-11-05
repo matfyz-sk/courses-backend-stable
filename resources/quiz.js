@@ -94,5 +94,50 @@ router.get("/questionTypes", async (req, res) => {
     res.status(200).send(await q.run());
 });
 
+router.post("/questions", async (req, res) => {
+    const author = req.body.token;
+    //TODO previest token na authora
+    const title = req.body.title;
+    const questionText = req.body.questionText;
+    const topic = req.body.topic;
+    const questionType = req.body.questionType;
+    const answers = req.body.answers;
+
+    let questionNode = await getNewNode(Constants.questionURI);
+    var triples = [
+        new Triple(questionNode, "rdf:type", "courses:Question"),
+        new Triple(questionNode, "courses:author", new Node(author)),
+        new Triple(questionNode, "rdfs:label", new Text(title)),
+        new Triple(questionNode, "courses:about", new Node(topic)),
+        new Triple(new Node(topic), "courses:questionsAboutMe", questionNode),
+        new Triple(questionNode, "courses:approvedAsPublic", new Node()),
+        new Triple(questionNode, "courses:approvedAsPrivate", new Node())
+    ];
+
+    let questionVersionNode = await getNewNode(Constants.questionVersionURI);
+
+    triples.push(new Triple(questionVersionNode, "rdf:type", new Node(questionType)));
+    triples.push(new Triple(questionVersionNode, "courses:text", new Text(questionText, "sk")));
+    triples.push(new Triple(questionVersionNode, "courses:author", new Node(author)));
+    triples.push(new Triple(questionVersionNode, "courses:ofQuestion", questionNode));
+    triples.push(new Triple(questionNode, "courses:version", questionVersionNode));
+    triples.push(new Triple(questionNode, "courses:lastChange", new Data(db.getLocalStore().now, "xsd:dateTimeStamp")));
+
+    let time = new Date();
+    time.setHours(time.getHours() - 4);
+    triples.push(
+        new Triple(questionNode, "courses:lastSeenByTeacher", new Data(isTeacher(author) ? db.getLocalStore().now : time.toISOString(), "xsd:dateTimeStamp"))
+    );
+    triples.push(
+        new Triple(questionNode, "courses:lastSeenByStudent", new Data(!isTeacher(author) ? db.getLocalStore().now : time.toISOString(), "xsd:dateTimeStamp"))
+    );
+
+    console.log(triples);
+    res.send(200);
+});
+
+function isTeacher(foo) {
+    return true;
+}
 
 exports.quizRouter = router;

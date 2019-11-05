@@ -12,3 +12,9 @@ db.addPrefixes({
 });
 db.setQueryFormat("application/json");
 db.setQueryGraph(Constants.graphURI);
+
+router.get("/lectures", (req, res) => {});
+
+router.get("/labs", (req, res) => {});
+
+exports.sessionsRouter = router;
