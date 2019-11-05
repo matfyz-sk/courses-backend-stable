@@ -1,16 +1,22 @@
 export const type = "rdf:type";
+export const subclassOf = "rdfs:subClassOf";
 export const label = "rdfs:label";
 export const description = "courses:description";
 export const abbreviation = "courses:abbreviation";
+export const date = "courses:date";
 export const year = "courses:year";
 export const name = "courses:name";
 export const surname = "courses:surname";
 export const email = "courses:email";
 export const nickname = "courses:nickname";
+export const location = "courses:location";
+export const duration = "courses:duration";
+export const time = "courses:time";
 
 export const hasPrerequisite = "courses:hasPrerequisite";
 export const mentions = "courses:mentions";
 export const covers = "courses:covers";
+export const uses = "courses:uses";
 export const instanceOf = "courses:instanceOf";
 export const hasInstructor = "courses:hasInstructor";
 export const hasMember = "courses:hasMember";
