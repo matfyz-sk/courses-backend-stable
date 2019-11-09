@@ -22,3 +22,4 @@ export const hasInstructor = "courses:hasInstructor";
 export const hasMember = "courses:hasMember";
 export const course = "courses:course";
 export const subtopicOf = "courses:subtopicOf";
+export const memberOf = "courses:memberOf";
