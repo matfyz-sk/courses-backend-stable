@@ -1,7 +1,8 @@
 import { graphURI, virtuosoEndpoint } from "../constants";
 import { Node } from "virtuoso-sparql-client";
 import * as ID from "../lib/virtuoso-uid";
-import { Validator } from "jsonschema";
+import Query from "../query/Query";
+import { type } from "../constants/predicates";
 
 /**
  * @param {String} resourceURI The full resource URI
@@ -28,24 +29,26 @@ export async function getNewNode(resourceURI) {
     return newNode;
 }
 
-/**
- * @param {Object} requestBody
- * @param {Object} schema
- */
-export function validateRequestBody(requestBody, schema) {
-    var v = new Validator();
-    var validationResult = v.validate(requestBody, schema);
-    console.log(validationResult);
-    if (validationResult.errors.length > 0) {
-        var res = [];
-        for (var validationError of validationResult.errors) {
-            res.push(validationError.stack);
-        }
-        return res;
-    }
-    return [];
-}
-
 export function predicate(predicate, required = true) {
     return "$" + predicate + (required ? "$required" : "");
+}
+
+export async function resourceExists(resourceURI, expectedType) {
+    resourceURI = "<" + resourceURI + ">";
+    const q = new Query();
+
+    q.setProto({
+        id: resourceURI,
+        type: predicate(type)
+    });
+    q.setWhere([`${resourceURI} ${type} ${expectedType}`]);
+    const res = await q.run();
+
+    if (JSON.stringify(res) == "{}") {
+        return false;
+    }
+    if (Array.isArray(res) && res.length > 0) {
+        return true;
+    }
+    return false;
 }
