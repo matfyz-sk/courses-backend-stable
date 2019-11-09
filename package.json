@@ -1,7 +1,11 @@
 {
     "name": "courses-backend",
     "version": "1.0.0",
-    "description": "",
+    "description": "Backend of web application",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mcifra/courses-backend"
+    },
     "main": "server.js",
     "scripts": {
         "start": "nodemon --exec babel-node server.js"
@@ -12,7 +16,6 @@
         "body-parser": "^1.19.0",
         "express": "^4.17.1",
         "express-validator": "^6.2.0",
-        "jsonschema": "^1.2.4",
         "sparql-transformer": "^2.1.1",
         "virtuoso-sparql-client": "^0.2.2",
         "virtuoso-uid": "^1.0.7"
