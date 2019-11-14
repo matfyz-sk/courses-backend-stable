@@ -23,3 +23,6 @@ export const hasMember = "courses:hasMember";
 export const course = "courses:course";
 export const subtopicOf = "courses:subtopicOf";
 export const memberOf = "courses:memberOf";
+export const requests = "courses:requests";
+export const studentOf = "courses:studentOf";
+export const understands = "courses:understands";
