@@ -7,14 +7,16 @@ const defaultOptions = {
     debug: true
 };
 
+const defaultPrefixes = {
+    courses: ontologyURI
+};
+
 class Query {
     constructor(options = defaultOptions) {
         this.q = {};
         this.options = options;
         this.sparqlTransformer = lib.default;
-        this.q["$prefixes"] = {
-            courses: ontologyURI
-        };
+        this.setPrefixes(defaultPrefixes);
     }
 
     setProto(proto) {
@@ -50,17 +52,16 @@ class Query {
         this.q["$orderBy"] = orderBy;
     }
 
-    async run() {
-        console.log(this.q);
-        var out = {};
-        await this.sparqlTransformer(this.q, this.options)
-            .then(res => (out = res))
-            .catch(err => (out = {}));
-        return out;
+    run() {
+        return this.sparqlTransformer(this.q, this.options);
     }
 
     prepare() {
         this.q = {};
+    }
+
+    setOptions(options) {
+        this.options = options;
     }
 }
 
