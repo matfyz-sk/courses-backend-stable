@@ -6,8 +6,8 @@ const router = express.Router();
 router.post("/user", User.createUserValidation, User.createUser);
 router.get("/user", User.getAllUsers);
 router.get("/user/:id", User.idValidation, User.getUser);
-router.post("/user/:id/requestCourse/:courseId", (req, res) => {});
-router.post("/user/:id/requestTeam/:teamId", (req, res) => {});
+router.post("/user/requestCourseInstance", User.requestCourseInstanceValidation, User.requestCourseInstance);
+router.post("/user/setCourseInstance", User.requestCourseInstanceValidation, User.setCourseInstance);
 router.delete("/user/:id", async (req, res) => {});
 
 router.post("/topic", Topic.createTopicValidation, Topic.createTopic);

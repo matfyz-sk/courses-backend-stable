@@ -33,22 +33,25 @@ export function predicate(predicate, required = true) {
     return "$" + predicate + (required ? "$required" : "");
 }
 
-export async function resourceExists(resourceURI, expectedType) {
-    resourceURI = "<" + resourceURI + ">";
-    const q = new Query();
+export function prepareQueryUri(uri) {
+    uri = uri.trim();
+    if (uri.charAt(0) != "<") uri = "<" + uri;
+    if (uri.charAt(uri.length - 1) != ">") uri = uri + ">";
+    return uri;
+}
 
-    q.setProto({
-        id: resourceURI,
-        type: predicate(type)
+export function resourceExists(resourceURI, expectedType) {
+    return findByURI(resourceURI, expectedType).then(data => {
+        if (JSON.stringify(data) == "[]") {
+            return Promise.reject(`Resource with URI ${resourceURI} does not exists`);
+        }
     });
-    q.setWhere([`${resourceURI} ${type} ${expectedType}`]);
-    const res = await q.run();
+}
 
-    if (JSON.stringify(res) == "{}") {
-        return false;
-    }
-    if (Array.isArray(res) && res.length > 0) {
-        return true;
-    }
-    return false;
+export function findByURI(resourceURI, expectedType) {
+    const uri = prepareQueryUri(resourceURI);
+    const q = new Query();
+    q.setProto({ id: uri, type: predicate(type) });
+    q.setWhere([`${uri} ${type} ${expectedType}`]);
+    return q.run();
 }
