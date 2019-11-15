@@ -8,6 +8,7 @@ router.get("/user", User.getAllUsers);
 router.get("/user/:id", User.idValidation, User.getUser);
 router.post("/user/requestCourseInstance", User.requestCourseInstanceValidation, User.requestCourseInstance);
 router.post("/user/setCourseInstance", User.requestCourseInstanceValidation, User.setCourseInstance);
+router.post("/user/setTeam", User.setTeamValidation, User.setTeam);
 router.delete("/user/:id", async (req, res) => {});
 
 router.post("/topic", Topic.createTopicValidation, Topic.createTopic);

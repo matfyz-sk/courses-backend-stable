@@ -4,7 +4,7 @@ import { Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 import * as Classes from "../constants/classes";
-import { buildUri, getNewNode, predicate, prepareQueryUri, resourceExists } from "../helpers";
+import { buildUri, getNewNode, predicate, prepareQueryUri, resourceExists, emptyResult } from "../helpers";
 import { db } from "../config/client";
 
 export const createUserValidation = [
@@ -30,6 +30,17 @@ export const requestCourseInstanceValidation = [
         .exists()
         .isURL()
         .custom(value => resourceExists(value, Classes.CourseInstance))
+];
+
+export const setTeamValidation = [
+    body("user")
+        .exists()
+        .isURL()
+        .custom(value => resourceExists(value, Classes.User)),
+    body("team")
+        .exists()
+        .isURL()
+        .custom(value => resourceExists(value, Classes.Team))
 ];
 
 export const idValidation = [
@@ -139,13 +150,13 @@ export async function requestCourseInstance(req, res) {
 
     q.run()
         .then(data => {
-    if (JSON.stringify(data) == "{}") {
+            if (JSON.stringify(data) == "{}") {
                 var triple = new Triple(new Node(req.body.user), Predicates.requests, new Node(req.body.courseInstance));
                 db.getLocalStore().add(triple);
                 db.store(true)
                     .then(result => res.status(200).send(result))
                     .catch(err => res.status(500).send(err));
-    } else {
+            } else {
                 res.status(400).send("User already requesting course instance");
             }
         })
@@ -162,4 +173,28 @@ export async function setCourseInstance(req, res) {
     var courseInstance = prepareQueryUri(req.body.courseInstance);
 
     res.status(200).send();
+}
+
+export async function setTeam(req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const user = prepareQueryUri(req.body.user);
+    const team = prepareQueryUri(req.body.team);
+
+    const q = new Query();
+    q.setProto({ id: user, type: predicate(Predicates.type) });
+    q.setWhere([`${user} ${Predicates.memberOf} ${team}`]);
+    q.run()
+        .then(data => {
+            if (!emptyResult(data)) {
+                return res.status(400).send(`User is already a member of the team ${req.body.team}`);
+            }
+            db.getLocalStore().add(new Triple(new Node(req.body.user), Predicates.memberOf, new Node(req.body.team)));
+            db.store(true)
+                .then(result => res.status(201).send(result))
+                .catch(err => res.status(500).send(err));
+        })
+        .catch(err => res.status(500).send(err));
 }

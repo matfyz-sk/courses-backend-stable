@@ -55,3 +55,8 @@ export function findByURI(resourceURI, expectedType) {
     q.setWhere([`${uri} ${type} ${expectedType}`]);
     return q.run();
 }
+
+export function emptyResult(data) {
+    const stringified = JSON.stringify(data);
+    return stringified == "{}" || stringified == "[]";
+}
