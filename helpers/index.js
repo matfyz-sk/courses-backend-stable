@@ -43,7 +43,7 @@ export function prepareQueryUri(uri) {
 export function resourceExists(resourceURI, expectedType) {
     return findByURI(resourceURI, expectedType).then(data => {
         if (JSON.stringify(data) == "[]") {
-            return Promise.reject(`Resource with URI ${resourceURI} does not exists`);
+            return Promise.reject(`Resource with URI ${resourceURI} and type ${expectedType} does not exists`);
         }
     });
 }
