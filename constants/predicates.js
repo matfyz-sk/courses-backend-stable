@@ -12,6 +12,7 @@ export const nickname = "courses:nickname";
 export const location = "courses:location";
 export const duration = "courses:duration";
 export const time = "courses:time";
+export const created = "dc:created";
 
 export const hasPrerequisite = "courses:hasPrerequisite";
 export const mentions = "courses:mentions";
