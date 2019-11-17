@@ -1,5 +1,5 @@
 import lib from "sparql-transformer";
-import { ontologyURI, virtuosoEndpoint } from "../constants";
+import { ontologyURI, virtuosoEndpoint, dcTermsURI } from "../constants";
 
 const defaultOptions = {
     context: "http://schema.org",
@@ -8,7 +8,8 @@ const defaultOptions = {
 };
 
 const defaultPrefixes = {
-    courses: ontologyURI
+    courses: ontologyURI,
+    dc: dcTermsURI
 };
 
 class Query {
