@@ -1,4 +1,5 @@
-import { graphURI, virtuosoEndpoint } from "../constants";
+import * as Constants from "../constants";
+import * as Classes from "../constants/classes";
 import { Node } from "virtuoso-sparql-client";
 import * as ID from "../lib/virtuoso-uid";
 import Query from "../query/Query";
@@ -16,8 +17,8 @@ export function buildUri(resourceURI, resourceId, full = true) {
 
 export async function getNewNode(resourceURI) {
     ID.cfg({
-        endpoint: virtuosoEndpoint,
-        graph: graphURI,
+        endpoint: Constants.virtuosoEndpoint,
+        graph: Constants.graphURI,
         prefix: resourceURI
     });
     let newNode;
@@ -33,8 +34,11 @@ export function predicate(predicate, required = true) {
     return "$" + predicate + (required ? "$required" : "");
 }
 
-export function prepareQueryUri(uri) {
+export function prepareQueryUri(uri, type) {
     uri = uri.trim();
+    if (!uri.startsWith("http://wwww") && !uri.startsWith("<http://www")) {
+        return "<" + classToURI(type) + uri + ">";
+    }
     if (uri.charAt(0) != "<") uri = "<" + uri;
     if (uri.charAt(uri.length - 1) != ">") uri = uri + ">";
     return uri;
@@ -42,14 +46,14 @@ export function prepareQueryUri(uri) {
 
 export function resourceExists(resourceURI, expectedType) {
     return findByURI(resourceURI, expectedType).then(data => {
-        if (JSON.stringify(data) == "[]") {
+        if (emptyResult(data)) {
             return Promise.reject(`Resource with URI ${resourceURI} and type ${expectedType} does not exists`);
         }
     });
 }
 
 export function findByURI(resourceURI, expectedType) {
-    const uri = prepareQueryUri(resourceURI);
+    const uri = prepareQueryUri(resourceURI, expectedType);
     const q = new Query();
     q.setProto({ id: uri, type: predicate(type) });
     q.setWhere([`${uri} ${type} ${expectedType}`]);
@@ -58,5 +62,30 @@ export function findByURI(resourceURI, expectedType) {
 
 export function emptyResult(data) {
     const stringified = JSON.stringify(data);
-    return stringified == "{}" || stringified == "[]";
+    return stringified == undefined || stringified == "{}" || stringified == "[]";
+}
+
+function classToURI(className) {
+    switch (className) {
+        case Classes.Course:
+            return Constants.coursesURI;
+        case Classes.CourseInstance:
+            return Constants.courseInstancesURI;
+        case Classes.Event:
+            return Constants.eventsURI;
+        case Classes.Lab:
+            return Constants.labURI;
+        case Classes.Lecture:
+            return Constants.lectureURI;
+        case Classes.Session:
+            return Constants.sessionURI;
+        case Classes.Team:
+            return Constants.teamsURI;
+        case Classes.Topic:
+            return Constants.topicURI;
+        case Classes.User:
+            return Constants.usersURI;
+        default:
+            return "";
+    }
 }
