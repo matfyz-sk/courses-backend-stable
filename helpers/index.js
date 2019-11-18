@@ -36,7 +36,7 @@ export function predicate(predicate, required = true) {
 
 export function prepareQueryUri(uri, type) {
     uri = uri.trim();
-    if (!uri.startsWith("http://wwww") && !uri.startsWith("<http://www")) {
+    if (!uri.startsWith("http:") && !uri.startsWith("<http:")) {
         return "<" + classToURI(type) + uri + ">";
     }
     if (uri.charAt(0) != "<") uri = "<" + uri;
