@@ -4,24 +4,23 @@ import { Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 import * as Classes from "../constants/classes";
-import { buildUri, getNewNode, predicate } from "../helpers";
+import { buildUri, getNewNode, predicate, resourceExists, emptyResult } from "../helpers";
 import { db } from "../config/client";
 
 export const createTeamValidation = [
     body("name")
         .exists()
+        .bail()
         .isString(),
     body("course")
         .exists()
+        .bail()
         .isURL()
+        .bail()
+        .custom(value => resourceExists(value, Classes.CourseInstance))
 ];
 
 export async function createTeam(req, res) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
-    // TODO check if course instance exists
     var newTeam = await getNewNode(Constants.teamsURI);
     var triples = [
         new Triple(newTeam, Predicates.type, Classes.Team),
@@ -30,11 +29,11 @@ export async function createTeam(req, res) {
     ];
     db.getLocalStore().bulk(triples);
     db.store(true)
-        .then(result => res.status(200).send(result))
+        .then(data => res.status(201).send(data))
         .catch(err => res.status(500).send(err));
 }
 
-export async function getAllTeams(req, res) {
+export function getAllTeams(req, res) {
     const q = new Query();
     q.setProto({
         id: "?teamId",
@@ -51,7 +50,9 @@ export async function getAllTeams(req, res) {
         `?teamId ${Predicates.course} ?courseId`,
         `OPTIONAL { ?userId ${Predicates.memberOf} ?teamId }`
     ]);
-    res.status(200).send(await q.run());
+    q.run()
+        .then(data => res.status(200).send(data))
+        .catch(err => res.status(500).send(err));
 }
 
 export async function getTeam(req, res) {
@@ -72,10 +73,13 @@ export async function getTeam(req, res) {
         `${resourceUri} ${Predicates.course} ?courseId`,
         `OPTIONAL {?userId ${Predicates.memberOf} ${resourceUri} }`
     ]);
-    const data = await q.run();
-    if (JSON.stringify(data) == "{}") {
-        res.status(404).json({});
-    } else {
-        res.status(200).json(data[0]);
-    }
+    q.run()
+        .then(data => {
+            if (emptyResult(data)) {
+                res.status(404).json({});
+            } else {
+                res.status(200).json(data[0]);
+            }
+        })
+        .catch(err => res.status(500).send(err));
 }

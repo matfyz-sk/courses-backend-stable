@@ -4,7 +4,7 @@ import { Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 import * as Classes from "../constants/classes";
-import { buildUri, getNewNode, predicate } from "../helpers";
+import { buildUri, getNewNode, predicate, resourceExists } from "../helpers";
 import { db } from "../config/client";
 
 export const createSessionValidation = [
@@ -16,36 +16,43 @@ export const createSessionValidation = [
     body("duration").exists(),
     body("course")
         .exists()
-        .isURL(),
+        .bail()
+        .isURL()
+        .bail()
+        .custom(value => resourceExists(value, Classes.CourseInstance)),
     body("hasInstructor")
         .exists()
+        .bail()
         .isArray(),
-    body("hasInstructor.*").isURL(),
+    body("hasInstructor.*")
+        .isURL()
+        .bail()
+        .custom(value => resourceExists(value, Classes.User)),
     body("covers")
         .exists()
+        .bail()
         .isArray(),
-    body("covers.*").isURL(),
+    body("covers.*")
+        .isURL()
+        .bail()
+        .custom(value => resourceExists(value, Classes.Topic)),
     body("uses")
         .exists()
+        .bail()
         .isArray(),
-    body("uses.*").isURL()
+    body("uses.*")
+        .isURL()
+        .bail()
+        .custom(value => resourceExists(value, Classes.Material))
 ];
 
 export async function createLecture(req, res) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
     createSession(req.body, Classes.Lecture)
         .then(result => res.status(200).json(result))
         .catch(err => res.status(500).send(err));
 }
 
 export async function createLab(req, res) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
     createSession(req.body, Classes.Lab)
         .then(result => {
             if (result.status) res.status(result.status).json(result);
@@ -57,20 +64,9 @@ export async function createLab(req, res) {
 
 async function createSession(data, sessionType) {
     const { course, covers, uses, hasInstructor, name, date, time, duration, location, description } = data;
-
-    // if (!(await resourceExists(course, Classes.Course))) {
-    //     return { status: 404, message: RESOURCE_NOT_EXISTS(course) };
-    // }
-
-    // TODO check if Course Instance exists
-    // TODO check if Topics exists
-    // TODO check if Materials exists
-    // TODO check if User exists
-
     var newNode;
     if (sessionType == Classes.Lecture) newNode = await getNewNode(Constants.lectureURI);
     else newNode = await getNewNode(Constants.labURI);
-
     var triples = [
         new Triple(newNode, Predicates.type, sessionType),
         new Triple(newNode, Predicates.course, new Node(course)),
