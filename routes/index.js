@@ -35,7 +35,7 @@ router.get("/session", Session.paramsValidation, validate, Session.getSessions);
 router.post("/courseInstance", CourseInstance.createCourseInstance);
 router.get("/courseInstance", CourseInstance.getCourseInstance);
 
-router.post("/course", Course.createCourse);
+router.post("/course", Course.createCourseValidation, validate, Course.createCourse);
 router.get("/course", Course.getAllCourses);
 router.get("/course/:id", Course.getCourse);
 
