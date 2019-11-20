@@ -30,6 +30,7 @@ router.get("/team/:id", Team.getTeam);
 
 router.post("/session/lecture", Session.createSessionValidation, validate, Session.createLecture);
 router.post("/session/lab", Session.createSessionValidation, validate, Session.createLab);
+router.get("/session", Session.paramsValidation, validate, Session.getSessions);
 
 router.post("/courseInstance", CourseInstance.createCourseInstance);
 router.get("/courseInstance", CourseInstance.getCourseInstance);
