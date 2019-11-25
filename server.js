@@ -8,6 +8,6 @@ const port = 3010;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use("/api", router);
+app.use("/data", router);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
