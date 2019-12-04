@@ -10,12 +10,13 @@ function validate(req, res, next) {
     } else next();
 }
 
+router.post("/user", User.createUserValidation, validate, User.createUser);
 router.get("/user", User.getAllUsers);
-router.get("/user/:id", User.idValidation, User.getUser);
-router.post("/user/requestCourseInstance", User.requestCourseInstanceValidation, User.requestCourseInstance);
-router.post("/user/setCourseInstance", User.requestCourseInstanceValidation, User.setCourseInstance);
-router.post("/user/setTeam", User.setTeamValidation, User.setTeam);
-router.delete("/user/:id", async (req, res) => {});
+router.get("/user/:id", User.idValidation, validate, User.getUser);
+router.post("/user/requestCourseInstance", User.requestCourseInstanceValidation, validate, User.requestCourseInstance);
+router.post("/user/setCourseInstance", User.requestCourseInstanceValidation, validate, User.setCourseInstance);
+router.post("/user/setTeam", User.setTeamValidation, validate, User.setTeam);
+router.delete("/user/:id", User.idValidation, validate, User.deleteUser);
 
 router.post("/topic", Topic.createTopicValidation, validate, Topic.createTopic);
 router.get("/topic", Topic.getAllTopics);
@@ -30,10 +31,12 @@ router.get("/team/:id", Team.getTeam);
 
 router.post("/session/lecture", Session.createSessionValidation, validate, Session.createLecture);
 router.post("/session/lab", Session.createSessionValidation, validate, Session.createLab);
-router.get("/session", Session.paramsValidation, validate, Session.getSessions);
+router.get("/session", Session.paramsValidation, validate, Session.getAllSessions);
+router.get("/session/:id", Session.getSession);
 
-router.post("/courseInstance", CourseInstance.createCourseInstance);
-router.get("/courseInstance", CourseInstance.getCourseInstance);
+router.post("/courseInstance", CourseInstance.createCourseInstanceValidation, validate, CourseInstance.createCourseInstance);
+router.get("/courseInstance", CourseInstance.getAllCourseInstances);
+router.get("/courseInstance/:id", CourseInstance.getCourseInstance);
 
 router.post("/course", Course.createCourseValidation, validate, Course.createCourse);
 router.get("/course", Course.getAllCourses);

@@ -4,35 +4,28 @@ import { Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 import * as Classes from "../constants/classes";
+import * as Messages from "../constants/messages";
 import { buildUri, getNewNode, predicate, resourceExists, prepareQueryUri, emptyResult } from "../helpers";
 import { db } from "../config/client";
 
+// prettier-ignore
 export const createTopicValidation = [
     body("name")
-        .exists()
+        .exists().withMessage(Messages.MISSING_FIELD)
         .bail()
-        .isString(),
-    body("description").exists(),
+        .isString().withMessage(Messages.FIELD_NOT_STRING),
+    body("description").exists().withMessage(Messages.MISSING_FIELD),
     body("hasPrerequisite")
         .optional()
-        .isArray(),
+        .isArray().withMessage(Messages.FIELD_NOT_ARRAY),
     body("hasPrerequisite.*")
-        .isURL()
-        .bail()
         .custom(value => resourceExists(value, Classes.Topic)),
     body("subtopicOf")
         .optional()
-        .isURL()
-        .bail()
         .custom(value => resourceExists(value, Classes.Topic))
 ];
 
-export const idValidation = [
-    param("id")
-        .exists()
-        .bail()
-        .custom(value => resourceExists(value, Classes.Topic))
-];
+export const idValidation = [param("id").custom(value => resourceExists(value, Classes.Topic))];
 
 export async function createTopic(req, res) {
     const topicNode = await getNewNode(Constants.topicURI);
@@ -49,7 +42,7 @@ export async function createTopic(req, res) {
     if (req.body.subtopicOf) triples.push(new Triple(topicNode, Predicates.subtopicOf, new Node(req.body.subtopicOf)));
     db.getLocalStore().bulk(triples);
     db.store(true)
-        .then(result => res.status(200).send(result))
+        .then(result => res.status(200).send(topicNode))
         .catch(err => res.status(500).send(err));
 }
 

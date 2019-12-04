@@ -4,66 +4,61 @@ import { Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 import * as Classes from "../constants/classes";
+import * as Messages from "../constants/messages";
 import { buildUri, getNewNode, predicate, resourceExists, prepareQueryUri } from "../helpers";
 import { db } from "../config/client";
 
 // prettier-ignore
 export const createSessionValidation = [
-    body("name").exists(),
-    body("description").exists(),
-    body("location").exists(),
-    body("date").exists(),
-    body("time").exists(),
-    body("duration").exists(),
+    body("name").exists().withMessage(Messages.MISSING_FIELD),
+    body("description").exists().withMessage(Messages.MISSING_FIELD),
+    body("location").exists().withMessage(Messages.MISSING_FIELD),
+    body("date").exists().withMessage(Messages.MISSING_FIELD),
+    body("time").exists().withMessage(Messages.MISSING_FIELD),
+    body("duration").exists().withMessage(Messages.MISSING_FIELD),
     body("course")
-        .exists().bail()
+        .exists().withMessage(Messages.MISSING_FIELD).bail()
         .isURL().bail()
         .custom(value => resourceExists(value, Classes.CourseInstance)),
     body("hasInstructor")
-        .exists().withMessage("Missing required field")
-        .isArray().withMessage("Field is not array")
+        .exists().withMessage(Messages.MISSING_FIELD)
+        .isArray().withMessage(Messages.FIELD_NOT_ARRAY)
         .not().isEmpty().withMessage("List of instructors cannot be empty"),
     body("hasInstructor.*")
         .isURL()
         .bail()
         .custom(value => resourceExists(value, Classes.User)),
     body("covers")
-        .exists().bail()
+        .exists().withMessage(Messages.MISSING_FIELD).bail()
         .isArray(),
     body("covers.*")
         .isURL().bail()
         .custom(value => resourceExists(value, Classes.Topic)),
     body("uses")
-        .exists().bail()
+        .exists().withMessage(Messages.MISSING_FIELD).bail()
         .isArray(),
     body("uses.*")
         .isURL().bail()
         .custom(value => resourceExists(value, Classes.Material))
 ];
 
-export const paramsValidation = [query("courseInstance").exists()];
+export const paramsValidation = [
+    query("course")
+        .exists()
+        .withMessage(Messages.MISSING_FIELD)
+];
 
 export async function createLecture(req, res) {
-    createSession(req.body, Classes.Lecture)
-        .then(result => res.status(200).json(result))
-        .catch(err => res.status(500).send(err));
+    createSession(req, res, Classes.Lecture);
 }
 
 export async function createLab(req, res) {
-    createSession(req.body, Classes.Lab)
-        .then(result => {
-            if (result.status) res.status(result.status).json(result);
-            else {
-            }
-        })
-        .catch(err => res.status(500).send(err));
+    createSession(req, res, Classes.Lab);
 }
 
-async function createSession(data, sessionType) {
-    const { course, covers, uses, hasInstructor, name, date, time, duration, location, description } = data;
-    var newNode;
-    if (sessionType == Classes.Lecture) newNode = await getNewNode(Constants.lectureURI);
-    else newNode = await getNewNode(Constants.labURI);
+async function createSession(req, res, sessionType) {
+    const { course, covers, uses, hasInstructor, name, date, time, duration, location, description } = req.body;
+    var newNode = sessionType == Classes.Lecture ? await getNewNode(Constants.lectureURI) : await getNewNode(Constants.labURI);
     var triples = [
         new Triple(newNode, Predicates.type, sessionType),
         new Triple(newNode, Predicates.subclassOf, Classes.Session),
@@ -77,24 +72,26 @@ async function createSession(data, sessionType) {
     ];
     for (var topicURI of covers) {
         triples.push(new Triple(newNode, Predicates.covers, new Node(topicURI)));
-        }
+    }
     for (var materialURI of uses) {
         triples.push(new Triple(newNode, Predicates.uses, new Node(materialURI)));
-        }
+    }
     for (var userURI of hasInstructor) {
         triples.push(new Triple(newNode, Predicates.hasInstructor, new Node(userURI)));
     }
     db.getLocalStore().bulk(triples);
-    return db.store(true);
+    db.store(true)
+        .then(data => res.status(201).send(newNode))
+        .catch(err => res.status(500).send(err));
 }
 
-export function getSessions(req, res) {
-    const courseInstanceURI = prepareQueryUri(req.query.courseInstance, Classes.CourseInstance);
+export function getAllSessions(req, res) {
+    const courseInstanceURI = buildUri(Constants.courseInstancesURI, req.query.course);
     const q = new Query();
     q.setProto({
         id: "?sessionURI",
         type: predicate(Predicates.type),
-        course: courseInstanceURI,
+        course: predicate(Predicates.course),
         name: predicate(Predicates.label),
         date: predicate(Predicates.date),
         time: predicate(Predicates.time),
@@ -115,9 +112,12 @@ export function getSessions(req, res) {
         `?sessionURI ${Predicates.subclassOf} ${Classes.Session}`,
         `OPTIONAL {?sessionURI ${Predicates.covers} ?topicURI}`,
         `OPTIONAL {?sessionURI ${Predicates.uses} ?materialURI}`,
-        `?sessionURI ${Predicates.hasInstructor} ?userURI`
+        `?sessionURI ${Predicates.hasInstructor} ?userURI`,
+        `?sessionURI ${Predicates.course} ${courseInstanceURI}`
     ]);
     q.run()
         .then(data => res.status(200).send(data))
         .catch(err => res.status(500).send(err));
 }
+
+export function getSession(req, res) {}

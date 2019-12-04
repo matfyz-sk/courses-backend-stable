@@ -4,33 +4,32 @@ import { Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 import * as Classes from "../constants/classes";
+import * as Messages from "../constants/messages";
 import { buildUri, getNewNode, predicate, resourceExists, emptyResult } from "../helpers";
 import { db } from "../config/client";
 
+// prettier-ignore
 export const createCourseValidation = [
-    body("name").exists(),
-    body("description").exists(),
-    body("abbreviation").exists(),
+    body("name").exists().withMessage(Messages.MISSING_FIELD),
+    body("description").exists().withMessage(Messages.MISSING_FIELD),
+    body("abbreviation").exists().withMessage(Messages.MISSING_FIELD),
     body("hasPrerequisite")
-        .exists()
+        .exists().withMessage(Messages.MISSING_FIELD)
         .bail()
-        .isArray(),
+        .isArray().withMessage(Messages.FIELD_NOT_ARRAY),
     body("hasPrerequisite.*")
-        .isURL()
         .custom(value => resourceExists(value, Classes.Course)),
     body("mentions")
-        .exists()
+        .exists().withMessage(Messages.MISSING_FIELD)
         .bail()
-        .isArray(),
+        .isArray().withMessage(Messages.FIELD_NOT_ARRAY),
     body("mentions.*")
-        .isURL()
         .custom(value => resourceExists(value, Classes.Topic)),
     body("covers")
-        .exists()
+        .exists().withMessage(Messages.MISSING_FIELD)
         .bail()
-        .isArray(),
+        .isArray().withMessage(Messages.FIELD_NOT_ARRAY),
     body("covers.*")
-        .isURL()
         .custom(value => resourceExists(value, Classes.Topic))
 ];
 
@@ -42,7 +41,6 @@ export async function createCourse(req, res) {
         new Triple(newCourse, Predicates.description, new Text(req.body.description)),
         new Triple(newCourse, Predicates.abbreviation, new Text(req.body.abbreviation))
     ];
-
     for (var courseURI of req.body.hasPrerequisite) {
         triples.push(new Triple(newCourse, Predicates.hasPrerequisite, new Node(courseURI)));
     }
@@ -52,10 +50,9 @@ export async function createCourse(req, res) {
     for (var topicURI of req.body.covers) {
         triples.push(new Triple(newCourse, Predicates.covers, new Node(topicURI)));
     }
-
     db.getLocalStore().bulk(triples);
     db.store(true)
-        .then(data => res.status(200).send(data))
+        .then(data => res.status(201).send(newCourse))
         .catch(err => res.status(500).send(err));
 }
 
