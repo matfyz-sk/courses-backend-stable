@@ -1,3 +1,1 @@
 # Courses Backend
-
-test
