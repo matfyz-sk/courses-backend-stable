@@ -1,15 +1,25 @@
 import * as User from "./user";
 import * as Team from "./team";
 import * as Topic from "./topic";
-import * as Session from "./session";
+// import * as Session from "./session";
 import * as Course from "./course";
 import * as CourseInstance from "./courseInstance";
+import * as Event from "./event";
+import * as Task from "./task";
+import * as Agent from "./agent";
+import * as ReviewComment from "./reviewComment";
+import * as Submission from "./submission";
 
 module.exports = {
     User,
     Team,
     Topic,
-    Session,
+    // Session,
+    Event,
     Course,
-    CourseInstance
+    CourseInstance,
+    Task,
+    Agent,
+    ReviewComment,
+    Submission
 };

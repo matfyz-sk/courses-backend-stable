@@ -16,3 +16,16 @@ export const quizTakeURI = graphURI + "/quizTake/";
 export const questionURI = graphURI + "/question/";
 export const questionVersionURI = graphURI + "/questionVersion/";
 export const topicURI = graphURI + "/topic/";
+export const assignmentURI = graphURI + "/assignment/";
+export const questionAssignmentURI = graphURI + "/questionAssignment/";
+export const quizAssignmentURI = graphURI + "/quizAssignment/";
+export const blockURI = graphURI + "/block/";
+export const oralExamURI = graphURI + "/oralExam/";
+export const testTakeURI = graphURI + "/testTake/";
+export const examinationEventURI = graphURI + "/examinationEvent/";
+export const assignmentPeriodURI = graphURI + "/assignmentPeriod/";
+
+export const codeCommentURI = graphURI + "/codeComment/";
+export const generalCommentURI = graphURI + "/generalComment/";
+export const submissionURI = graphURI + "/submission/";
+export const taskURI = graphURI + "/task/";

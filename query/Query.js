@@ -2,7 +2,7 @@ import lib from "sparql-transformer";
 import { ontologyURI, virtuosoEndpoint, dcTermsURI } from "../constants";
 
 const defaultOptions = {
-    context: "http://schema.org",
+    context: "http://www.courses.matfyz.sk/ontology#",
     endpoint: virtuosoEndpoint,
     debug: true
 };
@@ -21,7 +21,7 @@ class Query {
     }
 
     setProto(proto) {
-        this.q["proto"] = proto;
+        this.q["@graph"] = proto;
     }
 
     setWhere(where) {

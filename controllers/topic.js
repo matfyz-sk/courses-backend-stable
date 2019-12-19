@@ -8,30 +8,13 @@ import * as Messages from "../constants/messages";
 import { buildUri, getNewNode, predicate, resourceExists, prepareQueryUri, emptyResult } from "../helpers";
 import { db } from "../config/client";
 
-// prettier-ignore
-export const createTopicValidation = [
-    body("name")
-        .exists().withMessage(Messages.MISSING_FIELD)
-        .bail()
-        .isString().withMessage(Messages.FIELD_NOT_STRING),
-    body("description").exists().withMessage(Messages.MISSING_FIELD),
-    body("hasPrerequisite")
-        .optional()
-        .isArray().withMessage(Messages.FIELD_NOT_ARRAY),
-    body("hasPrerequisite.*")
-        .custom(value => resourceExists(value, Classes.Topic)),
-    body("subtopicOf")
-        .optional()
-        .custom(value => resourceExists(value, Classes.Topic))
-];
-
 export const idValidation = [param("id").custom(value => resourceExists(value, Classes.Topic))];
 
 export async function createTopic(req, res) {
     const topicNode = await getNewNode(Constants.topicURI);
     var triples = [
         new Triple(topicNode, Predicates.type, Classes.Topic),
-        new Triple(topicNode, Predicates.label, new Text(req.body.name)),
+        new Triple(topicNode, Predicates.name, new Text(req.body.name)),
         new Triple(topicNode, Predicates.description, new Text(req.body.description))
     ];
     if (req.body.hasPrerequisite) {

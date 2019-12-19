@@ -8,31 +8,6 @@ import * as Messages from "../constants/messages";
 import { buildUri, getNewNode, predicate, resourceExists, emptyResult } from "../helpers";
 import { db } from "../config/client";
 
-// prettier-ignore
-export const createCourseValidation = [
-    body("name").exists().withMessage(Messages.MISSING_FIELD),
-    body("description").exists().withMessage(Messages.MISSING_FIELD),
-    body("abbreviation").exists().withMessage(Messages.MISSING_FIELD),
-    body("hasPrerequisite")
-        .exists().withMessage(Messages.MISSING_FIELD)
-        .bail()
-        .isArray().withMessage(Messages.FIELD_NOT_ARRAY),
-    body("hasPrerequisite.*")
-        .custom(value => resourceExists(value, Classes.Course)),
-    body("mentions")
-        .exists().withMessage(Messages.MISSING_FIELD)
-        .bail()
-        .isArray().withMessage(Messages.FIELD_NOT_ARRAY),
-    body("mentions.*")
-        .custom(value => resourceExists(value, Classes.Topic)),
-    body("covers")
-        .exists().withMessage(Messages.MISSING_FIELD)
-        .bail()
-        .isArray().withMessage(Messages.FIELD_NOT_ARRAY),
-    body("covers.*")
-        .custom(value => resourceExists(value, Classes.Topic))
-];
-
 export async function createCourse(req, res) {
     const newCourse = await getNewNode(Constants.coursesURI);
     var triples = [
@@ -59,8 +34,8 @@ export async function createCourse(req, res) {
 export function getAllCourses(req, res) {
     const q = new Query();
     q.setProto({
-        id: "?courseId",
-        type: predicate(Predicates.type),
+        "@id": "?courseId",
+        "@type": Classes.Course,
         name: predicate(Predicates.label),
         description: predicate(Predicates.description),
         abbreviation: predicate(Predicates.abbreviation),
@@ -89,8 +64,8 @@ export function getCourse(req, res) {
     const resourceUri = buildUri(Constants.coursesURI, req.params.id);
     const q = new Query();
     q.setProto({
-        id: resourceUri,
-        type: predicate(Predicates.type),
+        "@id": resourceUri,
+        "@type": Classes.Course,
         name: predicate(Predicates.label),
         description: predicate(Predicates.description),
         abbreviation: predicate(Predicates.abbreviation),

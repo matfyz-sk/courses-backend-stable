@@ -81,7 +81,8 @@ export async function createUser(req, res) {
 export async function getAllUsers(req, res) {
     const q = new Query();
     q.setProto({
-        id: "?userId",
+        "@id": "?userId",
+        "@type": "User",
         name: predicate(Predicates.name),
         surname: predicate(Predicates.surname),
         email: predicate(Predicates.email),

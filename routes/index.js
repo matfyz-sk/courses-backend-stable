@@ -1,6 +1,7 @@
-import { User, Team, Topic, Course, CourseInstance, Session } from "../controllers";
+import { User, Team, Topic, Course, CourseInstance, Session, Event, Task, Agent, ReviewComment, Submission } from "../controllers";
 import express from "express";
 import { validationResult } from "express-validator";
+import * as Validators from "../constants/requestValidators";
 const router = express.Router();
 
 function validate(req, res, next) {
@@ -10,36 +11,54 @@ function validate(req, res, next) {
     } else next();
 }
 
-router.post("/user", User.createUserValidation, validate, User.createUser);
-router.get("/user", User.getAllUsers);
-router.get("/user/:id", User.idValidation, validate, User.getUser);
+router.post("/user", Validators.createUser, Agent.createUser);
+router.delete("/user/:id", Agent.deleteUser);
+router.patch("/user/:id", Agent.patchUser);
+
+router.post("/team", Validators.createTeam, Agent.createTeam);
+router.delete("/team/:id", Agent.deleteTeam);
+router.patch("/team/:id", Agent.patchTeam);
+
+router.get("/user", Agent.getAllUsers);
+router.get("/user/:id", Agent.getUser);
+router.get("/course", Course.getAllCourses);
+router.get("/course/:id", Course.getCourse);
+
 router.post("/user/requestCourseInstance", User.requestCourseInstanceValidation, validate, User.requestCourseInstance);
 router.post("/user/setCourseInstance", User.requestCourseInstanceValidation, validate, User.setCourseInstance);
 router.post("/user/setTeam", User.setTeamValidation, validate, User.setTeam);
-router.delete("/user/:id", User.idValidation, validate, User.deleteUser);
 
-router.post("/topic", Topic.createTopicValidation, validate, Topic.createTopic);
 router.get("/topic", Topic.getAllTopics);
 router.get("/topic/:id", Topic.getTopic);
 router.delete("/topic/:id", Topic.idValidation, validate, Topic.deleteTopic);
 router.patch("/topic/:id", Topic.idValidation, validate, Topic.patchTopic);
 router.put("/topic/:id", Topic.idValidation, validate, Topic.putTopic);
 
-router.post("/team", Team.createTeamValidation, validate, Team.createTeam);
 router.get("/team", Team.getAllTeams);
 router.get("/team/:id", Team.getTeam);
 
-router.post("/session/lecture", Session.createSessionValidation, validate, Session.createLecture);
-router.post("/session/lab", Session.createSessionValidation, validate, Session.createLab);
-router.get("/session", Session.paramsValidation, validate, Session.getAllSessions);
-router.get("/session/:id", Session.getSession);
+// router.post("/session/lecture", Session.createSessionValidation, validate, Session.createLecture);
+// router.post("/session/lab", Session.createSessionValidation, validate, Session.createLab);
+// router.get("/session", Session.paramsValidation, validate, Session.getAllSessions);
+// router.get("/session/:id", Session.getSession);
 
-router.post("/courseInstance", CourseInstance.createCourseInstanceValidation, validate, CourseInstance.createCourseInstance);
 router.get("/courseInstance", CourseInstance.getAllCourseInstances);
 router.get("/courseInstance/:id", CourseInstance.getCourseInstance);
 
-router.post("/course", Course.createCourseValidation, validate, Course.createCourse);
-router.get("/course", Course.getAllCourses);
-router.get("/course/:id", Course.getCourse);
+router.post("/lecture", Validators.createLecture, Event.createLecture);
+router.post("/lab", Validators.createLab, Event.createLab);
+router.post("/course", Validators.createCourse, Course.createCourse);
+router.post("/courseInstance", Validators.createCourseInstance, Event.createCourseInstance);
+router.post("/topic", Validators.createTopic, Topic.createTopic);
+router.post("/assignment", Task.createAssignment);
+router.post("/questionAssignment", Task.createQuestionAssignment);
+router.post("/quizAssignment", Task.createQuizAssignment);
+
+// laco
+router.post("/codeComment", ReviewComment.createCodeComment);
+router.post("/generalComment", ReviewComment.createGeneralComment);
+router.post("/submission", Submission.createSubmission);
+// router.post("/review", foo);
+// router.post("/teamReview", foo);
 
 export default router;
