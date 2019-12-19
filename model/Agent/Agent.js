@@ -17,24 +17,6 @@ export default class Agent extends Thing {
         this._setProperty("avatar", Predicates.avatar, new Text(value));
     }
 
-    store() {
-        this.props.name.subj = this.subject;
-        this.props.avatar.subj = this.subject;
-        super.store();
-    }
-
-    delete() {
-        this.props.name.setOperation(Triple.REMOVE);
-        this.props.avatar.setOperation(Triple.REMOVE);
-        super.delete();
-    }
-
-    patch() {
-        super.patch();
-    }
-
-    put() {}
-
     _fill(data) {
         this.props.name = new Triple(this.subject, Predicates.name, new Text(data[Constants.ontologyURI + "name"]), "nothing");
         this.props.avatar = new Triple(this.subject, Predicates.avatar, new Text(data[Constants.ontologyURI + "avatar"]), "nothing");

@@ -11,6 +11,7 @@ export default class User extends Agent {
         super(uri);
         this.type = Classes.User;
         this.subclassOf = Classes.Agent;
+        this.uriPrefix = Constants.usersURI;
     }
 
     set firstName(value) {
@@ -36,33 +37,6 @@ export default class User extends Agent {
     set memberOf(value) {
         this._setArrayProperty("memberOf", Predicates.memberOf, value, Node);
     }
-
-    async store() {
-        this.subject = await getNewNode(Constants.usersURI);
-        this.props.firstName.subj = this.subject;
-        this.props.lastName.subj = this.subject;
-        this.props.email.subj = this.subject;
-        this.props.description.subj = this.subject;
-        this.props.nickname.subj = this.subject;
-        for (var t of this.props.memberOf) t.subj = this.subject;
-        super.store();
-    }
-
-    delete() {
-        this.props.firstName.setOperation(Triple.REMOVE);
-        this.props.lastName.setOperation(Triple.REMOVE);
-        this.props.email.setOperation(Triple.REMOVE);
-        this.props.description.setOperation(Triple.REMOVE);
-        this.props.nickname.setOperation(Triple.REMOVE);
-        for (var t of this.props.memberOf) t.setOperation(Triple.REMOVE);
-        super.delete();
-    }
-
-    patch() {
-        super.patch();
-    }
-
-    put() {}
 
     _fill(data) {
         this.props.firstName = new Triple(

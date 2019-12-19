@@ -113,8 +113,9 @@ export async function createUser(req, res) {
     user.name = req.body.name;
     user.avatar = req.body.avatar;
     if (req.body.memberOf) user.memberOf = req.body.memberOf;
-    user.store();
-    res.send();
+    user.store()
+        .then(data => res.status(201).send(user.subject))
+        .catch(err => res.status(500).send(err));
 }
 
 export async function createTeam(req, res) {
@@ -129,8 +130,9 @@ export async function createTeam(req, res) {
 export async function deleteUser(req, res) {
     const user = new User(buildUri(Constants.usersURI, req.params.id, false));
     await user.fetch();
-    user.delete();
-    res.send();
+    user.delete()
+        .then(data => res.status(200).send(data))
+        .catch(err => res.status(500).send(err));
 }
 
 export async function deleteTeam(req, res) {

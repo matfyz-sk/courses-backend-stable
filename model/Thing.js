@@ -2,6 +2,7 @@ import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 import { db } from "../config/client";
+import { getNewNode } from "../helpers";
 
 export default class Thing {
     constructor(uri) {
@@ -11,6 +12,7 @@ export default class Thing {
         this.subject = new Node(uri);
         this.type = "";
         this.subclassOf = "";
+        this.uriPrefix = "";
     }
 
     getClientInstance() {
@@ -25,20 +27,52 @@ export default class Thing {
         return client;
     }
 
-    _prepareTriples() {
+    _prepareTriplesToStore() {
+        this.props.type = new Triple(this.subject, Predicates.type, this.type);
+        this.props.subclassOf = new Triple(this.subject, Predicates.subclassOf, this.subclassOf);
         for (var key in this.props) {
             const val = this.props[key];
             if (Array.isArray(val)) {
                 for (var t of val) {
-                    if (t.getOperation() == Triple.ADD) this.triples.toAdd.push(t);
-                    else if (t.getOperation() == Triple.UPDATE) this.triples.toUpdate.push(t);
-                    else if (t.getOperation() == Triple.REMOVE) this.triples.toRemove.push(t);
+                    t.subj = this.subject;
+                    this.triples.toAdd.push(t);
                 }
-            } else {
-                if (val.getOperation() == Triple.ADD) this.triples.toAdd.push(val);
-                else if (val.getOperation() == Triple.UPDATE) this.triples.toUpdate.push(val);
-                else if (val.getOperation() == Triple.REMOVE) this.triples.toRemove.push(val);
+                continue;
             }
+            val.subj = this.subject;
+            this.triples.toAdd.push(val);
+        }
+    }
+
+    _prepareTriplesToUpdate() {
+        for (var key in this.props) {
+            const val = this.props[key];
+            if (Array.isArray(val)) {
+                for (var t of val) this._arrangeTriple(t);
+                continue;
+            }
+            this._arrangeTriple(val);
+        }
+    }
+
+    _arrangeTriple(triple) {
+        if (triple.getOperation() == Triple.ADD) this.triples.toAdd.push(triple);
+        else if (triple.getOperation() == Triple.UPDATE) this.triples.toUpdate.push(triple);
+        else if (triple.getOperation() == Triple.REMOVE) this.triples.toRemove.push(triple);
+    }
+
+    _prepareTriplesToDelete() {
+        for (var key in this.props) {
+            const val = this.props[key];
+            if (Array.isArray(val)) {
+                for (var t of val) {
+                    t.setOperation(Triple.REMOVE);
+                    this.triples.toRemove.push(t);
+                }
+                continue;
+            }
+            val.setOperation(Triple.REMOVE);
+            this.triples.toRemove.push(val);
         }
     }
 
@@ -58,8 +92,6 @@ export default class Thing {
     }
 
     async _storeTriples() {
-        this._prepareTriples();
-
         console.log("to add:", this.triples.toAdd);
         console.log("to remove:", this.triples.toRemove);
         console.log("to update:", this.triples.toUpdate);
@@ -83,19 +115,23 @@ export default class Thing {
         }
     }
 
-    store() {
-        this.props.type = new Triple(this.subject, Predicates.type, this.type, Triple.ADD);
-        this.props.subclassOf = new Triple(this.subject, Predicates.subclassOf, this.subclassOf, Triple.ADD);
-        this._storeTriples();
+    async store() {
+        this.subject = await getNewNode(this.uriPrefix);
+        this._prepareTriplesToStore();
+        db.getLocalStore().empty();
+        db.getLocalStore().bulk(this.triples.toAdd);
+        return db.store(true);
     }
 
     delete() {
-        this.props.type.setOperation(Triple.REMOVE);
-        this.props.subclassOf.setOperation(Triple.REMOVE);
-        this._storeTriples();
+        this._prepareTriplesToDelete();
+        db.getLocalStore().empty();
+        db.getLocalStore().bulk(this.triples.toRemove);
+        return db.store(true);
     }
 
     patch() {
+        this._prepareTriplesToUpdate();
         this._storeTriples();
     }
 
@@ -107,13 +143,15 @@ export default class Thing {
         for (var row of data.results.bindings) {
             const predicate = row.p.value;
             const object = row.o.value;
-            if (!actualData.predicate) {
-                actualData[predicate] = object;
-            } else if (!Array.isArray(actualData.predicate)) {
-                actualData.predicate = [actualData.predicate, object];
-            } else {
-                actualData.predicate.push(object);
+            if (actualData[predicate]) {
+                if (Array.isArray(actualData[predicate])) {
+                    actualData[predicate].push(object);
+                } else {
+                    actualData[predicate] = [actualData[predicate], object];
+                }
+                continue;
             }
+            actualData[predicate] = object;
         }
         this._fill(actualData);
     }
