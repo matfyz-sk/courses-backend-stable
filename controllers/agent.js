@@ -7,8 +7,8 @@ import * as Classes from "../constants/classes";
 import * as Messages from "../constants/messages";
 import { buildUri, getNewNode, predicate, prepareQueryUri, resourceExists, emptyResult } from "../helpers";
 import { db } from "../config/client";
-import User from "../model/User";
-import Team from "../model/Team";
+import User from "../model/Agent/User";
+import Team from "../model/Agent/Team";
 
 export function getAllUsers(req, res) {
     const q = new Query();

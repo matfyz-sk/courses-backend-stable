@@ -1,23 +1,23 @@
-import * as Classes from "../constants/classes";
+import * as Classes from "../../constants/classes";
 import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
-import Thing from "./Thing";
-import * as Constants from "../constants";
-import * as Predicates from "../constants/predicates";
-import { getNewNode } from "../helpers";
+import Thing from "../Thing";
+import * as Constants from "../../constants";
+import * as Predicates from "../../constants/predicates";
+import { getNewNode } from "../../helpers";
 import Task from "./Task";
 
-export default class Assignment extends Task {
+export default class QuizAssignment extends Task {
     constructor(uri) {
         super();
         this._uri = uri;
-        this._type = Classes.Assignment;
+        this._type = Classes.QuizAssignment;
         this._subclassOf = Classes.Task;
         this.client = this.getClientInstance();
         this._old = {};
     }
 
     async store() {
-        var subject = await getNewNode(Constants.coursesURI);
+        var subject = await getNewNode(Constants.quizAssignmentURI);
         var triples = [new Triple(subject, Predicates.type, this._type), new Triple(subject, Predicates.subclassOf, this._subclassOf)];
         super.store(subject, triples);
     }

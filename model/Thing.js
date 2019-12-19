@@ -1,12 +1,16 @@
 import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
-import * as ID from "../lib/virtuoso-uid";
 import { db } from "../config/client";
 
 export default class Thing {
-    constructor() {
+    constructor(uri) {
         this.triples = { toAdd: [], toUpdate: [], toRemove: [] };
+        this.props = {};
+        this._uri = uri;
+        this.subject = new Node(uri);
+        this.type = "";
+        this.subclassOf = "";
     }
 
     getClientInstance() {
@@ -38,10 +42,27 @@ export default class Thing {
         }
     }
 
+    _setProperty(propertyName, predicateName, value) {
+        if (!this.props[propertyName]) {
+            this.props[propertyName] = new Triple(this.subject, predicateName, value);
+        } else {
+            this.props[propertyName].setOperation(Triple.ADD);
+            this.props[propertyName].updateObject(value);
+        }
+    }
+
+    _setArrayProperty(propertyName, predicateName, value, objectType) {
+        if (this.props[propertyName]) for (var t of this.props[propertyName]) t.setOperation(Triple.REMOVE);
+        else this.props[propertyName] = [];
+        for (var uri of value) this.props[propertyName].push(new Triple(this.subject, predicateName, new objectType(uri)));
+    }
+
     async _storeTriples() {
         this._prepareTriples();
 
-        console.log(this.triples);
+        console.log("to add:", this.triples.toAdd);
+        console.log("to remove:", this.triples.toRemove);
+        console.log("to update:", this.triples.toUpdate);
 
         if (this.triples.toAdd.length > 0) {
             db.getLocalStore().empty();
@@ -63,10 +84,14 @@ export default class Thing {
     }
 
     store() {
+        this.props.type = new Triple(this.subject, Predicates.type, this.type, Triple.ADD);
+        this.props.subclassOf = new Triple(this.subject, Predicates.subclassOf, this.subclassOf, Triple.ADD);
         this._storeTriples();
     }
 
     delete() {
+        this.props.type.setOperation(Triple.REMOVE);
+        this.props.subclassOf.setOperation(Triple.REMOVE);
         this._storeTriples();
     }
 
@@ -77,7 +102,7 @@ export default class Thing {
     put() {}
 
     async fetch() {
-        const data = await this.client.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this._uri}>}`, true);
+        const data = await db.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this._uri}>}`, true);
         var actualData = {};
         for (var row of data.results.bindings) {
             const predicate = row.p.value;
@@ -93,5 +118,8 @@ export default class Thing {
         this._fill(actualData);
     }
 
-    _fill(data) {}
+    _fill(data) {
+        this.props.type = new Triple(this.subject, Predicates.type, this.type, "nothing");
+        this.props.subclassOf = new Triple(this.subject, Predicates.subclassOf, this.subclassOf, "nothing");
+    }
 }

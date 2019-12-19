@@ -1,9 +1,9 @@
-import * as Classes from "../constants/classes";
+import * as Classes from "../../constants/classes";
 import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
-import Thing from "./Thing";
-import * as Constants from "../constants";
-import * as Predicates from "../constants/predicates";
-import { getNewNode } from "../helpers";
+import Thing from "../Thing";
+import * as Constants from "../../constants";
+import * as Predicates from "../../constants/predicates";
+import { getNewNode } from "../../helpers";
 import Task from "./Task";
 
 export default class QuestionAssignment extends Task {

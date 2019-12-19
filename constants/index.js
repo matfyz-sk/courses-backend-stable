@@ -29,3 +29,4 @@ export const codeCommentURI = graphURI + "/codeComment/";
 export const generalCommentURI = graphURI + "/generalComment/";
 export const submissionURI = graphURI + "/submission/";
 export const taskURI = graphURI + "/task/";
+export const taskEventURI = graphURI + "/taskEvent/";

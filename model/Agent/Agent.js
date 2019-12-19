@@ -1,27 +1,20 @@
-import * as Classes from "../constants/classes";
-import Thing from "./Thing";
+import * as Classes from "../../constants/classes";
+import Thing from "../Thing";
 import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
-import * as Constants from "../constants";
-import * as Predicates from "../constants/predicates";
-import { timingSafeEqual } from "crypto";
+import * as Constants from "../../constants";
+import * as Predicates from "../../constants/predicates";
 
 export default class Agent extends Thing {
     constructor(uri) {
-        super();
-        this.subject = new Node(uri);
-        // this._uri = uri;
-        // this._type = Classes.Agent;
-        this.props = {};
+        super(uri);
     }
 
     set name(value) {
-        if (!this.props.name) this.props.name = new Triple(this.subject, Predicates.name, new Text(value));
-        else this.props.name.updateObject(new Text(value));
+        this._setProperty("name", Predicates.name, new Text(value));
     }
 
     set avatar(value) {
-        if (!this.props.avatar) this.props.avatar = new Triple(this.subject, Predicates.avatar, new Text(value));
-        else this.props.avatar.updateObject(new Text(value));
+        this._setProperty("avatar", Predicates.avatar, new Text(value));
     }
 
     store() {
@@ -31,8 +24,6 @@ export default class Agent extends Thing {
     }
 
     delete() {
-        this.props.name.subj = this.subject;
-        this.props.avatar.subj = this.subject;
         this.props.name.setOperation(Triple.REMOVE);
         this.props.avatar.setOperation(Triple.REMOVE);
         super.delete();
