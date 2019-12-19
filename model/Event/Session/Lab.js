@@ -10,28 +10,12 @@ export default class Lab extends Session {
         super(uri);
         this.type = Classes.Lab;
         this.subclassOf = Classes.Session;
+        this.uriPrefix = Constants.labURI;
     }
 
     set room(value) {
         this._setProperty("room", Predicates.room, new Text(value));
     }
-
-    async store() {
-        this.subject = await getNewNode(Constants.labURI);
-        this.props.room.subj = this.subject;
-        super.store();
-    }
-
-    delete() {
-        this.props.room.setOperation(Triple.REMOVE);
-        super.delete();
-    }
-
-    patch() {
-        super.patch();
-    }
-
-    put() {}
 
     _fill(data) {
         this.props.room = new Triple(this.subject, Predicates.room, new Text(data[Constants.ontologyURI + "room"]), "nothing");

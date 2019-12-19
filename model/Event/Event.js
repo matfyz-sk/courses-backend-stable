@@ -16,23 +16,25 @@ export default class Event extends Thing {
         this._setProperty("endDate", Predicates.endDate, new Text(value));
     }
 
-    async store() {
-        this.props.startDate.subj = this.subject;
-        this.props.endDate.subj = this.subject;
-        super.store();
+    set uses(value) {
+        this._setArrayProperty("uses", Predicates.uses, value, Node);
     }
 
-    delete() {
-        this.props.startDate.setOperation(Triple.REMOVE);
-        this.props.endDate.setOperation(Triple.REMOVE);
-        super.delete();
+    set recommends(value) {
+        this._setArrayProperty("recommends", Predicates.recommends, value, Node);
     }
 
-    patch() {
-        super.patch();
+    set covers(value) {
+        this._setArrayProperty("covers", Predicates.covers, value, Node);
     }
 
-    put() {}
+    set mentions(value) {
+        this._setArrayProperty("mentions", Predicates.mentions, value, Node);
+    }
+
+    set requires(value) {
+        this._setArrayProperty("requires", Predicates.requires, value, Node);
+    }
 
     _fill(data) {
         this.props.startDate = new Triple(
@@ -42,6 +44,33 @@ export default class Event extends Thing {
             "nothing"
         );
         this.props.endDate = new Triple(this.subject, Predicates.endDate, new Text(data[Constants.ontologyURI + "endDate"]), "nothing");
+
+        this.props.uses = [];
+        this.props.recommends = [];
+        this.props.covers = [];
+        this.props.mentions = [];
+        this.props.requires = [];
+
+        for (var uri of data[Constants.ontologyURI + "uses"]) {
+            this.props.uses.push(new Triple(this.subject, Predicates.uses, new Node(uri), "nothing"));
+        }
+
+        for (var uri of data[Constants.ontologyURI + "recommends"]) {
+            this.props.recommends.push(new Triple(this.subject, Predicates.recommends, new Node(uri), "nothing"));
+        }
+
+        for (var uri of data[Constants.ontologyURI + "covers"]) {
+            this.props.covers.push(new Triple(this.subject, Predicates.covers, new Node(uri), "nothing"));
+        }
+
+        for (var uri of data[Constants.ontologyURI + "mentions"]) {
+            this.props.mentions.push(new Triple(this.subject, Predicates.mentions, new Node(uri), "nothing"));
+        }
+
+        for (var uri of data[Constants.ontologyURI + "requires"]) {
+            this.props.requires.push(new Triple(this.subject, Predicates.requires, new Node(uri), "nothing"));
+        }
+
         super._fill(data);
     }
 }

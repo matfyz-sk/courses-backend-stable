@@ -1,4 +1,3 @@
-import * as User from "./user";
 import * as Team from "./team";
 import * as Topic from "./topic";
 // import * as Session from "./session";
@@ -11,7 +10,6 @@ import * as ReviewComment from "./reviewComment";
 import * as Submission from "./submission";
 
 module.exports = {
-    User,
     Team,
     Topic,
     // Session,

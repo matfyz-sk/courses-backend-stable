@@ -16,24 +16,6 @@ export default class Session extends Event {
         this._setArrayProperty("hasInstructor", Predicates.hasInstructor, value, Node);
     }
 
-    async store() {
-        this.props.courseInstance.subj = this.subject;
-        for (var t of this.props.hasInstructor) t.subj = this.subject;
-        super.store();
-    }
-
-    delete() {
-        this.props.hasInstructor.setOperation(Triple.REMOVE);
-        for (var t of this.props.hasInstructor) t.setOperation(Triple.REMOVE);
-        super.delete();
-    }
-
-    patch() {
-        super.patch();
-    }
-
-    put() {}
-
     _fill(data) {
         this.props.courseInstance = new Triple(
             this.subject,

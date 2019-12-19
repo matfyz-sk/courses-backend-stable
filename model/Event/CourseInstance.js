@@ -8,6 +8,11 @@ export default class CourseInstance extends Event {
         super(uri);
         this.type = Classes.CourseInstance;
         this.subclassOf = Classes.Event;
+        this.uriPrefix = Constants.courseInstancesURI;
+    }
+
+    set year(value) {
+        this._setProperty("year", Predicates.year, new Text(value));
     }
 
     set instanceOf(value) {
@@ -18,26 +23,8 @@ export default class CourseInstance extends Event {
         this._setArrayProperty("hasInstructor", Predicates.hasInstructor, value, Node);
     }
 
-    async store() {
-        this.subject = await getNewNode(Constants.courseInstancesURI);
-        this.props.instanceOf.subj = this.subject;
-        for (var t of this.props.hasInstructor) t.subj = this.subject;
-        super.store();
-    }
-
-    delete() {
-        this.props.instanceOf.setOperation(Triple.REMOVE);
-        for (var t of this.props.hasInstructor) t.setOperation(Triple.REMOVE);
-        super.delete();
-    }
-
-    patch() {
-        super.patch();
-    }
-
-    put() {}
-
     _fill(data) {
+        this.props.year = new Triple(this.subject, Predicates.year, new Text(data[Constants.ontologyURI + "year"]), "nothing");
         this.props.instanceOf = new Triple(
             this.subject,
             Predicates.instanceOf,

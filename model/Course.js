@@ -8,26 +8,34 @@ import { getNewNode } from "../helpers";
 export default class Course extends Thing {
     constructor(uri) {
         super();
-        this._uri = uri;
-        this._type = Classes.Course;
-        this._subclassOf = Classes.Thing;
-        this.client = this.getClientInstance();
-        this._old = {};
+        this.type = Classes.Course;
+        this.subclassOf = Classes.Thing;
+        this.uriPrefix = Constants.coursesURI;
     }
 
-    set name(value) {}
-    set description(value) {}
-    set abbreviation(value) {}
-    set hasPrerequisite(value) {}
-    set mentions(value) {}
-    set covers(value) {}
-
-    async store() {
-        var subject = await getNewNode(Constants.coursesURI);
-        var triples = [new Triple(subject, Predicates.type, this._type)];
-        super.store(subject, triples);
+    set name(value) {
+        this._setProperty("name", Predicates.name, new Text(value));
     }
 
-    update() {}
-    delete() {}
+    set description(value) {
+        this._setProperty("description", Predicates.description, new Text(value));
+    }
+
+    set abbreviation(value) {
+        this._setProperty("abbreviation", Predicates.abbreviation, new Text(value));
+    }
+
+    set hasPrerequisite(value) {
+        this._setProperty("hasPrerequisite", Predicates.hasPrerequisite, new Node(value));
+    }
+
+    set mentions(value) {
+        this._setArrayProperty("mentions", Predicates.mentions, value, Node);
+    }
+
+    set covers(value) {
+        this._setArrayProperty("covers", Predicates.covers, value, Node);
+    }
+
+    _fill(data) {}
 }
