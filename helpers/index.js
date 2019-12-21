@@ -54,9 +54,10 @@ export function resourceExists(resourceURI, expectedType) {
 
 export function findByURI(resourceURI, expectedType) {
     const uri = prepareQueryUri(resourceURI, expectedType);
+    const p = type.prefix.name + ":" + type.value;
     const q = new Query();
-    q.setProto({ id: uri, type: predicate(type) });
-    q.setWhere([`${uri} ${type} ${expectedType}`]);
+    q.setProto({ id: uri, type: predicate(p) });
+    q.setWhere([`${uri} ${p} ${expectedType}`]);
     return q.run();
 }
 

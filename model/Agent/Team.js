@@ -3,7 +3,6 @@ import { Triple, Node, Text, Data } from "virtuoso-sparql-client";
 import Agent from "./Agent";
 import * as Constants from "../../constants";
 import * as Predicates from "../../constants/predicates";
-import { getNewNode } from "../../helpers";
 
 export default class Team extends Agent {
     constructor(uri) {
@@ -14,16 +13,11 @@ export default class Team extends Agent {
     }
 
     set courseInstance(value) {
-        this._setProperty("courseInstance", Predicates.courseInstance, new Node(value));
+        this._setProperty(Predicates.courseInstance, new Node(value));
     }
 
     _fill(data) {
-        this.props.courseInstance = new Triple(
-            this.subject,
-            Predicates.courseInstance,
-            new Node(data[Constants.ontologyURI + "courseInstance"]),
-            "nothing"
-        );
+        this._setNewProperty(Predicates.courseInstance, data.courseInstance);
         super._fill(data);
     }
 }

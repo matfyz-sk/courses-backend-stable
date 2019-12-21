@@ -28,8 +28,8 @@ export default class Thing {
     }
 
     _prepareTriplesToStore() {
-        this.props.type = new Triple(this.subject, Predicates.type, this.type);
-        this.props.subclassOf = new Triple(this.subject, Predicates.subclassOf, this.subclassOf);
+        this.props.type = new Triple(this.subject, this._buildPredicate(Predicates.type), this.type);
+        this.props.subclassOf = new Triple(this.subject, this._buildPredicate(Predicates.subclassOf), this.subclassOf);
         for (var key in this.props) {
             const val = this.props[key];
             if (Array.isArray(val)) {
@@ -76,19 +76,42 @@ export default class Thing {
         }
     }
 
-    _setProperty(propertyName, predicateName, value) {
-        if (!this.props[propertyName]) {
-            this.props[propertyName] = new Triple(this.subject, predicateName, value);
+    _buildPredicate(predicate) {
+        return predicate.prefix.name + ":" + predicate.value;
+    }
+
+    _setProperty(predicate, object) {
+        if (!this.props[predicate.value]) {
+            this.props[predicate.value] = new Triple(this.subject, this._buildPredicate(predicate), object);
         } else {
-            this.props[propertyName].setOperation(Triple.ADD);
-            this.props[propertyName].updateObject(value);
+            this.props[predicate.value].setOperation(Triple.ADD);
+            this.props[predicate.value].updateObject(object);
         }
     }
 
-    _setArrayProperty(propertyName, predicateName, value, objectType) {
-        if (this.props[propertyName]) for (var t of this.props[propertyName]) t.setOperation(Triple.REMOVE);
-        else this.props[propertyName] = [];
-        for (var uri of value) this.props[propertyName].push(new Triple(this.subject, predicateName, new objectType(uri)));
+    _setNewProperty(predicate, object) {
+        this.props[predicate.value] = new Triple(this.subject, this._buildPredicate(predicate), object, "nothing");
+    }
+
+    _setArrayProperty(predicate, objectValue, objectType) {
+        if (this.props[predicate.value]) {
+            for (var triple of this.props[predicate.value]) {
+                triple.setOperation(Triple.REMOVE);
+            }
+        } else {
+            this.props[predicate.value] = [];
+        }
+        for (var value of objectValue) {
+            this.props[predicate.value].push(new Triple(this.subject, this._buildPredicate(predicate), new objectType(value)));
+        }
+    }
+
+    _setNewArrayProperty(predicate, objectArrayValue, objectType) {
+        this.props[predicate.value] = [];
+        if (!objectArrayValue) return;
+        for (var value of objectArrayValue) {
+            this.props[predicate.value].push(new Triple(this.subject, this._buildPredicate(predicate), new objectType(value), "nothing"));
+        }
     }
 
     async _storeTriples() {
@@ -141,8 +164,15 @@ export default class Thing {
         const data = await db.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this._uri}>}`, true);
         var actualData = {};
         for (var row of data.results.bindings) {
-            const predicate = row.p.value;
+            var predicate = row.p.value;
             const object = row.o.value;
+            const lastSharpIndex = predicate.lastIndexOf("#");
+            const lastDashIndex = predicate.lastIndexOf("/");
+            if (lastSharpIndex > lastDashIndex) {
+                predicate = predicate.substring(lastSharpIndex + 1);
+            } else {
+                predicate = predicate.substring(lastDashIndex + 1);
+            }
             if (actualData[predicate]) {
                 if (Array.isArray(actualData[predicate])) {
                     actualData[predicate].push(object);
@@ -157,7 +187,7 @@ export default class Thing {
     }
 
     _fill(data) {
-        this.props.type = new Triple(this.subject, Predicates.type, this.type, "nothing");
-        this.props.subclassOf = new Triple(this.subject, Predicates.subclassOf, this.subclassOf, "nothing");
+        this._setNewProperty(Predicates.type, this.type);
+        this._setNewProperty(Predicates.subclassOf, this.subclassOf);
     }
 }

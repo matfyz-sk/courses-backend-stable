@@ -10,16 +10,16 @@ export default class Agent extends Thing {
     }
 
     set name(value) {
-        this._setProperty("name", Predicates.name, new Text(value));
+        this._setProperty(Predicates.name, new Text(value));
     }
 
     set avatar(value) {
-        this._setProperty("avatar", Predicates.avatar, new Text(value));
+        this._setProperty(Predicates.avatar, new Text(value));
     }
 
     _fill(data) {
-        this.props.name = new Triple(this.subject, Predicates.name, new Text(data[Constants.ontologyURI + "name"]), "nothing");
-        this.props.avatar = new Triple(this.subject, Predicates.avatar, new Text(data[Constants.ontologyURI + "avatar"]), "nothing");
+        this._setNewProperty(Predicates.name, data.name);
+        this._setNewProperty(Predicates.avatar, data.avatar);
         super._fill(data);
     }
 }
