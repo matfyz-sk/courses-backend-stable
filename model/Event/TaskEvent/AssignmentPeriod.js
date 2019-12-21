@@ -8,22 +8,8 @@ export default class AssignmentPeriod extends TaskEvent {
         super(uri);
         this.type = Classes.AssignmentPeriod;
         this.subclassOf = Classes.TaskEvent;
+        this.uriPrefix = Constants.assignmentPeriodURI;
     }
-
-    async store() {
-        this.subject = await getNewNode(Constants.assignmentPeriodURI);
-        super.store();
-    }
-
-    delete() {
-        super.delete();
-    }
-
-    patch() {
-        super.patch();
-    }
-
-    put() {}
 
     _fill(data) {
         super._fill(data);

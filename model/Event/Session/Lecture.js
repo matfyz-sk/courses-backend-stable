@@ -14,11 +14,11 @@ export default class Lecture extends Session {
     }
 
     set room(value) {
-        this._setProperty("room", Predicates.room, new Text(value));
+        this._setProperty(Predicates.room, new Text(value));
     }
 
     _fill(data) {
-        this.props.room = new Triple(this.subject, Predicates.room, new Text(data[Constants.ontologyURI + "room"]), "nothing");
+        this._setNewProperty(Predicates.room, new Text(data.room));
         super._fill(data);
     }
 }

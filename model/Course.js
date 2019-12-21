@@ -1,9 +1,8 @@
 import * as Classes from "../constants/classes";
-import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
+import { Node, Text, Data } from "virtuoso-sparql-client";
 import Thing from "./Thing";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
-import { getNewNode } from "../helpers";
 
 export default class Course extends Thing {
     constructor(uri) {
@@ -14,28 +13,38 @@ export default class Course extends Thing {
     }
 
     set name(value) {
-        this._setProperty("name", Predicates.name, new Text(value));
+        this._setProperty(Predicates.name, new Text(value));
     }
 
     set description(value) {
-        this._setProperty("description", Predicates.description, new Text(value));
+        this._setProperty(Predicates.description, new Text(value));
     }
 
     set abbreviation(value) {
-        this._setProperty("abbreviation", Predicates.abbreviation, new Text(value));
+        this._setProperty(Predicates.abbreviation, new Text(value));
     }
 
     set hasPrerequisite(value) {
-        this._setProperty("hasPrerequisite", Predicates.hasPrerequisite, new Node(value));
+        this._setProperty(Predicates.hasPrerequisite, new Node(value));
     }
 
     set mentions(value) {
-        this._setArrayProperty("mentions", Predicates.mentions, value, Node);
+        this._setArrayProperty(Predicates.mentions, value, Node);
     }
 
     set covers(value) {
-        this._setArrayProperty("covers", Predicates.covers, value, Node);
+        this._setArrayProperty(Predicates.covers, value, Node);
     }
 
-    _fill(data) {}
+    _fill(data) {
+        this._setNewProperty(Predicates.name, new Text(data.name));
+        this._setNewProperty(Predicates.description, new Text(data.description));
+        this._setNewProperty(Predicates.abbreviation, new Text(data.abbreviation));
+        this._setNewProperty(Predicates.hasPrerequisite, new Text(data.hasPrerequisite));
+
+        this._setArrayProperty(Predicates.mentions, data.mentions, Node);
+        this._setArrayProperty(Predicates.covers, data.covers, Node);
+
+        super._fill(data);
+    }
 }

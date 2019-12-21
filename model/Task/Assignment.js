@@ -1,27 +1,38 @@
 import * as Classes from "../../constants/classes";
-import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
-import Thing from "../Thing";
+import { Node, Text, Data } from "virtuoso-sparql-client";
 import * as Constants from "../../constants";
 import * as Predicates from "../../constants/predicates";
-import { getNewNode } from "../../helpers";
 import Task from "./Task";
 
 export default class Assignment extends Task {
     constructor(uri) {
         super();
-        this._uri = uri;
-        this._type = Classes.Assignment;
-        this._subclassOf = Classes.Task;
-        this.client = this.getClientInstance();
-        this._old = {};
+        this.type = Classes.Assignment;
+        this.subclassOf = Classes.Task;
+        this.uriPrefix = Constants.assignmentURI;
     }
 
-    async store() {
-        var subject = await getNewNode(Constants.coursesURI);
-        var triples = [new Triple(subject, Predicates.type, this._type), new Triple(subject, Predicates.subclassOf, this._subclassOf)];
-        super.store(subject, triples);
+    set initialSubmissionPeriod(value) {
+        this._setProperty(Predicates.initialSubmissionPeriod, new Node(value));
     }
 
-    update() {}
-    delete() {}
+    set peerReviewPeriod(value) {
+        this._setProperty(Predicates.peerReviewPeriod, new Node(value));
+    }
+
+    set improvedSubmissionPeriod(value) {
+        this._setProperty(Predicates.improvedSubmissionPeriod, new Node(value));
+    }
+
+    set teamReviewPeriod(value) {
+        this._setProperty(Predicates.teamReviewPeriod, new Node(value));
+    }
+
+    _fill(data) {
+        this._setNewProperty(Predicates.initialSubmissionPeriod, new Node(data.initialSubmissionPeriod));
+        this._setNewProperty(Predicates.peerReviewPeriod, new Node(data.peerReviewPeriod));
+        this._setNewProperty(Predicates.improvedSubmissionPeriod, new Node(data.improvedSubmissionPeriod));
+        this._setNewProperty(Predicates.teamReviewPeriod, new Node(data.teamReviewPeriod));
+        super._fill(data);
+    }
 }

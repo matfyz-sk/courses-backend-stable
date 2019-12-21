@@ -3,7 +3,6 @@ import { Triple, Node, Text, Data } from "virtuoso-sparql-client";
 import Session from "./Session";
 import * as Constants from "../../../constants";
 import * as Predicates from "../../../constants/predicates";
-import { getNewNode } from "../../../helpers";
 
 export default class Lab extends Session {
     constructor(uri) {
@@ -14,11 +13,11 @@ export default class Lab extends Session {
     }
 
     set room(value) {
-        this._setProperty("room", Predicates.room, new Text(value));
+        this._setProperty(Predicates.room, new Text(value));
     }
 
     _fill(data) {
-        this.props.room = new Triple(this.subject, Predicates.room, new Text(data[Constants.ontologyURI + "room"]), "nothing");
+        this._setNewProperty(Predicates.room, new Text(data.room));
         super._fill(data);
     }
 }

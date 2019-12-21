@@ -8,22 +8,8 @@ export default class TestTake extends ExaminationEvent {
         super(uri);
         this.type = Classes.TestTake;
         this.subclassOf = Classes.ExaminationEvent;
+        this.uriPrefix = Constants.testTakeURI;
     }
-
-    async store() {
-        this.subject = await getNewNode(Constants.testTakeURI);
-        super.store();
-    }
-
-    delete() {
-        super.delete();
-    }
-
-    patch() {
-        super.patch();
-    }
-
-    put() {}
 
     _fill(data) {
         super._fill(data);

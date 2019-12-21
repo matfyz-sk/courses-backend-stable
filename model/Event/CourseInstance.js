@@ -12,29 +12,21 @@ export default class CourseInstance extends Event {
     }
 
     set year(value) {
-        this._setProperty("year", Predicates.year, new Text(value));
+        this._setProperty(Predicates.year, new Text(value));
     }
 
     set instanceOf(value) {
-        this._setProperty("instanceof", Predicates.instanceOf, new Node(value));
+        this._setProperty(Predicates.instanceOf, new Node(value));
     }
 
     set hasInstructor(value) {
-        this._setArrayProperty("hasInstructor", Predicates.hasInstructor, value, Node);
+        this._setArrayProperty(Predicates.hasInstructor, value, Node);
     }
 
     _fill(data) {
-        this.props.year = new Triple(this.subject, Predicates.year, new Text(data[Constants.ontologyURI + "year"]), "nothing");
-        this.props.instanceOf = new Triple(
-            this.subject,
-            Predicates.instanceOf,
-            new Node(data[Constants.ontologyURI + "instanceOf"]),
-            "nothing"
-        );
-        this.props.hasInstructor = [];
-        for (var uri of data[Constants.ontologyURI + "hasInstructor"]) {
-            this.props.hasInstructor.push(new Triple(this.subject, Predicates.hasInstructor, new Node(uri), "nothing"));
-        }
+        this._setNewProperty(Predicates.year, new Text(data.year));
+        this._setNewProperty(Predicates.instanceOf, new Node(data.instanceOf));
+        this._setNewArrayProperty(Predicates.hasInstructor, data.hasInstructor, Node);
         super._fill(data);
     }
 }

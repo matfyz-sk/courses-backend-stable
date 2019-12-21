@@ -8,22 +8,8 @@ export default class Block extends Event {
         super(uri);
         this.type = Classes.Block;
         this.subclassOf = Classes.Event;
+        this.uriPrefix = Constants.blockURI;
     }
-
-    async store() {
-        this.subject = await getNewNode(Constants.courseInstancesURI);
-        super.store();
-    }
-
-    delete() {
-        super.delete();
-    }
-
-    patch() {
-        super.patch();
-    }
-
-    put() {}
 
     _fill(data) {
         super._fill(data);

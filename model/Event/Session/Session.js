@@ -9,24 +9,16 @@ export default class Session extends Event {
     }
 
     set courseInstance(value) {
-        this._setProperty("courseInstace", Predicates.courseInstance, new Node(value));
+        this._setProperty(Predicates.courseInstance, new Node(value));
     }
 
     set hasInstructor(value) {
-        this._setArrayProperty("hasInstructor", Predicates.hasInstructor, value, Node);
+        this._setArrayProperty(Predicates.hasInstructor, value, Node);
     }
 
     _fill(data) {
-        this.props.courseInstance = new Triple(
-            this.subject,
-            Predicates.courseInstance,
-            new Node(data[Constants.ontologyURI + "courseInstance"]),
-            "nothing"
-        );
-        this.props.hasInstructor = [];
-        for (var uri of data[Constants.ontologyURI + "hasInstructor"]) {
-            this.props.hasInstructor.push(new Triple(this.subject, Predicates.hasInstructor, new Node(uri), "nothing"));
-        }
+        this._setNewProperty(Predicates.courseInstance, new Node(data.courseInstance));
+        this._setNewArrayProperty(Predicates.hasInstructor, data.hasInstructor, Node);
         super._fill(data);
     }
 }
