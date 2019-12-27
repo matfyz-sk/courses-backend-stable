@@ -7,27 +7,49 @@ import * as Classes from "../constants/classes";
 import * as Messages from "../constants/messages";
 import { buildUri, getNewNode, predicate, resourceExists, emptyResult } from "../helpers";
 import { db } from "../config/client";
+import Course from "../model/Course";
 
-export async function createCourse(req, res) {
-    const newCourse = await getNewNode(Constants.coursesURI);
-    var triples = [
-        new Triple(newCourse, Predicates.type, Classes.Course),
-        new Triple(newCourse, Predicates.label, new Text(req.body.name)),
-        new Triple(newCourse, Predicates.description, new Text(req.body.description)),
-        new Triple(newCourse, Predicates.abbreviation, new Text(req.body.abbreviation))
-    ];
-    for (var courseURI of req.body.hasPrerequisite) {
-        triples.push(new Triple(newCourse, Predicates.hasPrerequisite, new Node(courseURI)));
-    }
-    for (var topicURI of req.body.mentions) {
-        triples.push(new Triple(newCourse, Predicates.mentions, new Node(topicURI)));
-    }
-    for (var topicURI of req.body.covers) {
-        triples.push(new Triple(newCourse, Predicates.covers, new Node(topicURI)));
-    }
-    db.getLocalStore().bulk(triples);
-    db.store(true)
-        .then(data => res.status(201).send(newCourse))
+export function createCourse(req, res) {
+    const course = new Course();
+    course.name = req.body.name;
+    course.description = req.body.description;
+    course.abbreviation = req.body.abbreviation;
+    course.hasPrerequisite = req.body.hasPrerequisite;
+    course.mentions = req.body.mentions;
+    course.covers = req.body.covers;
+    course
+        .store()
+        .then(data => res.status(201).send(course.subject))
+        .catch(error => res.status(500).send(error));
+}
+
+export async function patchCourse(req, res) {
+    const course = new Course(buildUri(Constants.coursesURI, req.params.id, false));
+    course
+        .fetch()
+        .then(data => {
+            course._fill(course.prepareData(data));
+            if (req.body.name) course.name = req.body.name;
+            if (req.body.description) course.description = req.body.description;
+            if (req.body.abbreviation) course.abbreviation = req.body.abbreviation;
+            if (req.body.hasPrerequisite) course.hasPrerequisite = req.body.hasPrerequisite;
+            if (req.body.mentions) course.mentions = req.body.mentions;
+            if (req.body.covers) course.covers = req.body.covers;
+            course.patch();
+        })
+        .then(data => res.status(200).send(data))
+        .catch(error => res.status(500).send(error));
+}
+
+export async function deleteCourse(req, res) {
+    const course = new Course(buildUri(Constants.coursesURI, req.params.id, false));
+    course
+        .fetch()
+        .then(data => {
+            course._fill(course.prepareData(data));
+            course.delete();
+        })
+        .then(data => res.status(200).send(data))
         .catch(err => res.status(500).send(err));
 }
 
@@ -36,7 +58,7 @@ export function getAllCourses(req, res) {
     q.setProto({
         "@id": "?courseId",
         "@type": Classes.Course,
-        name: predicate(Predicates.label),
+        name: predicate(Predicates.name),
         description: predicate(Predicates.description),
         abbreviation: predicate(Predicates.abbreviation),
         hasPrerequisite: {
@@ -57,7 +79,7 @@ export function getAllCourses(req, res) {
     ]);
     q.run()
         .then(data => res.status(200).send(data))
-        .catch(err => res.status(500).send(err));
+        .catch(error => res.status(500).send(error));
 }
 
 export function getCourse(req, res) {

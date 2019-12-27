@@ -1,3 +1,4 @@
+export const Thing = "courses:Thing";
 export const Agent = "courses:Agent";
 export const User = "courses:User";
 export const Team = "courses:Team";
@@ -25,3 +26,5 @@ export const Review = "courses:Review";
 export const CodeReview = "courses:CodeReview";
 export const TeamReview = "courses:TeamReview";
 export const Submission = "courses:Submission";
+export const Comment = "courses:Comment";
+export const Question = "courses:Question";

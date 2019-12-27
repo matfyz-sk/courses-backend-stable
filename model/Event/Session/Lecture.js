@@ -3,7 +3,6 @@ import { Triple, Node, Text, Data } from "virtuoso-sparql-client";
 import Session from "./Session";
 import * as Constants from "../../../constants";
 import * as Predicates from "../../../constants/predicates";
-import { getNewNode } from "../../../helpers";
 
 export default class Lecture extends Session {
     constructor(uri) {
@@ -13,12 +12,7 @@ export default class Lecture extends Session {
         this.uriPrefix = Constants.lectureURI;
     }
 
-    set room(value) {
-        this._setProperty(Predicates.room, new Text(value));
-    }
-
     _fill(data) {
-        this._setNewProperty(Predicates.room, new Text(data.room));
         super._fill(data);
     }
 }

@@ -7,36 +7,41 @@ import * as Classes from "../constants/classes";
 import * as Messages from "../constants/messages";
 import { buildUri, getNewNode, predicate, prepareQueryUri, resourceExists, emptyResult } from "../helpers";
 import { db } from "../config/client";
+import CodeComment from "../model/CodeComment";
+import CodeReview from "../model/CodeReview";
+import GeneralComment from "../model/GeneralComment";
 
 export async function createCodeComment(req, res) {
-    var newCodeComment = await getNewNode(Constants.codeCommentURI);
-    var triples = [
-        new Triple(newCodeComment, Predicates.type, Classes.CodeComment),
-        new Triple(newCodeComment, Predicates.author, new Node(req.body.author)),
-        new Triple(newCodeComment, Predicates.time, new Text(req.body.time)),
-        new Triple(newCodeComment, Predicates.comment, new Text(req.body.comment)),
-        new Triple(newCodeComment, Predicates.commentedText, new Text(req.body.commentedText)),
-        new Triple(newCodeComment, Predicates.occurance, new Data(req.body.occurance)),
-        new Triple(newCodeComment, Predicates.filePath, new Text(req.body.filePath)),
-        new Triple(new Node(req.body.codeReview), Predicates.hasCodeComment, newCodeComment)
-    ];
-    db.getLocalStore().bulk(triples);
-    db.store(true)
-        .then(data => res.status(201).send(newCodeComment))
-        .catch(err => res.status(500).send(err));
+    const codeComment = new CodeComment();
+    codeComment.creator = req.body.creator;
+    codeComment.commentTime = req.body.commentTime;
+    codeComment.commentText = req.body.commentText;
+    codeComment.commentedText = req.body.commentedText;
+    codeComment.occurance = req.body.occurance;
+    codeComment.filePath = req.body.filePath;
+    codeComment
+        .store()
+        .then(data => {
+            const codeReview = new CodeReview(req.body.codeReviewURI);
+            codeReview.hasCodeComment = data.iri;
+            return codeReview.store();
+        })
+        .then(data => res.status(201).send())
+        .catch(err => res.status(500).send());
 }
 
 export async function createGeneralComment(req, res) {
-    var newGeneralComment = await getNewNode(Constants.generalCommentURI);
-    var triples = [
-        new Triple(newGeneralComment, Predicates.type, Classes.GeneralComment),
-        new Triple(newGeneralComment, Predicates.author, new Node(req.body.author)),
-        new Triple(newGeneralComment, Predicates.time, new Text(req.body.time)),
-        new Triple(newGeneralComment, Predicates.comment, new Text(req.body.comment)),
-        new Triple(new Node(req.body.codeReview), Predicates.hasGeneralComment, newGeneralComment)
-    ];
-    db.getLocalStore().bulk(triples);
-    db.store(true)
-        .then(data => res.status(201).send(newGeneralComment))
-        .catch(err => res.status(500).send(err));
+    const generalComment = new GeneralComment();
+    generalComment.creator = req.body.creator;
+    generalComment.commentTime = req.body.commentTime;
+    generalComment.commentText = req.body.commentText;
+    generalComment
+        .store()
+        .then(data => {
+            const codeReview = new CodeReview(req.body.codeReviewURI);
+            codeReview.hasCodeComment = data.iri;
+            return codeReview.store();
+        })
+        .then(data => res.status(201).send())
+        .catch(err => res.status(500).send());
 }

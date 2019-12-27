@@ -6,7 +6,7 @@ import * as Predicates from "../constants/predicates";
 
 export default class Topic extends Thing {
     constructor(uri) {
-        super();
+        super(uri);
         this.type = Classes.Topic;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.topicURI;

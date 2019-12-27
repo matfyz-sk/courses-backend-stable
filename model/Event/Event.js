@@ -6,6 +6,21 @@ import Thing from "../Thing";
 export default class Event extends Thing {
     constructor(uri) {
         super(uri);
+        this.type = Classes.Event;
+        this.subclassOf = Classes.Thing;
+        this.uriPrefix = Constants.eventsURI;
+    }
+
+    set name(value) {
+        this._setProperty(Predicates.name, new Text(value));
+    }
+
+    set location(value) {
+        this._setProperty(Predicates.location, new Text(value));
+    }
+
+    set description(value) {
+        this._setProperty(Predicates.description, new Text(value));
     }
 
     set startDate(value) {
@@ -37,6 +52,9 @@ export default class Event extends Thing {
     }
 
     _fill(data) {
+        this._setNewProperty(Predicates.name, new Text(data.name));
+        this._setNewProperty(Predicates.location, new Text(data.location));
+        this._setNewProperty(Predicates.description, new Text(data.description));
         this._setNewProperty(Predicates.startDate, new Text(data.startDate));
         this._setNewProperty(Predicates.endDate, new Text(data.endDate));
 

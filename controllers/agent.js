@@ -60,6 +60,9 @@ export function getAllUsers(req, res) {
 }
 
 export async function getUser(req, res) {
+    const u = new User(buildUri(Constants.usersURI, req.params.id));
+    u.prepareQuery();
+
     const resourceUri = buildUri(Constants.usersURI, req.params.id);
     const q = new Query();
     q.setProto({
@@ -105,14 +108,14 @@ export async function getUser(req, res) {
 
 export async function createUser(req, res) {
     const user = new User();
-    user.firstName = req.body.firstName;
+    user.firstName = req.body[Predicates.firstName.value];
     user.lastName = req.body.lastName;
     user.email = req.body.email;
     user.description = req.body.description;
     user.nickname = req.body.nickname;
-    user.name = req.body.name;
     user.avatar = req.body.avatar;
-    if (req.body.memberOf) user.memberOf = req.body.memberOf;
+    // user.name = req.body.name;
+    // if (req.body.memberOf) user.memberOf = req.body.memberOf;
     user.store()
         .then(data => res.status(201).send(user.subject))
         .catch(err => res.status(500).send(err));
@@ -123,8 +126,9 @@ export async function createTeam(req, res) {
     team.name = req.body.name;
     team.avatar = req.body.avatar;
     team.courseInstance = req.body.courseInstance;
-    team.store();
-    res.send();
+    team.store()
+        .then(data => res.status(201).send(team.subject))
+        .catch(err => res.status(500).send(err));
 }
 
 export async function deleteUser(req, res) {
@@ -146,6 +150,7 @@ export async function patchUser(req, res) {
     const user = new User(buildUri(Constants.usersURI, req.params.id, false));
     await user.fetch();
     if (req.body.firstName) user.firstName = req.body.firstName;
+    if (req.body.lastName) user.lastName = req.body.lastName;
     if (req.body.email) user.email = req.body.email;
     if (req.body.avatar) user.avatar = req.body.avatar;
     if (req.body.memberOf) user.memberOf = req.body.memberOf;
@@ -156,8 +161,8 @@ export async function patchUser(req, res) {
 export async function patchTeam(req, res) {
     const team = new Team(buildUri(Constants.teamsURI, req.params.id, false));
     await team.fetch();
-    if (req.body.courseInstance) team.courseInstance = req.body.courseInstance;
     if (req.body.name) team.name = req.body.name;
+    if (req.body.courseInstance) team.courseInstance = req.body.courseInstance;
     if (req.body.avatar) team.avatar = req.body.avatar;
     team.patch();
     res.send();

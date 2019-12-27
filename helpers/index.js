@@ -4,6 +4,7 @@ import { Node } from "virtuoso-sparql-client";
 import * as ID from "../lib/virtuoso-uid";
 import Query from "../query/Query";
 import { type } from "../constants/predicates";
+import { body, param, validationResult } from "express-validator";
 
 /**
  * @param {String} resourceURI The full resource URI
@@ -89,4 +90,11 @@ function classToURI(className) {
         default:
             return "";
     }
+}
+
+export function validateRequest(req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        res.status(422).json({ errors: errors.array() });
+    } else next();
 }

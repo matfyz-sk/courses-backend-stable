@@ -3,10 +3,14 @@ import { Node, Text, Data } from "virtuoso-sparql-client";
 import Agent from "./Agent";
 import * as Constants from "../../constants";
 import * as Predicates from "../../constants/predicates";
+import * as Messages from "../../constants/messages";
+import { body, param, validationResult } from "express-validator";
+import Team from "./Team";
 
 export default class User extends Agent {
     constructor(uri) {
         super(uri);
+        this.uri = uri;
         this.type = Classes.User;
         this.subclassOf = Classes.Agent;
         this.uriPrefix = Constants.usersURI;
@@ -56,5 +60,36 @@ export default class User extends Agent {
         this._setNewArrayProperty(Predicates.studentOf, data.studentOf, Node);
 
         super._fill(data);
+    }
+
+    static validate() {
+        const x = [
+            body("firstName")
+                .exists()
+                .withMessage(Messages.MISSING_FIELD)
+                .bail()
+                .isString()
+                .withMessage(Messages.FIELD_NOT_STRING),
+            body("lastName")
+                .exists()
+                .withMessage(Messages.MISSING_FIELD)
+                .bail()
+                .isString()
+                .withMessage(Messages.FIELD_NOT_STRING),
+            body("email")
+                .exists()
+                .withMessage(Messages.MISSING_FIELD)
+                .bail()
+                .isEmail()
+                .withMessage(Messages.FIELD_NOT_EMAIL),
+            body("description")
+                .exists()
+                .withMessage(Messages.MISSING_FIELD),
+            body("nickname")
+                .exists()
+                .withMessage(Messages.MISSING_FIELD)
+        ].concat(Agent.validate());
+        console.log(x);
+        return x;
     }
 }

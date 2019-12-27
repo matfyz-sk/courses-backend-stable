@@ -6,6 +6,9 @@ import Event from "../Event";
 export default class Session extends Event {
     constructor(uri) {
         super(uri);
+        this.type = Classes.Session;
+        this.subclassOf = Classes.Event;
+        this.uriPrefix = Constants.sessionURI;
     }
 
     set courseInstance(value) {

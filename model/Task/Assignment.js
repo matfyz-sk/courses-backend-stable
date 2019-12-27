@@ -6,7 +6,7 @@ import Task from "./Task";
 
 export default class Assignment extends Task {
     constructor(uri) {
-        super();
+        super(uri);
         this.type = Classes.Assignment;
         this.subclassOf = Classes.Task;
         this.uriPrefix = Constants.assignmentURI;

@@ -6,9 +6,9 @@ import Thing from "../Thing";
 export default class Task extends Thing {
     constructor(uri) {
         super(uri);
-        // this.type = Classes.Task;
-        // this.subclassOf = Classes.Thing;
-        // this.uriPrefix = Constants.taskURI;
+        this.type = Classes.Task;
+        this.subclassOf = Classes.Thing;
+        this.uriPrefix = Constants.taskURI;
     }
 
     set covers(value) {

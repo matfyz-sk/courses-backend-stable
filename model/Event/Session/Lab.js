@@ -12,12 +12,7 @@ export default class Lab extends Session {
         this.uriPrefix = Constants.labURI;
     }
 
-    set room(value) {
-        this._setProperty(Predicates.room, new Text(value));
-    }
-
     _fill(data) {
-        this._setNewProperty(Predicates.room, new Text(data.room));
         super._fill(data);
     }
 }

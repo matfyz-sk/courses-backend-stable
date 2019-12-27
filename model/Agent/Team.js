@@ -20,4 +20,16 @@ export default class Team extends Agent {
         this._setNewProperty(Predicates.courseInstance, data.courseInstance);
         super._fill(data);
     }
+
+    static validate() {
+        return [
+            body("courseInstance")
+                .exists()
+                .withMessage(Messages.MISSING_FIELD)
+                .bail()
+                .isURL()
+                .bail()
+                .custom(value => resourceExists(value, Classes.CourseInstance))
+        ].concat(super.validate());
+    }
 }

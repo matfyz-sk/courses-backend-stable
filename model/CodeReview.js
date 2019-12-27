@@ -4,12 +4,16 @@ import Thing from "./Thing";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 
-export default class Material extends Thing {
+export default class CodeReview extends Thing {
     constructor(uri) {
         super(uri);
-        this.type = Classes.Material;
+        this.type = Classes.CodeReview;
         this.subclassOf = Classes.Thing;
-        this.uriPrefix = Constants.materialURI;
+        this.uriPrefix = Constants.codeReviewURI;
+    }
+
+    set hasCodeComment(value) {
+        this._setArrayProperty(Predicates.hasCodeComment, value, Node);
     }
 
     _fill(data) {

@@ -1,38 +1,61 @@
 import { body, param } from "express-validator";
 import Query from "../query/Query";
-import { Node, Text, Data, Triple } from "virtuoso-sparql-client";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 import * as Classes from "../constants/classes";
 import * as Messages from "../constants/messages";
 import { buildUri, getNewNode, predicate, resourceExists, prepareQueryUri, emptyResult } from "../helpers";
-import { db } from "../config/client";
+import Topic from "../model/Topic";
 
 export const idValidation = [param("id").custom(value => resourceExists(value, Classes.Topic))];
 
 export async function createTopic(req, res) {
-    const topicNode = await getNewNode(Constants.topicURI);
-    var triples = [
-        new Triple(topicNode, Predicates.type, Classes.Topic),
-        new Triple(topicNode, Predicates.name, new Text(req.body.name)),
-        new Triple(topicNode, Predicates.description, new Text(req.body.description))
-    ];
-    if (req.body.hasPrerequisite) {
-        for (var p of req.body.hasPrerequisite) {
-            triples.push(new Triple(topicNode, Predicates.hasPrerequisite, new Node(p)));
-        }
-    }
-    if (req.body.subtopicOf) triples.push(new Triple(topicNode, Predicates.subtopicOf, new Node(req.body.subtopicOf)));
-    db.getLocalStore().bulk(triples);
-    db.store(true)
-        .then(result => res.status(200).send(topicNode))
+    const topic = new Topic();
+    topic.name = req.body.name;
+    topic.description = req.body.description;
+    topic.hasPrerequisite = req.body.hasPrerequisite;
+    topic.subtopicOf = req.body.subtopicOf;
+    topic
+        .store()
+        .then(data => res.status(201).send(topic.subject))
         .catch(err => res.status(500).send(err));
 }
+
+export function deleteTopic(req, res) {
+    const topic = new Topic(buildUri(Constants.topicURI, req.params.id));
+    topic
+        .fetch()
+        .then(data => {
+            topic._fill(topic.prepareData(data));
+            topic.delete();
+        })
+        .then(data => res.status(200).send(data))
+        .catch(err => res.status(500).send(err));
+}
+
+export async function patchTopic(req, res) {
+    const topic = new Topic(buildUri(Constants.topicURI, req.params.id));
+    topic
+        .fetch()
+        .then(data => {
+            topic._fill(topic.prepareData(data));
+            if (req.body.name) topic.name = req.body.name;
+            if (req.body.description) topic.description = req.body.description;
+            if (req.body.hasPrerequisite) topic.hasPrerequisite = req.body.hasPrerequisite;
+            if (req.body.subtopicOf) topic.subtopicOf = req.body.subtopicOf;
+            topic.patch();
+        })
+        .then(data => res.status(200).send(data))
+        .catch(err => res.status(500).send(err));
+}
+
+export async function putTopic(req, res) {}
 
 export async function getAllTopics(req, res) {
     const q = new Query();
     q.setProto({
-        id: "?topicId",
+        "@id": "?topicId",
+        "@type": Classes.Topic,
         name: predicate(Predicates.label),
         description: predicate(Predicates.description),
         hasPrerequisite: {
@@ -53,82 +76,11 @@ export async function getAllTopics(req, res) {
 }
 
 export async function getTopic(req, res) {
-    findById(req.params.id)
-        .then(data => {
-            res.status(emptyResult(data) ? 404 : 200).send(data);
-        })
-        .catch(err => res.status(500).send(err));
-}
-
-export function deleteTopic(req, res) {
-    findById(req.params.id).then(data => {
-        const uri = buildUri(Constants.topicURI, req.params.id);
-        var triples = [];
-        triples.push(new Triple(uri, Predicates.type, Classes.Topic, Triple.REMOVE));
-        // triples.push(new Triple(uri, Predicates.created, new Data(data[0].created), Triple.REMOVE)),
-        triples.push(new Triple(uri, Predicates.label, new Text(data[0].name), Triple.REMOVE));
-        triples.push(new Triple(uri, Predicates.description, new Text(data[0].description), Triple.REMOVE));
-        if (Array.isArray(data[0].hasPrerequisite)) {
-            for (var p of data[0].hasPrerequisite) {
-                triples.push(new Triple(uri, Predicates.hasPrerequisite, new Node(p.id), Triple.REMOVE));
-            }
-        } else if (data[0].hasPrerequisite.id) {
-            triples.push(new Triple(uri, Predicates.hasPrerequisite, new Node(data[0].hasPrerequisite.id), Triple.REMOVE));
-        }
-        if (data[0].subtopicOf.id) {
-            triples.push(new Triple(uri, Predicates.subtopicOf, new Node(data[0].subtopicOf.id), Triple.REMOVE));
-        }
-        db.getLocalStore().bulk(triples);
-        db.store(true)
-            .then(result => res.status(200).json(result))
-            .catch(err => res.status(500).json(err));
-    });
-}
-
-export async function patchTopic(req, res) {
-    const data = await findById(req.params.id);
-    if (JSON.stringify(data) == "{}") {
-        res.status(404).json({});
-        return;
-    }
-    const uri = buildUri(Constants.topicURI, req.params.id);
-    var triples = [];
-    var tmp;
-    if (req.body.name) {
-        tmp = new Triple(uri, Predicates.label, new Text(data[0].name));
-        tmp.updateObject(new Text(req.body.name));
-        triples.push(tmp);
-    }
-    if (req.body.description) {
-        tmp = new Triple(uri, Predicates.description, new Text(data[0].description));
-        tmp.updateObject(new Text(req.body.description));
-        triples.push(tmp);
-    }
-    if (req.body.hasPrerequisite) {
-        for (var p of req.body.hasPrerequisite) {
-            tmp = new Triple(uri, Predicates.hasPrerequisite, new Text(data[0].description));
-            tmp.updateObject(new Text(req.body.description));
-        }
-    }
-    if (triples.length == 0) {
-        res.status(200).send("OK");
-        return;
-    }
-    db.getLocalStore().bulk(triples);
-    db.store(true)
-        .then(result => res.status(201).json(result))
-        .catch(err => res.status(500).json(err));
-}
-
-export async function putTopic(req, res) {}
-
-async function findById(topicId) {
-    const uri = buildUri(Constants.topicURI, topicId);
+    const resourceUri = buildUri(Constants.topicURI, req.params.id);
     const q = new Query();
     q.setProto({
-        id: uri,
-        type: predicate(Predicates.type),
-        created: predicate(Predicates.created),
+        "@id": resourceUri,
+        "@type": Classes.Topic,
         name: predicate(Predicates.label),
         description: predicate(Predicates.description),
         hasPrerequisite: {
@@ -139,9 +91,11 @@ async function findById(topicId) {
         }
     });
     q.setWhere([
-        `${uri} ${Predicates.type} ${Classes.Topic}`,
-        `OPTIONAL {${uri} ${Predicates.hasPrerequisite} ?prereqId}`,
-        `OPTIONAL {${uri} ${Predicates.subtopicOf} ?subtopicId}`
+        `${resourceUri} ${Predicates.type} ${Classes.Topic}`,
+        `OPTIONAL {${resourceUri} ${Predicates.hasPrerequisite} ?prereqId}`,
+        `OPTIONAL {${resourceUri} ${Predicates.subtopicOf} ?subtopicId}`
     ]);
-    return q.run();
+    q.run()
+        .then(data => res.status(200).send(data))
+        .catch(err => res.status(500).send(err));
 }
