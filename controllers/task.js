@@ -6,53 +6,61 @@ import * as Predicates from "../constants/predicates";
 import * as Classes from "../constants/classes";
 import * as Messages from "../constants/messages";
 import { buildUri, getNewNode, predicate, prepareQueryUri, resourceExists, emptyResult } from "../helpers";
-import { db } from "../config/client";
+import Assignment from "../model/Task/Assignment";
+import QuizAssignment from "../model/Task/QuizAssignment";
+import QuestionAssignment from "../model/Task/QuestionAssignment";
+import { deleteResource } from "./main";
 
-export async function createAssignment(req, res) {
-    var newAssignment = await getNewNode(Constants.assignmentURI);
-    var triples = [
-        new Triple(newAssignment, Predicates.type, Classes.Assignment),
-        new Triple(newAssignment, Predicates.subclassOf, Classes.Task)
-    ];
-    // TODO initialSubmissionPeriod AssignmentPeriod
-    // TODO peerReviewPeriod AssignmentPeriod
-    // TODO improvedSubmissionPeriod AssignmentPeriod
-    // TODO teamReviewPeriod AssignmentPeriod
-    createTask(req, res, newAssignment, triples);
-}
-export async function createQuizAssignment(req, res) {
-    var newQuizAssignment = await getNewNode(Constants.quizAssignmentURI);
-    var triples = [
-        new Triple(newQuizAssignment, Predicates.type, Classes.QuizAssignment),
-        new Triple(newQuizAssignment, Predicates.subclassOf, Classes.Task)
-    ];
-    // TODO takingEvent TaskEvent
-    createTask(req, res, newQuizAssignment, triples);
-}
-export async function createQuestionAssignment(req, res) {
-    var newQuestionAssignment = await getNewNode(Constants.questionAssignmentURI);
-    var triples = [
-        new Triple(newQuestionAssignment, Predicates.type, Classes.QuestionAssignment),
-        new Triple(newQuestionAssignment, Predicates.subclassOf, Classes.Task)
-    ];
-    // TODO creationPeriod TaskEvent
-    createTask(req, res, newQuestionAssignment, triples);
+export function createAssignment(req, res) {
+    const assignment = new Assignment();
+    assignment.initialSubmissionPeriod = req.body.initialSubmissionPeriod;
+    assignment.peerReviewPeriod = req.body.peerReviewPeriod;
+    assignment.improvedSubmissionPeriod = req.body.improvedSubmissionPeriod;
+    assignment.teamReviewPeriod = req.body.teamReviewPeriod;
+    assignment.covers = req.body.covers;
+    assignment.mentions = req.body.mentions;
+    assignment.requires = req.body.requires;
+    assignment
+        .store()
+        .then(data => res.status(201).send(assignment.subject))
+        .catch(err => res.status(500).send(err));
 }
 
-function createTask(req, res, subject, triples) {
-    if (req.body.covers) {
-        for (topicURI of req.body.covers) triples.push(new Triple(subject, Predicates.covers, new Node(topicURI)));
-    }
-    if (req.body.mentions) {
-        for (topicURI of req.body.mentions) triples.push(new Triple(subject, Predicates.mentions, new Node(topicURI)));
-    }
-    if (req.body.requires) {
-        for (topicURI of req.body.requires) triples.push(new Triple(subject, Predicates.requires, new Node(topicURI)));
-    }
-    console.log("triples:", triples);
-    // db.getLocalStore().bulk(triples);
-    // db.store(true)
-    //     .then(result => res.status(201).send(subject))
-    //     .catch(err => res.status(500).send(err));
-    res.status(200).send();
+export function createQuizAssignment(req, res) {
+    const quizAssignment = new QuizAssignment();
+    quizAssignment.covers = req.body.covers;
+    quizAssignment.mentions = req.body.mentions;
+    quizAssignment.requires = req.body.requires;
+    quizAssignment
+        .store()
+        .then(data => res.status(201).send(quizAssignment.subject))
+        .catch(err => res.status(500).send(err));
 }
+
+export function createQuestionAssignment(req, res) {
+    const questionAssignment = new QuestionAssignment();
+    questionAssignment.covers = req.body.covers;
+    questionAssignment.mentions = req.body.mentions;
+    questionAssignment.requires = req.body.requires;
+    questionAssignment
+        .store()
+        .then(data => res.status(201).send(questionAssignment.subject))
+        .catch(err => res.status(500).send(err));
+}
+
+export function deleteAssignment(req, res) {
+    const assignment = new Assignment(buildUri(Constants.assignmentURI, req.params.id, false));
+    deleteResource(assignment, res);
+}
+
+export function deleteQuizAssignment(req, res) {
+    const quizAssignment = new QuizAssignment(buildUri(Constants.quizAssignmentURI, req.params.id, false));
+    deleteResource(quizAssignment, res);
+}
+
+export function deleteQuestionAssignment(req, res) {
+    const questionAssignment = new QuestionAssignment(buildUri(Constants.questionAssignmentURI, req.params.id, false));
+    deleteResource(questionAssignment, res);
+}
+
+export function patchAssignment(req, res) {}

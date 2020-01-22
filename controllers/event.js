@@ -8,6 +8,7 @@ import { buildUri, getNewNode, predicate, prepareQueryUri, resourceExists, empty
 import Lecture from "../model/Event/Session/Lecture";
 import Lab from "../model/Event/Session/Lab";
 import CourseInstance from "../model/Event/CourseInstance";
+import Block from "../model/Event/Block";
 
 export function createLecture(req, res) {
     const lecture = new Lecture();
@@ -65,13 +66,35 @@ export function createCourseInstance(req, res) {
     courseInstance.startDate = req.body.startDate;
     courseInstance.endDate = req.body.endDate;
     courseInstance.hasInstructor = req.body.hasInstructor;
-    courseInstance.store();
-    res.send();
+    courseInstance
+        .store()
+        .then(data => res.status(201).send(courseInstance.subject))
+        .catch(err => res.status(500).send(err));
 }
 
 export function createBlock(req, res) {
-    res.send();
+    const block = new Block();
+    block.name = req.body.name;
+    block.location = req.body.location;
+    block.description = req.body.description;
+    block.startDate = req.body.startDate;
+    block.endDate = req.body.endDate;
+    block.uses = req.body.uses;
+    block.recommends = req.body.recommends;
+    block.covers = req.body.covers;
+    block.mentions = req.body.mentions;
+    block.requires = req.body.requires;
+    block
+        .store()
+        .then(data => res.status(201).send(block.subject))
+        .catch(err => res.status(500).send(err));
 }
+
+export function createAssignmentPeriod(req, res) {}
+
+export function createOralExam(req, res) {}
+
+export function createTestTake(req, res) {}
 
 export function getAllCourseInstances(req, res) {
     const q = new Query();

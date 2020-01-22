@@ -40,7 +40,7 @@ router.delete("/course/:id", Course.deleteCourse);
 router.patch("/topic/:id", Topic.patchTopic);
 router.patch("/course/:id", Course.patchCourse);
 
-// router.get("/user", Agent.getAllUsers);
+router.get("/user", Agent.getAllUsers);
 router.get("/user/:id", Agent.getUser);
 // router.get("/team", Team.getAllTeams);
 // router.get("/team/:id", Team.getTeam);

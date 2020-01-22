@@ -10,17 +10,68 @@ import { db } from "../config/client";
 import User from "../model/Agent/User";
 import Team from "../model/Agent/Team";
 
+export function getAllTeams(req, res) {
+    const q = new Query();
+    q.setProto({
+        id: "?teamId",
+        name: predicate(Predicates.label),
+        course: {
+            id: "?courseId"
+        },
+        members: {
+            id: "?userId"
+        }
+    });
+    q.setWhere([
+        `?teamId ${Predicates.type} ${Classes.Team}`,
+        `?teamId ${Predicates.course} ?courseId`,
+        `OPTIONAL { ?userId ${Predicates.memberOf} ?teamId }`
+    ]);
+    q.run()
+        .then(data => res.status(200).send(data))
+        .catch(err => res.status(500).send(err));
+}
+
+export async function getTeam(req, res) {
+    const resourceUri = buildUri(Constants.teamsURI, req.params.id);
+    const q = new Query();
+    q.setProto({
+        id: resourceUri,
+        name: predicate(Predicates.label),
+        course: {
+            id: "?courseId"
+        },
+        members: {
+            id: "?userId"
+        }
+    });
+    q.setWhere([
+        `${resourceUri} ${Predicates.type} ${Classes.Team}`,
+        `${resourceUri} ${Predicates.course} ?courseId`,
+        `OPTIONAL {?userId ${Predicates.memberOf} ${resourceUri} }`
+    ]);
+    q.run()
+        .then(data => {
+            if (emptyResult(data)) {
+                res.status(404).json({});
+            } else {
+                res.status(200).json(data[0]);
+            }
+        })
+        .catch(err => res.status(500).send(err));
+}
+
 export function getAllUsers(req, res) {
     const q = new Query();
     q.setProto({
         "@id": "?userId",
         "@type": "User",
-        name: predicate(Predicates.name),
-        firstName: predicate(Predicates.firstName),
-        lastName: predicate(Predicates.lastName),
-        email: predicate(Predicates.email),
-        description: predicate(Predicates.description),
-        nickname: predicate(Predicates.nickname),
+
+        firstName: predicate("courses:firstName"),
+        lastName: predicate("courses:lastName"),
+        email: predicate("courses:email"),
+        description: predicate("courses:description"),
+        nickname: predicate("courses:nickname"),
         requests: {
             id: "?requestsCourseInstanceId"
         },
@@ -35,23 +86,24 @@ export function getAllUsers(req, res) {
         }
     });
     q.setWhere([
-        `?userId ${Predicates.type} ${Classes.User}`,
-        `OPTIONAL { ?userId ${Predicates.memberOf} ?memberOfTeamId }`,
-        `OPTIONAL { ?userId ${Predicates.understands} ?understandsTopicId }`
+        `?userId rdf:type ${Classes.User}`,
+        `OPTIONAL { ?userId courses:memberOf ?memberOfTeamId }`,
+        `OPTIONAL { ?userId courses:understands ?understandsTopicId }`
     ]);
 
     if (req.query.requests) {
         var courseInstanceURI = buildUri(Constants.courseInstancesURI, req.query.requests);
-        q.appendWhere(`?userId ${Predicates.requests} ${courseInstanceURI}`);
+        q.appendWhere(`?userId courses:requests ${courseInstanceURI}`);
     } else {
-        q.appendWhere(`OPTIONAL { ?userId ${Predicates.requests} ?requestsCourseInstanceId }`);
+        q.appendWhere(`OPTIONAL { ?userId courses:requests ?requestsCourseInstanceId }`);
     }
 
-    if (req.query.studentOf) {
-        var courseInstanceURI = buildUri(Constants.courseInstancesURI, req.query.studentOf);
-        q.appendWhere(`?userId ${Predicates.studentOf} ${courseInstanceURI}`);
+    if (req.query.memberOf) {
+        var courseInstanceURI = buildUri(Constants.teamsURI, req.query.memberOf);
+
+        q.appendWhere(`?userId courses:memberOf ${courseInstanceURI}`);
     } else {
-        q.appendWhere(`OPTIONAL { ?userId ${Predicates.studentOf} ?requestsCourseInstanceId }`);
+        q.appendWhere(`OPTIONAL { ?userId courses:memberOf ?requestsCourseInstanceId }`);
     }
 
     q.run()
@@ -115,7 +167,7 @@ export async function createUser(req, res) {
     user.nickname = req.body.nickname;
     user.avatar = req.body.avatar;
     // user.name = req.body.name;
-    // if (req.body.memberOf) user.memberOf = req.body.memberOf;
+    if (req.body.memberOf) user.memberOf = req.body.memberOf;
     user.store()
         .then(data => res.status(201).send(user.subject))
         .catch(err => res.status(500).send(err));

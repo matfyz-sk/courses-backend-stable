@@ -1,4 +1,3 @@
-import * as Team from "./team";
 import * as Topic from "./topic";
 // import * as Session from "./session";
 import * as Course from "./course";
@@ -10,7 +9,6 @@ import * as ReviewComment from "./reviewComment";
 import * as Submission from "./submission";
 
 module.exports = {
-    Team,
     Topic,
     // Session,
     Event,
