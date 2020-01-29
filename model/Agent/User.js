@@ -6,6 +6,7 @@ import * as Predicates from "../../constants/predicates";
 import * as Messages from "../../constants/messages";
 import { body, param, validationResult } from "express-validator";
 import Team from "./Team";
+import { predicate } from "../../helpers";
 
 export default class User extends Agent {
     constructor(uri) {
@@ -14,6 +15,16 @@ export default class User extends Agent {
         this.type = Classes.User;
         this.subclassOf = Classes.Agent;
         this.uriPrefix = Constants.usersURI;
+        this.predicates.push(
+            { predicate: Predicates.firstName, asNode: false },
+            { predicate: Predicates.lastName, asNode: false },
+            { predicate: Predicates.email, asNode: false },
+            { predicate: Predicates.description, asNode: false },
+            { predicate: Predicates.nickname, asNode: false },
+            { predicate: Predicates.memberOf, asNode: true },
+            { predicate: Predicates.requests, asNode: true },
+            { predicate: Predicates.studentOf, asNode: true }
+        );
     }
 
     set firstName(value) {

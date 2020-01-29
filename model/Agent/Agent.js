@@ -12,6 +12,7 @@ export default class Agent extends Thing {
         this.type = Classes.Agent;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.agentURI;
+        // this.predicates.push({ predicate: Predicates.name, asNode: false }, { predicate: Predicates.avatar, asNode: false });
     }
 
     set name(value) {

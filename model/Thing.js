@@ -6,6 +6,7 @@ import { getNewNode } from "../helpers";
 import { body, param, validationResult } from "express-validator";
 import { validateRequest } from "../helpers";
 import * as Messages from "../constants/messages";
+import Query from "../query/Query";
 
 export default class Thing {
     constructor(uri) {
@@ -16,6 +17,54 @@ export default class Thing {
         this.type = undefined;
         this.subclassOf = undefined;
         this.uriPrefix = undefined;
+        this.query = {};
+        this.predicates = [];
+    }
+
+    generateQuery(filters) {
+        this.query = {
+            "@graph": {
+                "@id": "?resourceURI",
+                "@type": this.type.split(":")[1]
+            },
+            $where: [`?resourceURI rdf:type ${this.type}`]
+            // $filter: []
+        };
+
+        if (filters._offset) this.query["$offset"] = filters._offset;
+        if (filters._limit) this.query["$limit"] = filters._limit;
+
+        for (var p of this.predicates) {
+            if (p.asNode) {
+                this.query["@graph"][p.predicate.value] = { "@id": `?${p.predicate.value}URI` };
+                if (p.predicate.value in filters) {
+                    this.query["$where"].push(`?resourceURI ${p.predicate.prefix.name}:${p.predicate.value} ${filters[p.predicate.value]}`);
+                } else {
+                    this.query["$where"].push(
+                        `OPTIONAL {?resourceURI ${p.predicate.prefix.name}:${p.predicate.value} ?${p.predicate.value}URI}`
+                    );
+                }
+            } else {
+                this.query["@graph"][p.predicate.value] = `?${p.predicate.value}`;
+                if (p.predicate.value in filters) {
+                    this.query["$where"].push(`?resourceURI ${p.predicate.prefix.name}:${p.predicate.value} ${filters[p.predicate.value]}`);
+                } else {
+                    this.query["$where"].push(`?resourceURI ${p.predicate.prefix.name}:${p.predicate.value} ?${p.predicate.value}`);
+                }
+            }
+        }
+
+        // const teamQueryPart = Team._getQueryPart(rules.join);
+        // query["@graph"]["memberOf"] = teamQueryPart.graph;
+        // query.$where.concat(teamQueryPart.where);
+
+        const q = new Query();
+        q.setProto(this.query["@graph"]);
+        q.setWhere(this.query["$where"]);
+        q.setOffset(this.query["$offset"]);
+        q.setLimit(this.query["$limit"]);
+
+        return q;
     }
 
     _prepareTriplesToStore() {

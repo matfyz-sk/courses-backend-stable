@@ -4,12 +4,12 @@ import Thing from "./Thing";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 
-export default class PreddefinedAnswer extends Thing {
+export default class PredefinedAnswer extends Thing {
     constructor(uri) {
         super(uri);
-        this.type = Classes.PreddefinedAnswer;
+        this.type = Classes.PredefinedAnswer;
         this.subclassOf = Classes.Thing;
-        this.uriPrefix = Constants.preddefinedAnswerURI;
+        this.uriPrefix = Constants.predefinedAnswerURI;
     }
 
     set text(value) {
@@ -20,19 +20,14 @@ export default class PreddefinedAnswer extends Thing {
         this._setProperty(Predicates.position, new Data(value, "xsd:integer"));
     }
 
-    set correctnes(value) {
-        this._setProperty(Predicates.correctnes, new Data(value, "xsd:boolean"));
-    }
-
-    set answer(value) {
-        this._setProperty(Predicates.answer, new Node(value));
+    set correct(value) {
+        this._setProperty(Predicates.correct, new Data(value, "xsd:boolean"));
     }
 
     _fill(data) {
         this._setNewProperty(Predicates.text, new Text(data.text));
         this._setNewProperty(Predicates.position, new Data(data.position, "xsd:integer"));
-        this._setNewProperty(Predicates.correctnes, new Data(data.correctnes, "xsd:boolean"));
-        this._setNewProperty(Predicates.answer, new Node(data.answer));
+        this._setNewProperty(Predicates.correct, new Data(data.correct, "xsd:boolean"));
         super._fill(data);
     }
 }

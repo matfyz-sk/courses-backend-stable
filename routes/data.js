@@ -1,9 +1,10 @@
-import { Team, Topic, Course, CourseInstance, Session, Event, Task, Agent, ReviewComment, Submission } from "../controllers";
+import { Team, Topic, Course, CourseInstance, Session, Event, Task, Agent, ReviewComment, Submission, Quiz } from "../controllers";
 import express from "express";
 import * as Validators from "../constants/requestValidators";
 const router = express.Router();
 
 import User from "../model/Agent/User";
+import Query from "../query/Query";
 
 router.post("/user", Agent.createUser);
 router.post("/team", Agent.createTeam);
@@ -44,7 +45,6 @@ router.get("/user", Agent.getAllUsers);
 router.get("/user/:id", Agent.getUser);
 // router.get("/team", Team.getAllTeams);
 // router.get("/team/:id", Team.getTeam);
-
 // router.get("/course", Course.getAllCourses);
 // router.get("/course/:id", Course.getCourse);
 // router.post("/user/requestCourseInstance", User.requestCourseInstanceValidation, validate, User.requestCourseInstance);
@@ -55,5 +55,32 @@ router.get("/user/:id", Agent.getUser);
 // router.put("/topic/:id", Topic.idValidation, validate, Topic.putTopic);
 // router.get("/courseInstance", CourseInstance.getAllCourseInstances);
 // router.get("/courseInstance/:id", CourseInstance.getCourseInstance);
+router.get("/essayQuestion", Quiz.getAllEssayQuestions);
+router.get("/openQuestion");
+router.get("/questionWithPredefinedAnswer");
+
+router.get("/test", (req, res) => {
+    const rules = {
+        // limit: 100,
+        // offset: 50,
+        filters: {
+            // firstName: "Milan",
+            // memberOf: "http://courses.matfyz.sk/data/team/10"
+        }
+    };
+    const u = new User();
+    const query = u.generateQuery(rules);
+    console.log(query);
+
+    const q2 = new Query();
+    q2.setProto(query["@graph"]);
+    q2.setWhere(query.$where);
+
+    q2.run()
+        .then(data => {
+            res.status(200).send(data);
+        })
+        .catch(err => res.status(500).send(err));
+});
 
 export default router;

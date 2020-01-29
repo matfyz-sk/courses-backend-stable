@@ -66,7 +66,6 @@ export function getAllUsers(req, res) {
     q.setProto({
         "@id": "?userId",
         "@type": "User",
-
         firstName: predicate("courses:firstName"),
         lastName: predicate("courses:lastName"),
         email: predicate("courses:email"),
@@ -112,40 +111,39 @@ export function getAllUsers(req, res) {
 }
 
 export async function getUser(req, res) {
-    const u = new User(buildUri(Constants.usersURI, req.params.id));
-    u.prepareQuery();
+    // const u = new User(buildUri(Constants.usersURI, req.params.id));
+    // u.prepareQuery();
 
     const resourceUri = buildUri(Constants.usersURI, req.params.id);
     const q = new Query();
     q.setProto({
         "@id": resourceUri,
         "@type": "User",
-        name: predicate(Predicates.name),
-        firstName: predicate(Predicates.firstName),
-        lastName: predicate(Predicates.lastName),
-        email: predicate(Predicates.email),
-        about: predicate(Predicates.description),
-        nickname: predicate(Predicates.nickname),
-        requests: {
-            id: "?requestsCourseInstanceId"
-        },
-        studentOf: {
-            id: "?studentOfCourseInstanceId"
-        },
-        memberOf: {
-            id: "?memberOfTeamId"
-            //"@type": "Team"
-        },
-        understands: {
-            id: "?understandsTopicId"
-        }
+        firstName: predicate("courses:firstName"),
+        lastName: predicate("courses:lastName")
+        // email: predicate(Predicates.email),
+        // about: predicate(Predicates.description),
+        // nickname: predicate(Predicates.nickname),
+        // requests: {
+        //     id: "?requestsCourseInstanceId"
+        // },
+        // studentOf: {
+        //     id: "?studentOfCourseInstanceId"
+        // },
+        // memberOf: {
+        //     id: "?memberOfTeamId"
+        //     //"@type": "Team"
+        // },
+        // understands: {
+        //     id: "?understandsTopicId"
+        // }
     });
     q.setWhere([
-        `${resourceUri} ${Predicates.type} ${Classes.User}`,
-        `OPTIONAL { ${resourceUri} ${Predicates.requests} ?requestsCourseInstanceId }`,
-        `OPTIONAL { ${resourceUri} ${Predicates.studentOf} ?studentOfCourseInstanceId }`,
-        `OPTIONAL { ${resourceUri} ${Predicates.memberOf} ?memberOfTeamId }`,
-        `OPTIONAL { ${resourceUri} ${Predicates.understands} ?understandsTopicId }`
+        `${resourceUri} rdf:type ${Classes.User}`
+        // `OPTIONAL { ${resourceUri} ${Predicates.requests} ?requestsCourseInstanceId }`,
+        // `OPTIONAL { ${resourceUri} ${Predicates.studentOf} ?studentOfCourseInstanceId }`,
+        // `OPTIONAL { ${resourceUri} ${Predicates.memberOf} ?memberOfTeamId }`,
+        // `OPTIONAL { ${resourceUri} ${Predicates.understands} ?understandsTopicId }`
     ]);
     q.run()
         .then(data => {

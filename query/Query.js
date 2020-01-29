@@ -54,6 +54,7 @@ class Query {
     }
 
     run() {
+        console.log(this.q);
         return this.sparqlTransformer(this.q, this.options);
     }
 

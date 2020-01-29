@@ -1,14 +1,12 @@
 import * as Classes from "../../constants/classes";
-import { Node, Text, Data } from "virtuoso-sparql-client";
 import * as Constants from "../../constants";
-import * as Predicates from "../../constants/predicates";
-import QuestionVersion from "./QuestionVersion";
+import Question from "./Question";
 
-export default class EssayQuestion extends QuestionVersion {
+export default class EssayQuestion extends Question {
     constructor(uri) {
         super(uri);
         this.type = Classes.EssayQuestion;
-        this.subclassOf = Classes.QuestionVersion;
+        this.subclassOf = Classes.Question;
         this.uriPrefix = Constants.essayQuestionURI;
     }
 

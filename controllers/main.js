@@ -9,3 +9,12 @@ export function deleteResource(resource, res) {
         .then(data => res.status(200).send(data))
         .catch(err => res.status(500).send(err));
 }
+
+export function runQuery(query, res) {
+    query
+        .run()
+        .then(data => {
+            res.status(200).send(data);
+        })
+        .catch(err => res.status(500).send(err));
+}
