@@ -10,6 +10,7 @@ export default class QuizTakePrototype extends Thing {
         this.type = Classes.QuizTakePrototype;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.quizTakePrototypeURI;
+        this.predicates.push({ predicate: Predicates.orderedQuestion, asNode: true });
     }
 
     set orderedQuestion(value) {

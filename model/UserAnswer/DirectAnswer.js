@@ -1,15 +1,16 @@
-import * as Classes from "../constants/classes";
+import * as Classes from "../../constants/classes";
 import { Node, Text, Data } from "virtuoso-sparql-client";
-import Thing from "./Thing";
-import * as Constants from "../constants";
-import * as Predicates from "../constants/predicates";
+import UserAnswer from "./UserAnswer";
+import * as Constants from "../../constants";
+import * as Predicates from "../../constants/predicates";
 
-export default class DirectAnswer extends Thing {
+export default class DirectAnswer extends UserAnswer {
     constructor(uri) {
         super(uri);
         this.type = Classes.DirectAnswer;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.directAnswerURI;
+        this.predicates.push({ predicate: Predicates.text, asNode: false });
     }
 
     set text(value) {

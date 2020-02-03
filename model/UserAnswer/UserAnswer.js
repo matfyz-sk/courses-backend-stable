@@ -1,8 +1,8 @@
-import * as Classes from "../constants/classes";
+import * as Classes from "../../constants/classes";
 import { Node, Text, Data } from "virtuoso-sparql-client";
-import Thing from "./Thing";
-import * as Constants from "../constants";
-import * as Predicates from "../constants/predicates";
+import Thing from "../Thing";
+import * as Constants from "../../constants";
+import * as Predicates from "../../constants/predicates";
 
 export default class UserAnswer extends Thing {
     constructor(uri) {
@@ -10,6 +10,7 @@ export default class UserAnswer extends Thing {
         this.type = Classes.UserAnswer;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.userAnswerURI;
+        this.predicates.push({ predicate: Predicates.score, asNode: false }, { predicate: Predicates.orderedQuestion, asNode: true });
     }
 
     set score(value) {

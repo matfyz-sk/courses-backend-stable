@@ -37,3 +37,5 @@ export const userAnswerURI = graphURI + "/userAnswer/";
 export const predefinedAnswerURI = graphURI + "/predefinedAnswer/";
 export const quizTakePrototypeURI = graphURI + "/quizTakePrototype/";
 export const questionCommentURI = graphURI + "/questionComment/";
+export const essayQuestionURI = graphURI + "/essayQuestion/";
+export const directAnswerURI = graphURI + "/directAnswer/";

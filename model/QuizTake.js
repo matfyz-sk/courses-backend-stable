@@ -10,6 +10,13 @@ export default class QuizTake extends Thing {
         this.type = Classes.QuizTake;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.quizTakeURI;
+        this.predicates.push(
+            { predicate: Predicates.startDate, asNode: false },
+            { predicate: Predicates.endDate, asNode: false },
+            { predicate: Predicates.submitedDate, asNode: false },
+            { predicate: Predicates.reviewedDate, asNode: false },
+            { predicate: Predicates.hasAuthor, asNode: true }
+        );
     }
 
     set startDate(value) {

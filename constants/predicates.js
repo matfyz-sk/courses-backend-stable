@@ -1,7 +1,6 @@
 import * as Prefixes from "./prefixes";
 
-export const created = "dc:created";
-
+export const created = { prefix: Prefixes.courses, value: "created" };
 export const type = { prefix: Prefixes.rdf, value: "type" };
 export const subclassOf = { prefix: Prefixes.rdfs, value: "subclassOf" };
 export const label = { prefix: Prefixes.rdfs, value: "label" };
@@ -84,3 +83,4 @@ export const predefinedAnswer = { prefix: Prefixes.courses, value: "predefinedAn
 export const correct = { prefix: Prefixes.courses, value: "correct" };
 export const submitedDate = { prefix: Prefixes.courses, value: "submitedDate" };
 export const reviewedDate = { prefix: Prefixes.courses, value: "reviewedDate" };
+export const commentText = { prefix: Prefixes.courses, value: "commentText" };

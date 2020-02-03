@@ -1,15 +1,20 @@
-import * as Classes from "../constants/classes";
+import * as Classes from "../../constants/classes";
 import { Node, Text, Data } from "virtuoso-sparql-client";
-import Thing from "./Thing";
-import * as Constants from "../constants";
-import * as Predicates from "../constants/predicates";
+import UserAnswer from "./UserAnswer";
+import * as Constants from "../../constants";
+import * as Predicates from "../../constants/predicates";
 
-export default class OrderedAnswer extends Thing {
+export default class OrderedAnswer extends UserAnswer {
     constructor(uri) {
         super(uri);
         this.type = Classes.OrderedAnswer;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.orderedAnswerURI;
+        this.predicates.push(
+            { predicate: Predicates.position, asNode: false },
+            { predicate: Predicates.userChoice, asNode: false },
+            { predicate: Predicates.predefinedAnswer, asNode: true }
+        );
     }
 
     set position(value) {

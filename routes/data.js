@@ -7,6 +7,9 @@ import User from "../model/Agent/User";
 import Query from "../query/Query";
 
 router.post("/user", Agent.createUser);
+
+router.put("/user/:id/:predicateName");
+
 router.post("/team", Agent.createTeam);
 router.post("/lecture", Event.createLecture);
 router.post("/lab", Event.createLab);
@@ -26,6 +29,17 @@ router.post("/generalComment", ReviewComment.createGeneralComment);
 router.post("/submission", Submission.createSubmission);
 // router.post("/review", foo);
 // router.post("/teamReview", foo);
+
+router.post("/quizTake", Quiz.createQuizTake);
+router.post("/quizTakePrototype", Quiz.createQuizTakePrototype);
+router.post("/questionComment", Quiz.createQuestionComment);
+router.post("/essayQuestion", Quiz.createEssayQuestion);
+router.post("/openQuestion", Quiz.createOpenQuestion);
+router.post("/questionWithPredefinedAnswer", Quiz.createQuestionWithPredefinedAnswer);
+router.post("/orderedQuestion", Quiz.createOrderedQuestion);
+router.post("/directAnswer", Quiz.createDirectAnswer);
+router.post("/orderedAnswer", Quiz.createOrderedAnswer);
+router.post("/predefinedAnswer", Quiz.createPredefinedAnswer);
 
 // router.delete("/user/:id", Agent.deleteUser);
 // router.delete("/team/:id", Agent.deleteTeam);
@@ -55,32 +69,15 @@ router.get("/user/:id", Agent.getUser);
 // router.put("/topic/:id", Topic.idValidation, validate, Topic.putTopic);
 // router.get("/courseInstance", CourseInstance.getAllCourseInstances);
 // router.get("/courseInstance/:id", CourseInstance.getCourseInstance);
-router.get("/essayQuestion", Quiz.getAllEssayQuestions);
-router.get("/openQuestion");
-router.get("/questionWithPredefinedAnswer");
 
-router.get("/test", (req, res) => {
-    const rules = {
-        // limit: 100,
-        // offset: 50,
-        filters: {
-            // firstName: "Milan",
-            // memberOf: "http://courses.matfyz.sk/data/team/10"
-        }
-    };
-    const u = new User();
-    const query = u.generateQuery(rules);
-    console.log(query);
-
-    const q2 = new Query();
-    q2.setProto(query["@graph"]);
-    q2.setWhere(query.$where);
-
-    q2.run()
-        .then(data => {
-            res.status(200).send(data);
-        })
-        .catch(err => res.status(500).send(err));
-});
+router.get("/quizTake/:id?", Quiz.getQuizTake);
+router.get("/quizTakePrototype/:id?", Quiz.getQuizTakePrototype);
+router.get("/orderedQuestion/:id?", Quiz.getOrderedQuestion);
+router.get("/essayQuestion/:id?", Quiz.getEssayQuestion);
+router.get("/openQuestion/:id?", Quiz.getOpenQuestion);
+router.get("/questionWithPredefinedAnswer/:id?", Quiz.getQwpa);
+router.get("/directAnswer/:id?", Quiz.getDirectAnswer);
+router.get("/orderedAnswer/:id?", Quiz.getOrderedAnswer);
+router.get("/predefinedAnswer/:id?", Quiz.getPredefinedAnswer);
 
 export default router;

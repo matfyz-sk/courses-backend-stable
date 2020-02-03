@@ -10,6 +10,11 @@ export default class PredefinedAnswer extends Thing {
         this.type = Classes.PredefinedAnswer;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.predefinedAnswerURI;
+        this.predicates.push(
+            { predicate: Predicates.text, asNode: false },
+            { predicate: Predicates.position, asNode: false },
+            { predicate: Predicates.correct, asNode: false }
+        );
     }
 
     set text(value) {

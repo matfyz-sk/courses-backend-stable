@@ -10,6 +10,11 @@ export default class QuestionComment extends Thing {
         this.type = Classes.QuestionComment;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.questionCommentURI;
+        this.predicates.push(
+            { predicate: Predicates.commentText, asNode: false },
+            { predicate: Predicates.hasAuthor, asNode: true },
+            { predicate: Predicates.created, asNode: false }
+        );
     }
 
     set commentText(value) {

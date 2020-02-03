@@ -35,3 +35,5 @@ export const QuizTake = "courses:QuizTake";
 export const QuizTakePrototype = "courses:QuizTakePrototype";
 export const QuestionComment = "courses:QuestionComment";
 export const EssayQuestion = "courses:EssayQuestion";
+export const DirectAnswer = "courses:DirectAnswer";
+export const OrderedAnswer = "courses:OrderedAnswer";
