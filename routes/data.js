@@ -48,6 +48,8 @@ router.post("/predefinedAnswer", Quiz.createPredefinedAnswer);
 router.delete("/topic/:id", Topic.deleteTopic);
 router.delete("/course/:id", Course.deleteCourse);
 
+router.delete("/quizTake/:id/:attributeName?", Quiz.deleteQuizTake);
+
 // router.patch("/team/:id", Agent.patchTeam);
 // router.patch("/user/:id", Agent.patchUser);
 // router.patch("/lecture/:id", Event.patchLecture);

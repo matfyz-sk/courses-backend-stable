@@ -22,13 +22,17 @@ export default class Thing {
     }
 
     generateQuery(filters) {
+        var resourceURI = "?resourceURI";
+        if (filters.id) {
+            resourceURI = `<${this.uriPrefix}${filters.id}>`;
+        }
         this.query = {
             "@graph": {
-                "@id": "?resourceURI",
+                "@id": resourceURI,
                 "@type": this.type.split(":")[1]
             },
-            $where: [`?resourceURI rdf:type ${this.type}`]
-            // $filter: []
+            $where: [`${resourceURI} ${this._buildPredicate(Predicates.type)} ${this.type}`],
+            $filter: []
         };
 
         if (filters._offset) this.query["$offset"] = filters._offset;
@@ -37,32 +41,25 @@ export default class Thing {
         for (var p of this.predicates) {
             if (p.asNode) {
                 this.query["@graph"][p.predicate.value] = { "@id": `?${p.predicate.value}URI` };
+                this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._buildPredicate(p.predicate)} ?${p.predicate.value}URI}`);
                 if (p.predicate.value in filters) {
-                    this.query["$where"].push(`?resourceURI ${p.predicate.prefix.name}:${p.predicate.value} ${filters[p.predicate.value]}`);
-                } else {
-                    this.query["$where"].push(
-                        `OPTIONAL {?resourceURI ${p.predicate.prefix.name}:${p.predicate.value} ?${p.predicate.value}URI}`
-                    );
+                    this.query["$filter"].push(`?${p.predicate.value}URI=<${filters[p.predicate.value]}>`);
                 }
             } else {
                 this.query["@graph"][p.predicate.value] = `?${p.predicate.value}`;
+                this.query["$where"].push(`${resourceURI} ${this._buildPredicate(p.predicate)} ?${p.predicate.value}`);
                 if (p.predicate.value in filters) {
-                    this.query["$where"].push(`?resourceURI ${p.predicate.prefix.name}:${p.predicate.value} ${filters[p.predicate.value]}`);
-                } else {
-                    this.query["$where"].push(`?resourceURI ${p.predicate.prefix.name}:${p.predicate.value} ?${p.predicate.value}`);
+                    this.query["$filter"].push(`?${p.predicate.value}="${filters[p.predicate.value]}"`);
                 }
             }
         }
-
-        // const teamQueryPart = Team._getQueryPart(rules.join);
-        // query["@graph"]["memberOf"] = teamQueryPart.graph;
-        // query.$where.concat(teamQueryPart.where);
 
         const q = new Query();
         q.setProto(this.query["@graph"]);
         q.setWhere(this.query["$where"]);
         q.setOffset(this.query["$offset"]);
         q.setLimit(this.query["$limit"]);
+        q.setFilter(this.query["$filter"]);
 
         return q;
     }

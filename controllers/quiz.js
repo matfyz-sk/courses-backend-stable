@@ -232,3 +232,24 @@ export function getPredefinedAnswer(req, res) {
     const query = predefinedAnswer.generateQuery(req.query);
     runQuery(query, res);
 }
+
+export function deleteQuizTake(req, res) {
+    const quizTake = new QuizTake(buildUri(Constants.quizTakeURI, req.params.id, false));
+    quizTake
+        .fetch()
+        .then(data => {
+            data = quizTake.prepareData(data);
+            if (req.params.attributeName) {
+                if (req.body.values) {
+                    quizTake[req.params.attributeName] = req.body.values;
+                } else {
+                    quizTake[req.params.attributeName] = data[req.params.attributeName];
+                }
+            } else {
+                quizTake._fill(data);
+            }
+            quizTake.delete();
+        })
+        .then(data => res.status(200).send(data))
+        .catch(err => res.status(500).send(err));
+}
