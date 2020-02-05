@@ -10,6 +10,14 @@ export default class Course extends Thing {
         this.type = Classes.Course;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.coursesURI;
+        this.predicates.push(
+            { predicate: Predicates.name, asNode: false },
+            { predicate: Predicates.description, asNode: false },
+            { predicate: Predicates.abbreviation, asNode: false },
+            { predicate: Predicates.hasPrerequisite, asNode: true },
+            { predicate: Predicates.mentions, asNode: true },
+            { predicate: Predicates.covers, asNode: true }
+        );
     }
 
     set name(value) {
@@ -25,7 +33,7 @@ export default class Course extends Thing {
     }
 
     set hasPrerequisite(value) {
-        this._setProperty(Predicates.hasPrerequisite, new Node(value));
+        this._setArrayProperty(Predicates.hasPrerequisite, value, Node);
     }
 
     set mentions(value) {

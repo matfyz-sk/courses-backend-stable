@@ -1,6 +1,4 @@
-import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
-import * as Constants from "../../../constants";
-import * as Predicates from "../../../constants/predicates";
+import * as Constants from "../../../../constants";
 import ExaminationEvent from "./ExaminationEvent";
 
 export default class OralExam extends ExaminationEvent {

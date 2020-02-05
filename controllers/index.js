@@ -8,8 +8,14 @@ import * as Agent from "./agent";
 import * as ReviewComment from "./reviewComment";
 import * as Submission from "./submission";
 import * as Quiz from "./quiz";
+import * as PostController from "./post";
+import * as GetController from "./get";
+import * as DeleteController from "./delete";
 
 module.exports = {
+    PostController,
+    GetController,
+    DeleteController,
     Quiz,
     Topic,
     // Session,
