@@ -11,11 +11,11 @@ export default class QuizTake extends Thing {
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.quizTakeURI;
         this.predicates.push(
-            { predicate: Predicates.startDate, asNode: false },
-            { predicate: Predicates.endDate, asNode: false },
-            { predicate: Predicates.submitedDate, asNode: false },
-            { predicate: Predicates.reviewedDate, asNode: false },
-            { predicate: Predicates.hasAuthor, asNode: true }
+            { predicate: Predicates.startDate, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.endDate, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.submitedDate, asNode: false, required: false, multiple: false },
+            { predicate: Predicates.reviewedDate, asNode: false, required: false, multiple: false },
+            { predicate: Predicates.hasAuthor, asNode: true, required: true, multiple: false }
         );
     }
 

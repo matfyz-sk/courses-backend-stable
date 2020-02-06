@@ -11,9 +11,9 @@ export default class QuestionComment extends Thing {
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.questionCommentURI;
         this.predicates.push(
-            { predicate: Predicates.commentText, asNode: false },
-            { predicate: Predicates.hasAuthor, asNode: true },
-            { predicate: Predicates.created, asNode: false }
+            { predicate: Predicates.commentText, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.hasAuthor, asNode: true, required: true, multiple: false },
+            { predicate: Predicates.created, asNode: false, required: true, multiple: false }
         );
     }
 

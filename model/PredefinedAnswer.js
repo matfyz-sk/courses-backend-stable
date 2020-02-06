@@ -11,9 +11,9 @@ export default class PredefinedAnswer extends Thing {
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.predefinedAnswerURI;
         this.predicates.push(
-            { predicate: Predicates.text, asNode: false },
-            { predicate: Predicates.position, asNode: false },
-            { predicate: Predicates.correct, asNode: false }
+            { predicate: Predicates.text, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.position, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.correct, asNode: false, required: true, multiple: false }
         );
     }
 

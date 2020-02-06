@@ -11,9 +11,9 @@ export default class OrderedAnswer extends UserAnswer {
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.orderedAnswerURI;
         this.predicates.push(
-            { predicate: Predicates.position, asNode: false },
-            { predicate: Predicates.userChoice, asNode: false },
-            { predicate: Predicates.predefinedAnswer, asNode: true }
+            { predicate: Predicates.position, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.userChoice, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.predefinedAnswer, asNode: true, required: true, multiple: false }
         );
     }
 

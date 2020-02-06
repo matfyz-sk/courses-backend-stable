@@ -11,10 +11,10 @@ export default class OrderedQuestion extends Thing {
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.orderedQuestionURI;
         this.predicates.push(
-            { predicate: Predicates.question, asNode: true },
-            { predicate: Predicates.userAnswer, asNode: true },
-            { predicate: Predicates.quizTake, asNode: true },
-            { predicate: Predicates.next, asNode: true }
+            { predicate: Predicates.question, asNode: true, required: true, multiple: false },
+            { predicate: Predicates.userAnswer, asNode: true, required: false, multiple: false },
+            { predicate: Predicates.quizTake, asNode: true, required: true, multiple: false },
+            { predicate: Predicates.next, asNode: true, required: false, multiple: false }
         );
     }
 

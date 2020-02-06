@@ -11,15 +11,15 @@ export default class Question extends Thing {
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.questionURI;
         this.predicates.push(
-            { predicate: Predicates.name, asNode: false },
-            { predicate: Predicates.text, asNode: false },
-            { predicate: Predicates.visibilityIsRestricted, asNode: false },
-            { predicate: Predicates.hasQuestionState, asNode: false },
-            { predicate: Predicates.ofTopic, asNode: true },
-            { predicate: Predicates.hasAuthor, asNode: true },
-            { predicate: Predicates.hasComment, asNode: true },
-            { predicate: Predicates.approver, asNode: true },
-            { predicate: Predicates.hasChangeEvent, asNode: true }
+            { predicate: Predicates.name, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.text, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.visibilityIsRestricted, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.hasQuestionState, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.ofTopic, asNode: true, required: true, multiple: false },
+            { predicate: Predicates.hasAuthor, asNode: true, required: true, multiple: false },
+            { predicate: Predicates.hasComment, asNode: true, required: false, multiple: true },
+            { predicate: Predicates.approver, asNode: true, required: false, multiple: false },
+            { predicate: Predicates.hasChangeEvent, asNode: true, required: false, multiple: false }
         );
     }
 

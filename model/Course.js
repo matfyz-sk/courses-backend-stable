@@ -11,12 +11,12 @@ export default class Course extends Thing {
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.coursesURI;
         this.predicates.push(
-            { predicate: Predicates.name, asNode: false },
-            { predicate: Predicates.description, asNode: false },
-            { predicate: Predicates.abbreviation, asNode: false },
-            { predicate: Predicates.hasPrerequisite, asNode: true },
-            { predicate: Predicates.mentions, asNode: true },
-            { predicate: Predicates.covers, asNode: true }
+            { predicate: Predicates.name, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.description, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.abbreviation, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.hasPrerequisite, asNode: true, required: false, multiple: true },
+            { predicate: Predicates.mentions, asNode: true, required: false, multiple: true },
+            { predicate: Predicates.covers, asNode: true, required: false, multiple: true }
         );
     }
 

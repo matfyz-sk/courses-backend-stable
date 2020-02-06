@@ -10,7 +10,7 @@ export default class DirectAnswer extends UserAnswer {
         this.type = Classes.DirectAnswer;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.directAnswerURI;
-        this.predicates.push({ predicate: Predicates.text, asNode: false });
+        this.predicates.push({ predicate: Predicates.text, asNode: false, required: true, multiple: false });
     }
 
     set text(value) {

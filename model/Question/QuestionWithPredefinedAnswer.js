@@ -10,7 +10,7 @@ export default class QuestionWithPredefinedAnswer extends Question {
         this.type = Classes.QuestionWithPreddefinedAnswer;
         this.subclassOf = Classes.Question;
         this.uriPrefix = Constants.questionWithPreddefinedAnswerURI;
-        this.predicates.push({ predicate: Predicates.hasAnswer, asNode: true });
+        this.predicates.push({ predicate: Predicates.hasAnswer, asNode: true, required: true, multiple: false });
     }
 
     set hasAnswer(value) {

@@ -10,7 +10,10 @@ export default class UserAnswer extends Thing {
         this.type = Classes.UserAnswer;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.userAnswerURI;
-        this.predicates.push({ predicate: Predicates.score, asNode: false }, { predicate: Predicates.orderedQuestion, asNode: true });
+        this.predicates.push(
+            { predicate: Predicates.score, asNode: false, required: false, multiple: false },
+            { predicate: Predicates.orderedQuestion, asNode: true, required: true, multiple: false }
+        );
     }
 
     set score(value) {

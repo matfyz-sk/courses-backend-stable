@@ -19,6 +19,7 @@ export default class Thing {
         this.uriPrefix = undefined;
         this.query = {};
         this.predicates = [];
+        this.removeOld = true;
     }
 
     generateQuery(filters) {
@@ -140,11 +141,12 @@ export default class Thing {
     }
 
     _setArrayProperty(predicate, objectValue, objectType) {
-        if (this.props[predicate.value]) {
+        if (this.props[predicate.value] && this.removeOld) {
             for (var triple of this.props[predicate.value]) {
                 triple.setOperation(Triple.REMOVE);
             }
-        } else {
+        }
+        if (!this.props[predicate.value]) {
             this.props[predicate.value] = [];
         }
         for (var value of objectValue) {
@@ -209,9 +211,14 @@ export default class Thing {
         return this._storeTriples();
     }
 
-    put() {}
+    put() {
+        this._prepareTriplesToUpdate();
+        return this._storeTriples();
+    }
 
     fetch() {
+        db.setQueryFormat("application/json");
+        db.setQueryGraph("http://www.courses.matfyz.sk/data");
         return db.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this.uri}>}`, true);
     }
 

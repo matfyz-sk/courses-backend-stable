@@ -16,14 +16,14 @@ export default class User extends Agent {
         this.subclassOf = Classes.Agent;
         this.uriPrefix = Constants.usersURI;
         this.predicates.push(
-            { predicate: Predicates.firstName, asNode: false },
-            { predicate: Predicates.lastName, asNode: false },
-            { predicate: Predicates.email, asNode: false },
-            { predicate: Predicates.description, asNode: false },
-            { predicate: Predicates.nickname, asNode: false },
-            { predicate: Predicates.memberOf, asNode: true },
-            { predicate: Predicates.requests, asNode: true },
-            { predicate: Predicates.studentOf, asNode: true }
+            { predicate: Predicates.firstName, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.lastName, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.email, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.description, asNode: false, required: false, multiple: false },
+            { predicate: Predicates.nickname, asNode: false, required: true, multiple: false },
+            { predicate: Predicates.memberOf, asNode: true, required: false, multiple: true },
+            { predicate: Predicates.requests, asNode: true, required: false, multiple: true },
+            { predicate: Predicates.studentOf, asNode: true, required: false, multiple: true }
         );
     }
 

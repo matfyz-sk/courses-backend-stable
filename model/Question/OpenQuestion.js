@@ -10,7 +10,7 @@ export default class OpenQuestion extends Question {
         this.type = Classes.OpenQuestion;
         this.subclassOf = Classes.Question;
         this.uriPrefix = Constants.openQuestionURI;
-        this.predicates.push({ predicate: Predicates.regexp, asNode: false });
+        this.predicates.push({ predicate: Predicates.regexp, asNode: false, required: true, multiple: false });
     }
 
     set regexp(value) {

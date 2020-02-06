@@ -10,6 +10,7 @@ export default class Team extends Agent {
         this.type = Classes.Team;
         this.subclassOf = Classes.Agent;
         this.uriPrefix = Constants.teamsURI;
+        this.predicates.push({ predicate: Predicates.courseInstance, asNode: true, required: true, multiple: false });
     }
 
     set courseInstance(value) {
