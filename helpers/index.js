@@ -5,6 +5,12 @@ import * as ID from "../lib/virtuoso-uid";
 import Query from "../query/Query";
 import { type } from "../constants/predicates";
 import { body, param, validationResult } from "express-validator";
+import * as Resources from "../model";
+
+export function getResourceObject(resourceName, resourceID = "") {
+    if (!Resources[resourceName]) return undefined;
+    return new Resources[resourceName](resourceID);
+}
 
 /**
  * @param {String} resourceURI The full resource URI

@@ -1,11 +1,16 @@
 import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
 import * as Constants from "../../../constants";
 import * as Predicates from "../../../constants/predicates";
+import * as Classes from "../../../constants/classes";
 import Event from "../Event";
 
 export default class TaskEvent extends Event {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.taskEventURI;
+        this.subject = new Node(this.uriPrefix + this.id);
+        this.type = Classes.TaskEvent;
+        this.subclassOf = Classes.Event;
     }
 
     set extraTime(value) {

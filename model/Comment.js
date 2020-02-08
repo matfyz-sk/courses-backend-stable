@@ -5,8 +5,10 @@ import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 
 export default class Comment extends Thing {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.commentURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Comment;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.commentURI;

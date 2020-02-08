@@ -5,11 +5,12 @@ import * as Predicates from "../../constants/predicates";
 import Question from "./Question";
 
 export default class OpenQuestion extends Question {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.openQuestionURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.OpenQuestion;
         this.subclassOf = Classes.Question;
-        this.uriPrefix = Constants.openQuestionURI;
         this.predicates.push({ predicate: Predicates.regexp, asNode: false, required: true, multiple: false });
     }
 

@@ -5,8 +5,10 @@ import * as Constants from "../../../constants";
 import * as Predicates from "../../../constants/predicates";
 
 export default class Lecture extends Session {
-    constructor(uri) {
-        super();
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.lectureURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Lecture;
         this.subclassOf = Classes.Session;
         this.uriPrefix = Constants.lectureURI;

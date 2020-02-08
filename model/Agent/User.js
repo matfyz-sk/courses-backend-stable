@@ -5,16 +5,14 @@ import * as Constants from "../../constants";
 import * as Predicates from "../../constants/predicates";
 import * as Messages from "../../constants/messages";
 import { body, param, validationResult } from "express-validator";
-import Team from "./Team";
-import { predicate } from "../../helpers";
 
 export default class User extends Agent {
-    constructor(uri) {
-        super(uri);
-        this.uri = uri;
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.usersURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.User;
         this.subclassOf = Classes.Agent;
-        this.uriPrefix = Constants.usersURI;
         this.predicates.push(
             { predicate: Predicates.firstName, asNode: false, required: true, multiple: false },
             { predicate: Predicates.lastName, asNode: false, required: true, multiple: false },

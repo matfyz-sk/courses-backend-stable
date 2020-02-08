@@ -4,8 +4,10 @@ import * as Predicates from "../../constants/predicates";
 import Thing from "../Thing";
 
 export default class Task extends Thing {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.taskURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Task;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.taskURI;

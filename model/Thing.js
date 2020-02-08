@@ -1,6 +1,7 @@
 import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
-import * as Constants from "../constants";
+import { thingURI } from "../constants";
 import * as Predicates from "../constants/predicates";
+import * as Classes from "../constants/classes";
 import { db } from "../config/client";
 import { getNewNode } from "../helpers";
 import { body, param, validationResult } from "express-validator";
@@ -9,17 +10,17 @@ import * as Messages from "../constants/messages";
 import Query from "../query/Query";
 
 export default class Thing {
-    constructor(uri) {
+    constructor(id) {
         this.triples = { toAdd: [], toUpdate: [], toRemove: [] };
         this.props = {};
-        this.uri = uri;
-        this.subject = new Node(uri);
-        this.type = undefined;
+        this.id = id;
+        this.uriPrefix = thingURI;
+        this.type = Classes.Thing;
         this.subclassOf = undefined;
-        this.uriPrefix = undefined;
         this.query = {};
         this.predicates = [];
         this.removeOld = true;
+        this.subject = new Node(this.uriPrefix + this.id);
     }
 
     generateQuery(filters) {
@@ -219,7 +220,7 @@ export default class Thing {
     fetch() {
         db.setQueryFormat("application/json");
         db.setQueryGraph("http://www.courses.matfyz.sk/data");
-        return db.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this.uri}>}`, true);
+        return db.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this.uriPrefix + this.id}>}`, true);
     }
 
     prepareData(data) {

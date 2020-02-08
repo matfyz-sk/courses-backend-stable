@@ -5,8 +5,10 @@ import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 
 export default class CodeReview extends Thing {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.codeReviewURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.CodeReview;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.codeReviewURI;

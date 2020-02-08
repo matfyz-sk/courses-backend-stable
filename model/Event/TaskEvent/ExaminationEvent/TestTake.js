@@ -1,13 +1,15 @@
-import { Client, Triple, Node, Text, Data } from "virtuoso-sparql-client";
+import { Node } from "virtuoso-sparql-client";
 import * as Constants from "../../../../constants";
+import * as Classes from "../../../../constants/classes";
 import ExaminationEvent from "./ExaminationEvent";
 
 export default class TestTake extends ExaminationEvent {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.testTakeURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.TestTake;
         this.subclassOf = Classes.ExaminationEvent;
-        this.uriPrefix = Constants.testTakeURI;
     }
 
     _fill(data) {

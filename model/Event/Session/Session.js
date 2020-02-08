@@ -4,11 +4,12 @@ import * as Predicates from "../../../constants/predicates";
 import Event from "../Event";
 
 export default class Session extends Event {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.sessionURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Session;
         this.subclassOf = Classes.Event;
-        this.uriPrefix = Constants.sessionURI;
     }
 
     set courseInstance(value) {

@@ -3,6 +3,7 @@ export const dcTermsURI = "http://purl.org/dc/terms/";
 export const ontologyURI = "http://www.courses.matfyz.sk/ontology#";
 export const graphURI = "http://www.courses.matfyz.sk/data";
 
+export const thingURI = graphURI + "/thing/";
 export const usersURI = graphURI + "/user/";
 export const teamsURI = graphURI + "/team/";
 export const coursesURI = graphURI + "/course/";
@@ -24,7 +25,6 @@ export const oralExamURI = graphURI + "/oralExam/";
 export const testTakeURI = graphURI + "/testTake/";
 export const examinationEventURI = graphURI + "/examinationEvent/";
 export const assignmentPeriodURI = graphURI + "/assignmentPeriod/";
-
 export const codeCommentURI = graphURI + "/codeComment/";
 export const generalCommentURI = graphURI + "/generalComment/";
 export const submissionURI = graphURI + "/submission/";

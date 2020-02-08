@@ -5,11 +5,12 @@ import * as Constants from "../../constants";
 import * as Predicates from "../../constants/predicates";
 
 export default class Question extends Thing {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.questionURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Question;
         this.subclassOf = Classes.Thing;
-        this.uriPrefix = Constants.questionURI;
         this.predicates.push(
             { predicate: Predicates.name, asNode: false, required: true, multiple: false },
             { predicate: Predicates.text, asNode: false, required: true, multiple: false },

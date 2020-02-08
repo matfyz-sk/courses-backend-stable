@@ -5,8 +5,10 @@ import * as Predicates from "../../constants/predicates";
 import Task from "./Task";
 
 export default class QuizAssignment extends Task {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.quizAssignmentURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.QuizAssignment;
         this.subclassOf = Classes.Task;
         this.uriPrefix = Constants.quizAssignmentURI;

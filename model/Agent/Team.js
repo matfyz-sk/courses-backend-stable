@@ -5,11 +5,12 @@ import * as Constants from "../../constants";
 import * as Predicates from "../../constants/predicates";
 
 export default class Team extends Agent {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.teamsURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Team;
         this.subclassOf = Classes.Agent;
-        this.uriPrefix = Constants.teamsURI;
         this.predicates.push({ predicate: Predicates.courseInstance, asNode: true, required: true, multiple: false });
     }
 

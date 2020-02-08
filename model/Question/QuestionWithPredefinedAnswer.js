@@ -5,8 +5,10 @@ import * as Predicates from "../../constants/predicates";
 import Question from "./Question";
 
 export default class QuestionWithPredefinedAnswer extends Question {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.questionWithPreddefinedAnswerURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.QuestionWithPreddefinedAnswer;
         this.subclassOf = Classes.Question;
         this.uriPrefix = Constants.questionWithPreddefinedAnswerURI;

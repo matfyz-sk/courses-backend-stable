@@ -3,11 +3,12 @@ import * as Constants from "../../constants";
 import Question from "./Question";
 
 export default class EssayQuestion extends Question {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.essayQuestionURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.EssayQuestion;
         this.subclassOf = Classes.Question;
-        this.uriPrefix = Constants.essayQuestionURI;
     }
 
     _fill(data) {

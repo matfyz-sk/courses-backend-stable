@@ -5,8 +5,10 @@ import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
 
 export default class OrderedQuestion extends Thing {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.orderedQuestionURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.OrderedQuestion;
         this.subclassOf = Classes.Thing;
         this.uriPrefix = Constants.orderedQuestionURI;

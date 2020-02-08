@@ -1,10 +1,11 @@
-import * as Constants from "../constants";
-import User from "../model/Agent/User";
-import { buildUri } from "../helpers";
-import Team from "../model/Agent/Team";
-import Course from "../model/Course";
+import { getResourceObject } from "../helpers";
 
-function putResource(resource, req, res) {
+export function putResource(resourceName, req, res) {
+    const resource = getResourceObject(resourceName, req.params.id);
+    if (!resource) {
+        res.status(400).send("not implemented");
+        return;
+    }
     resource
         .fetch()
         .then(data => {
@@ -19,19 +20,4 @@ function putResource(resource, req, res) {
         .catch(error => {
             res.status(500).send(error);
         });
-}
-
-export function putUser(req, res) {
-    const user = new User(buildUri(Constants.usersURI, req.params.id, false));
-    putResource(user, req, res);
-}
-
-export function putTeam(req, res) {
-    const team = new Team(buildUri(Constants.teamsURI, req.params.id, false));
-    putResource(team, req, res);
-}
-
-export function putCourse(req, res) {
-    const course = new Course(buildUri(Constants.coursesURI, req.params.id, false));
-    putResource(course, req, res);
 }

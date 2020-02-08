@@ -7,11 +7,12 @@ import * as Predicates from "../../constants/predicates";
 import { body, param, validationResult } from "express-validator";
 
 export default class Agent extends Thing {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.agentURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Agent;
         this.subclassOf = Classes.Thing;
-        this.uriPrefix = Constants.agentURI;
         this.predicates.push(
             { predicate: Predicates.name, asNode: false, required: true, multiple: false },
             { predicate: Predicates.avatar, asNode: false, required: false, multiple: false }

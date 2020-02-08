@@ -1,12 +1,14 @@
 import * as Constants from "../../../../constants";
+import * as Classes from "../../../../constants/classes";
 import ExaminationEvent from "./ExaminationEvent";
 
 export default class OralExam extends ExaminationEvent {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.oralExamURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.OralExam;
         this.subclassOf = Classes.ExaminationEvent;
-        this.uriPrefix = Constants.oralExamURI;
     }
 
     _fill(data) {
