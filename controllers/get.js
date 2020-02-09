@@ -1,15 +1,8 @@
-import { getResourceObject } from "../helpers";
-
-export function runQuery(resourceName, req, res) {
-    const resource = getResourceObject(resourceName);
-    if (!resource) {
-        res.status(400).send("not implemented");
-        return;
-    }
+export function runQuery(req, res) {
     if (req.params.id) {
         req.query["id"] = req.params.id;
     }
-    const query = resource.generateQuery(req.query);
+    const query = res.locals.resource.generateQuery(req.query);
     query
         .run()
         .then(data => {

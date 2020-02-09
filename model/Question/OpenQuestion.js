@@ -11,15 +11,6 @@ export default class OpenQuestion extends Question {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.OpenQuestion;
         this.subclassOf = Classes.Question;
-        this.predicates.push({ predicate: Predicates.regexp, asNode: false, required: true, multiple: false });
-    }
-
-    set regexp(value) {
-        this._setProperty(Predicates.regexp, new Text(value));
-    }
-
-    _fill(data) {
-        this._setNewProperty(Predicates.regexp, new Text(data.regexp));
-        super._fill(data);
+        this.props[Predicates.regexp.value] = { required: false, multiple: false, type: Text, primitive: true };
     }
 }

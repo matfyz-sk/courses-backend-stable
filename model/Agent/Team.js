@@ -11,27 +11,6 @@ export default class Team extends Agent {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Team;
         this.subclassOf = Classes.Agent;
-        this.predicates.push({ predicate: Predicates.courseInstance, asNode: true, required: true, multiple: false });
-    }
-
-    set courseInstance(value) {
-        this._setProperty(Predicates.courseInstance, new Node(value));
-    }
-
-    _fill(data) {
-        this._setNewProperty(Predicates.courseInstance, data.courseInstance);
-        super._fill(data);
-    }
-
-    static validate() {
-        return [
-            body("courseInstance")
-                .exists()
-                .withMessage(Messages.MISSING_FIELD)
-                .bail()
-                .isURL()
-                .bail()
-                .custom(value => resourceExists(value, Classes.CourseInstance))
-        ].concat(super.validate());
+        this.props[Predicates.courseInstance.value] = { required: false, multiple: false, type: Node, primitive: false };
     }
 }

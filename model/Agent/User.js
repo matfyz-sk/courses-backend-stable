@@ -13,92 +13,15 @@ export default class User extends Agent {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.User;
         this.subclassOf = Classes.Agent;
-        this.predicates.push(
-            { predicate: Predicates.firstName, asNode: false, required: true, multiple: false },
-            { predicate: Predicates.lastName, asNode: false, required: true, multiple: false },
-            { predicate: Predicates.email, asNode: false, required: true, multiple: false },
-            { predicate: Predicates.description, asNode: false, required: false, multiple: false },
-            { predicate: Predicates.nickname, asNode: false, required: true, multiple: false },
-            { predicate: Predicates.memberOf, asNode: true, required: false, multiple: true },
-            { predicate: Predicates.requests, asNode: true, required: false, multiple: true },
-            { predicate: Predicates.studentOf, asNode: true, required: false, multiple: true }
-        );
-    }
-
-    set firstName(value) {
-        this._setProperty(Predicates.firstName, new Text(value));
-    }
-
-    set lastName(value) {
-        this._setProperty(Predicates.lastName, new Text(value));
-    }
-
-    set email(value) {
-        this._setProperty(Predicates.email, new Text(value));
-    }
-
-    set description(value) {
-        this._setProperty(Predicates.description, new Text(value));
-    }
-
-    set nickname(value) {
-        this._setProperty(Predicates.nickname, new Text(value));
-    }
-
-    set memberOf(value) {
-        this._setArrayProperty(Predicates.memberOf, value, Node);
-    }
-
-    set requests(value) {
-        this._setArrayProperty(Predicates.requests, value, Node);
-    }
-
-    set studentOf(value) {
-        this._setArrayProperty(Predicates.studentOf, value, Node);
-    }
-
-    _fill(data) {
-        this._setNewProperty(Predicates.firstName, new Text(data.firstName));
-        this._setNewProperty(Predicates.lastName, new Text(data.lastName));
-        this._setNewProperty(Predicates.description, new Text(data.description));
-        this._setNewProperty(Predicates.email, new Text(data.email));
-        this._setNewProperty(Predicates.nickname, new Text(data.nickname));
-
-        this._setNewArrayProperty(Predicates.memberOf, data.memberOf, Node);
-        this._setNewArrayProperty(Predicates.requests, data.requests, Node);
-        this._setNewArrayProperty(Predicates.studentOf, data.studentOf, Node);
-
-        super._fill(data);
-    }
-
-    static validate() {
-        const x = [
-            body("firstName")
-                .exists()
-                .withMessage(Messages.MISSING_FIELD)
-                .bail()
-                .isString()
-                .withMessage(Messages.FIELD_NOT_STRING),
-            body("lastName")
-                .exists()
-                .withMessage(Messages.MISSING_FIELD)
-                .bail()
-                .isString()
-                .withMessage(Messages.FIELD_NOT_STRING),
-            body("email")
-                .exists()
-                .withMessage(Messages.MISSING_FIELD)
-                .bail()
-                .isEmail()
-                .withMessage(Messages.FIELD_NOT_EMAIL),
-            body("description")
-                .exists()
-                .withMessage(Messages.MISSING_FIELD),
-            body("nickname")
-                .exists()
-                .withMessage(Messages.MISSING_FIELD)
-        ].concat(Agent.validate());
-        console.log(x);
-        return x;
+        this.props[Predicates.firstName.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.lastName.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.email.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.description.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.nickname.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.memberOf.value] = { required: false, multiple: true, type: Node, primitive: false };
+        this.props[Predicates.requests.value] = { required: false, multiple: true, type: Node, primitive: false };
+        this.props[Predicates.studentOf.value] = { required: false, multiple: true, type: Node, primitive: false };
+        this.props[Predicates.understands.value] = { required: false, multiple: true, type: Node, primitive: false };
+        this.props[Predicates.useNickName.value] = { required: false, multiple: true, type: Node, primitive: false };
     }
 }

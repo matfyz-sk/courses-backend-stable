@@ -1,5 +1,5 @@
 import * as Classes from "../constants/classes";
-import { Node, Text, Data } from "virtuoso-sparql-client";
+import { Node, Text } from "virtuoso-sparql-client";
 import Thing from "./Thing";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
@@ -11,20 +11,7 @@ export default class Topic extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Topic;
         this.subclassOf = Classes.Thing;
-        this.uriPrefix = Constants.topicURI;
-    }
-
-    set name(value) {
-        this._setProperty(Predicates.name, new Text(value));
-    }
-
-    set description(value) {
-        this._setProperty(Predicates.description, new Text(value));
-    }
-
-    _fill(data) {
-        this._setNewProperty(Predicates.name, new Text(data.name));
-        this._setNewProperty(Predicates.description, new Text(data.description));
-        super._fill(data);
+        this.props[Predicates.name.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.description.value] = { required: false, multiple: false, type: Text, primitive: true };
     }
 }

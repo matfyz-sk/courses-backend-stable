@@ -13,32 +13,8 @@ export default class Agent extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Agent;
         this.subclassOf = Classes.Thing;
-        this.predicates.push(
-            { predicate: Predicates.name, asNode: false, required: true, multiple: false },
-            { predicate: Predicates.avatar, asNode: false, required: false, multiple: false }
-        );
-    }
-
-    set name(value) {
-        this._setProperty(Predicates.name, new Text(value));
-    }
-
-    set avatar(value) {
-        this._setProperty(Predicates.avatar, new Text(value));
-    }
-
-    _fill(data) {
-        this._setNewProperty(Predicates.name, data.name);
-        this._setNewProperty(Predicates.avatar, data.avatar);
-        super._fill(data);
-    }
-
-    static validate() {
-        return [
-            body("name")
-                .exists()
-                .withMessage(Messages.MISSING_FIELD),
-            body("avatar").optional()
-        ].concat(Thing.validate());
+        this.props[Predicates.name.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.avatar.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.reviews.value] = { required: false, multiple: true, type: Node, primitive: false };
     }
 }

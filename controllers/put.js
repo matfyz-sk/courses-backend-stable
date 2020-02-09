@@ -1,23 +1,16 @@
-import { getResourceObject } from "../helpers";
-
-export function putResource(resourceName, req, res) {
-    const resource = getResourceObject(resourceName, req.params.id);
-    if (!resource) {
-        res.status(400).send("not implemented");
-        return;
-    }
+export function putResource(req, res) {
+    const resource = res.locals.resource;
+    Object.keys(resource.props).forEach(key => {
+        if (req.body[key]) {
+            resource.setPredicate(key, req.body[key]);
+        }
+    });
+    resource.removeOld = false;
     resource
-        .fetch()
-        .then(data => {
-            resource._fill(resource.prepareData(data));
-            for (var p of resource.predicates) {
-                if (req.body[p.predicate.value]) resource[p.predicate.value] = req.body[p.predicate.value];
-            }
-            resource.removeOld = false;
-            resource.put();
-        })
+        .put()
         .then(data => res.status(200).send(data))
         .catch(error => {
+            console.log(error);
             res.status(500).send(error);
         });
 }

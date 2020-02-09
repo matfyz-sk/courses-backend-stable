@@ -11,16 +11,6 @@ export default class QuestionWithPredefinedAnswer extends Question {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.QuestionWithPreddefinedAnswer;
         this.subclassOf = Classes.Question;
-        this.uriPrefix = Constants.questionWithPreddefinedAnswerURI;
-        this.predicates.push({ predicate: Predicates.hasAnswer, asNode: true, required: true, multiple: false });
-    }
-
-    set hasAnswer(value) {
-        this._setProperty(Predicates.hasAnswer, new Node(value));
-    }
-
-    _fill(data) {
-        this._setNewProperty(Predicates.hasAnswer, new Node(data.hasAnswer));
-        super._fill(data);
+        this.props[Predicates.hasAnswer.value] = { required: false, multiple: false, type: Node, primitive: false };
     }
 }

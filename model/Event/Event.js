@@ -4,11 +4,12 @@ import * as Predicates from "../../constants/predicates";
 import Thing from "../Thing";
 
 export default class Event extends Thing {
-    constructor(uri) {
-        super(uri);
+    constructor(id) {
+        super(id);
+        this.uriPrefix = Constants.eventsURI;
+        this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Event;
         this.subclassOf = Classes.Thing;
-        this.uriPrefix = Constants.eventsURI;
     }
 
     set name(value) {

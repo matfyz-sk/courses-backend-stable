@@ -1,5 +1,5 @@
 import * as Classes from "../constants/classes";
-import { Node, Text, Data } from "virtuoso-sparql-client";
+import { Node, Text } from "virtuoso-sparql-client";
 import Thing from "./Thing";
 import * as Constants from "../constants";
 import * as Predicates from "../constants/predicates";
@@ -11,54 +11,11 @@ export default class Course extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Course;
         this.subclassOf = Classes.Thing;
-        this.uriPrefix = Constants.coursesURI;
-        this.predicates.push(
-            { predicate: Predicates.name, asNode: false, required: true, multiple: false },
-            { predicate: Predicates.description, asNode: false, required: true, multiple: false },
-            { predicate: Predicates.abbreviation, asNode: false, required: true, multiple: false },
-            { predicate: Predicates.hasPrerequisite, asNode: true, required: false, multiple: true },
-            { predicate: Predicates.mentions, asNode: true, required: false, multiple: true },
-            { predicate: Predicates.covers, asNode: true, required: false, multiple: true }
-        );
-    }
-
-    set name(value) {
-        this._setProperty(Predicates.name, new Text(value));
-    }
-
-    set description(value) {
-        this._setProperty(Predicates.description, new Text(value));
-    }
-
-    set abbreviation(value) {
-        this._setProperty(Predicates.abbreviation, new Text(value));
-    }
-
-    set hasPrerequisite(value) {
-        this._setArrayProperty(Predicates.hasPrerequisite, value, Node);
-    }
-
-    set mentions(value) {
-        this._setArrayProperty(Predicates.mentions, value, Node);
-    }
-
-    set covers(value) {
-        this._setArrayProperty(Predicates.covers, value, Node);
-    }
-
-    validate() {
-        return [].concat(super.validate());
-    }
-
-    _fill(data) {
-        this._setNewProperty(Predicates.name, new Text(data.name));
-        this._setNewProperty(Predicates.description, new Text(data.description));
-        this._setNewProperty(Predicates.abbreviation, new Text(data.abbreviation));
-        this._setNewProperty(Predicates.hasPrerequisite, new Node(data.hasPrerequisite));
-
-        this._setArrayProperty(Predicates.mentions, data.mentions, Node);
-        this._setArrayProperty(Predicates.covers, data.covers, Node);
-
-        super._fill(data);
+        this.props[Predicates.name.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.description.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.abbreviation.value] = { required: false, multiple: false, type: Text, primitive: true };
+        this.props[Predicates.hasPrerequisite.value] = { required: false, multiple: true, type: Node, primitive: false };
+        this.props[Predicates.mentions.value] = { required: false, multiple: true, type: Node, primitive: false };
+        this.props[Predicates.covers.value] = { required: false, multiple: true, type: Node, primitive: false };
     }
 }

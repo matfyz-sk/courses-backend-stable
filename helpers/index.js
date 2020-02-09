@@ -12,6 +12,10 @@ export function getResourceObject(resourceName, resourceID = "") {
     return new Resources[resourceName](resourceID);
 }
 
+export function prepareClassName(className) {
+    return className.charAt(0).toUpperCase() + className.slice(1);
+}
+
 /**
  * @param {String} resourceURI The full resource URI
  * @param {String} resourceId The resource ID
