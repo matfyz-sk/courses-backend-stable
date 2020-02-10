@@ -1,7 +1,7 @@
 export function putResource(req, res) {
     const resource = res.locals.resource;
     Object.keys(resource.props).forEach(key => {
-        if (req.body[key]) {
+        if (req.body.hasOwnProperty(key)) {
             resource.setPredicate(key, req.body[key]);
         }
     });

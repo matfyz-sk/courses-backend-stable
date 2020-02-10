@@ -11,9 +11,9 @@ export default class OrderedQuestion extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.OrderedQuestion;
         this.subclassOf = Classes.Thing;
-        this.props[Predicates.question.value] = { required: false, multiple: false, type: Node, primitive: false };
-        this.props[Predicates.userAnswer.value] = { required: false, multiple: false, type: Node, primitive: false };
-        this.props[Predicates.quizTake.value] = { required: false, multiple: false, type: Node, primitive: false };
-        this.props[Predicates.next.value] = { required: false, multiple: false, type: Node, primitive: false };
+        [Predicates.question.value] = { required: false, multiple: false, type: Node, primitive: false };
+        [Predicates.userAnswer.value] = { required: false, multiple: false, type: Node, primitive: false };
+        [Predicates.quizTake.value] = { required: false, multiple: false, type: Node, primitive: false };
+        [Predicates.next.value] = { required: false, multiple: false, type: Node, primitive: false };
     }
 }

@@ -2,28 +2,28 @@ import { PostController, GetController, PutController, PatchController, DeleteCo
 import { getResourceObject, prepareClassName } from "../helpers";
 import express from "express";
 const router = express.Router();
+import Resource from "../model/Resource";
 
 router.use("/:className", (req, res, next) => {
-    console.log("router use middleware /:className ");
     const resource = getResourceObject(prepareClassName(req.params.className));
     if (!resource) {
-        res.status(400).send("not implemented");
+        res.status(400).send(`Resource with class name ${req.params.className} is not supported`);
         return;
     }
-    res.locals.resource = resource;
+    res.locals.resource = new Resource(resource);
     next();
 });
 
 router.use("/:className/:id", (req, res, next) => {
-    res.locals.resource.id = req.params.id;
+    res.locals.resource.setSubject(req.params.id);
     res.locals.resource
         .fetch()
         .then(data => {
             if (data.results.bindings.length == 0) {
-                res.status(404).send("Resource does not exist");
+                res.status(404).send(`Resource with ID ${req.params.id} and class name ${req.params.className} does not exist`);
                 return;
             }
-            res.locals.resource._fill(data);
+            res.locals.resource.fill(data);
             next();
         })
         .catch(error => {

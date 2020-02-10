@@ -1,27 +1,82 @@
-import * as Classes from "../../constants/classes";
-import { Node, Text, Data } from "virtuoso-sparql-client";
-import Agent from "./Agent";
-import * as Constants from "../../constants";
-import * as Predicates from "../../constants/predicates";
-import * as Messages from "../../constants/messages";
-import { body, param, validationResult } from "express-validator";
+import { User } from "../../constants/classes";
+import { Node, Text } from "virtuoso-sparql-client";
+import {
+    firstName,
+    lastName,
+    email,
+    description,
+    nickname,
+    memberOf,
+    requests,
+    studentOf,
+    understands,
+    useNickName
+} from "../../constants/predicates";
+import { agent } from "./Agent";
 
-export default class User extends Agent {
-    constructor(id) {
-        super(id);
-        this.uriPrefix = Constants.usersURI;
-        this.subject = new Node(this.uriPrefix + this.id);
-        this.type = Classes.User;
-        this.subclassOf = Classes.Agent;
-        this.props[Predicates.firstName.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.lastName.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.email.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.description.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.nickname.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.memberOf.value] = { required: false, multiple: true, type: Node, primitive: false };
-        this.props[Predicates.requests.value] = { required: false, multiple: true, type: Node, primitive: false };
-        this.props[Predicates.studentOf.value] = { required: false, multiple: true, type: Node, primitive: false };
-        this.props[Predicates.understands.value] = { required: false, multiple: true, type: Node, primitive: false };
-        this.props[Predicates.useNickName.value] = { required: false, multiple: true, type: Node, primitive: false };
+export const user = {
+    type: User,
+    subclassOf: agent,
+    props: {
+        [firstName.value]: {
+            required: false,
+            multiple: false,
+            type: Text,
+            primitive: true
+        },
+        [lastName.value]: {
+            required: false,
+            multiple: false,
+            type: Text,
+            primitive: true
+        },
+        [email.value]: {
+            required: false,
+            multiple: false,
+            type: Text,
+            primitive: true
+        },
+        [description.value]: {
+            required: false,
+            multiple: false,
+            type: Text,
+            primitive: true
+        },
+        [nickname.value]: {
+            required: false,
+            multiple: false,
+            type: Text,
+            primitive: true
+        },
+        [memberOf.value]: {
+            required: false,
+            multiple: true,
+            type: Node,
+            primitive: false
+        },
+        [requests.value]: {
+            required: false,
+            multiple: true,
+            type: Node,
+            primitive: false
+        },
+        [studentOf.value]: {
+            required: false,
+            multiple: true,
+            type: Node,
+            primitive: false
+        },
+        [understands.value]: {
+            required: false,
+            multiple: true,
+            type: Node,
+            primitive: false
+        },
+        [useNickName.value]: {
+            required: false,
+            multiple: true,
+            type: Node,
+            primitive: false
+        }
     }
-}
+};

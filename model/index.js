@@ -1,5 +1,5 @@
-import User from "./Agent/User";
-import Team from "./Agent/Team";
+import { user } from "./Agent/User";
+import { team } from "./Agent/Team";
 import EssayQuestion from "./Question/EssayQuestion";
 import OpenQuestion from "./Question/OpenQuestion";
 import QuestionWithPredefinedAnswer from "./Question/QuestionWithPredefinedAnswer";
@@ -12,8 +12,8 @@ import QuizTake from "./QuizTake";
 import QuizTakePrototype from "./QuizTakePrototype";
 
 module.exports = {
-    User,
-    Team,
+    user,
+    team,
     EssayQuestion,
     OpenQuestion,
     QuestionWithPredefinedAnswer,

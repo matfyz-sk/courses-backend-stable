@@ -11,6 +11,6 @@ export default class QuizTakePrototype extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.QuizTakePrototype;
         this.subclassOf = Classes.Thing;
-        this.props[Predicates.orderedQuestion.value] = { required: false, multiple: false, type: Node, primitive: false };
+        [Predicates.orderedQuestion.value] = { required: false, multiple: false, type: Node, primitive: false };
     }
 }

@@ -9,11 +9,23 @@ import * as Resources from "../model";
 
 export function getResourceObject(resourceName, resourceID = "") {
     if (!Resources[resourceName]) return undefined;
-    return new Resources[resourceName](resourceID);
+    return Resources[resourceName];
 }
 
 export function prepareClassName(className) {
-    return className.charAt(0).toUpperCase() + className.slice(1);
+    return className.charAt(0).toLowerCase() + className.slice(1);
+}
+
+export function getAllProps(resource) {
+    var props = {};
+    var r = resource;
+    while (r) {
+        Object.keys(r.props).forEach(key => {
+            props[key] = r.props[key];
+        });
+        r = r.subclassOf;
+    }
+    return props;
 }
 
 /**

@@ -11,8 +11,8 @@ export default class QuestionComment extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.QuestionComment;
         this.subclassOf = Classes.Thing;
-        this.props[Predicates.commentText.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.hasAuthor.value] = { required: false, multiple: false, type: Node, primitive: false };
-        this.props[Predicates.created.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.commentText.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.hasAuthor.value] = { required: false, multiple: false, type: Node, primitive: false };
+        [Predicates.created.value] = { required: false, multiple: false, type: Text, primitive: true };
     }
 }

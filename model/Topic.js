@@ -11,7 +11,7 @@ export default class Topic extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Topic;
         this.subclassOf = Classes.Thing;
-        this.props[Predicates.name.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.description.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.name.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.description.value] = { required: false, multiple: false, type: Text, primitive: true };
     }
 }

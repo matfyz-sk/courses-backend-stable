@@ -11,8 +11,8 @@ export default class GeneralComment extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.GeneralComment;
         this.subclassOf = Classes.Thing;
-        this.props[Predicates.creator.value] = { required: false, multiple: false, type: Node, primitive: false };
-        this.props[Predicates.commentTime.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.commentText.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.creator.value] = { required: false, multiple: false, type: Node, primitive: false };
+        [Predicates.commentTime.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.commentText.value] = { required: false, multiple: false, type: Text, primitive: true };
     }
 }

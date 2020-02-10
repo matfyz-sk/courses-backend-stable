@@ -11,11 +11,11 @@ export default class Course extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.Course;
         this.subclassOf = Classes.Thing;
-        this.props[Predicates.name.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.description.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.abbreviation.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.hasPrerequisite.value] = { required: false, multiple: true, type: Node, primitive: false };
-        this.props[Predicates.mentions.value] = { required: false, multiple: true, type: Node, primitive: false };
-        this.props[Predicates.covers.value] = { required: false, multiple: true, type: Node, primitive: false };
+        [Predicates.name.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.description.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.abbreviation.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.hasPrerequisite.value] = { required: false, multiple: true, type: Node, primitive: false };
+        [Predicates.mentions.value] = { required: false, multiple: true, type: Node, primitive: false };
+        [Predicates.covers.value] = { required: false, multiple: true, type: Node, primitive: false };
     }
 }

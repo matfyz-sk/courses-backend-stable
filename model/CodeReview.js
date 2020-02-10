@@ -11,7 +11,7 @@ export default class CodeReview extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.CodeReview;
         this.subclassOf = Classes.Thing;
-        this.props[Predicates.hasGeneralComment.value] = { required: false, multiple: false, type: Node, primitive: false };
-        this.props[Predicates.hasCodeComment.value] = { required: false, multiple: false, type: Node, primitive: false };
+        [Predicates.hasGeneralComment.value] = { required: false, multiple: false, type: Node, primitive: false };
+        [Predicates.hasCodeComment.value] = { required: false, multiple: false, type: Node, primitive: false };
     }
 }

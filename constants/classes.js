@@ -1,7 +1,10 @@
+import * as Prefixes from "./prefixes";
+import * as URIPrefixes from "./index";
+
 export const Thing = "courses:Thing";
-export const Agent = "courses:Agent";
-export const User = "courses:User";
-export const Team = "courses:Team";
+export const Agent = { prefix: Prefixes.courses, value: "Agent", uriPrefix: URIPrefixes.agentURI };
+export const User = { prefix: Prefixes.courses, value: "User", uriPrefix: URIPrefixes.usersURI };
+export const Team = { prefix: Prefixes.courses, value: "Team", uriPrefix: URIPrefixes.teamsURI };
 export const Course = "courses:Course";
 export const CourseInstance = "courses:CourseInstance";
 export const Event = "courses:Event";
@@ -37,3 +40,9 @@ export const QuestionComment = "courses:QuestionComment";
 export const EssayQuestion = "courses:EssayQuestion";
 export const DirectAnswer = "courses:DirectAnswer";
 export const OrderedAnswer = "courses:OrderedAnswer";
+export const OpenQuestion = { prefix: Prefixes.courses, value: "OpenQuestion", uriPrefix: URIPrefixes.openQuestionURI };
+export const QuestionWithPreddefinedAnswer = {
+    prefix: Prefixes.courses,
+    value: "QuestionWithPreddefinedAnswer",
+    uriPrefix: URIPrefixes.questionWithPreddefinedAnswerURI
+};

@@ -11,10 +11,10 @@ export default class QuizTake extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.QuizTake;
         this.subclassOf = Classes.Thing;
-        this.props[Predicates.startDate.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.endDate.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.submitedDate.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.reviewedDate.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.hasAuthor.value] = { required: false, multiple: false, type: Node, primitive: false };
+        [Predicates.startDate.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.endDate.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.submitedDate.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.reviewedDate.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.hasAuthor.value] = { required: false, multiple: false, type: Node, primitive: false };
     }
 }

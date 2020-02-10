@@ -11,8 +11,8 @@ export default class PredefinedAnswer extends Thing {
         this.subject = new Node(this.uriPrefix + this.id);
         this.type = Classes.PredefinedAnswer;
         this.subclassOf = Classes.Thing;
-        this.props[Predicates.text.value] = { required: false, multiple: false, type: Text, primitive: true };
-        this.props[Predicates.position.value] = { required: false, multiple: false, type: Data, dataType: "xsd:integer", primitive: true };
-        this.props[Predicates.correct.value] = { required: false, multiple: false, type: Data, dataType: "xsd:integer", primitive: true };
+        [Predicates.text.value] = { required: false, multiple: false, type: Text, primitive: true };
+        [Predicates.position.value] = { required: false, multiple: false, type: Data, dataType: "xsd:integer", primitive: true };
+        [Predicates.correct.value] = { required: false, multiple: false, type: Data, dataType: "xsd:integer", primitive: true };
     }
 }
