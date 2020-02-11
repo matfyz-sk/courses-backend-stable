@@ -90,3 +90,5 @@ export const creator = { prefix: Prefixes.courses, value: "creator" };
 export const commentTime = { prefix: Prefixes.courses, value: "commentTime" };
 export const commentedTextFrom = { prefix: Prefixes.courses, value: "commentedTextFrom" };
 export const commentedTextTo = { prefix: Prefixes.courses, value: "commentedTextTo" };
+export const regexp = { prefix: Prefixes.courses, value: "regexp" };
+export const hasAnswer = { prefix: Prefixes.courses, value: "hasAnswer" };

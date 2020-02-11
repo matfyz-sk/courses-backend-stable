@@ -1,27 +1,27 @@
 import { user } from "./Agent/User";
 import { team } from "./Agent/Team";
-import EssayQuestion from "./Question/EssayQuestion";
-import OpenQuestion from "./Question/OpenQuestion";
-import QuestionWithPredefinedAnswer from "./Question/QuestionWithPredefinedAnswer";
-import DirectAnswer from "./UserAnswer/DirectAnswer";
-import OrderedAnswer from "./UserAnswer/OrderedAnswer";
-import OrderedQuestion from "./OrderedQuestion";
-import PredefinedAnswer from "./PredefinedAnswer";
-import QuestionComment from "./QuestionComment";
-import QuizTake from "./QuizTake";
-import QuizTakePrototype from "./QuizTakePrototype";
+import { essayQuestion } from "./Question/EssayQuestion";
+import { openQuestion } from "./Question/OpenQuestion";
+import { questionWithPredefinedAnswer } from "./Question/QuestionWithPredefinedAnswer";
+import { directAnswer } from "./UserAnswer/DirectAnswer";
+import { orderedAnswer } from "./UserAnswer/OrderedAnswer";
+import { orderedQuestion } from "./OrderedQuestion";
+import { predefinedAnswer } from "./PredefinedAnswer";
+import { questionComment } from "./QuestionComment";
+import { quizTake } from "./QuizTake";
+import { quizTakePrototype } from "./QuizTakePrototype";
 
 module.exports = {
     user,
     team,
-    EssayQuestion,
-    OpenQuestion,
-    QuestionWithPredefinedAnswer,
-    DirectAnswer,
-    OrderedAnswer,
-    OrderedQuestion,
-    PredefinedAnswer,
-    QuestionComment,
-    QuizTake,
-    QuizTakePrototype
+    essayQuestion,
+    openQuestion,
+    questionWithPredefinedAnswer,
+    directAnswer,
+    orderedAnswer,
+    orderedQuestion,
+    predefinedAnswer,
+    questionComment,
+    quizTake,
+    quizTakePrototype
 };
