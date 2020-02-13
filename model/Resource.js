@@ -3,6 +3,7 @@ import * as Predicates from "../constants/predicates";
 import { db } from "../config/client";
 import { getNewNode, getAllProps } from "../helpers";
 import Query from "../query/Query";
+import { REMOVE } from "virtuoso-sparql-client/lib/triple";
 
 export default class Resource {
     constructor(resource) {
@@ -31,6 +32,18 @@ export default class Resource {
             this._setProperty(Predicates[predicateName], new this.props[predicateName].type(value, this.props[predicateName].dataType));
         } else {
             this._setArrayProperty(Predicates[predicateName], value, this.props[predicateName].type);
+        }
+    }
+
+    setPredicateToDelete(predicateName, value) {
+        if (!this.props[predicateName].value) {
+            return;
+        }
+        if (this.props[predicateName].multiple) {
+            if (value) {
+            }
+        } else {
+            this.props[predicateName].value.setOperation(Triple.REMOVE);
         }
     }
 
@@ -270,7 +283,7 @@ export default class Resource {
     fill(data) {
         data = this._prepareData(data);
         Object.keys(this.props).forEach(predicateName => {
-            if (data[predicateName]) {
+            if (data.hasOwnProperty(predicateName)) {
                 if (this.props[predicateName].multiple) {
                     this._setNewArrayProperty(Predicates[predicateName], data[predicateName], this.props[predicateName].type);
                 } else {
