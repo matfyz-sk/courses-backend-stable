@@ -61,21 +61,31 @@ export default class Resource {
             $filter: []
         };
 
-        if (filters._offset) this.query["$offset"] = filters._offset;
-        if (filters._limit) this.query["$limit"] = filters._limit;
+        if (filters.hasOwnProperty("_offset")) this.query["$offset"] = filters._offset;
+        if (filters.hasOwnProperty("_limit")) this.query["$limit"] = filters._limit;
 
         Object.keys(this.props).forEach(predicateName => {
             if (predicateName != "type" && predicateName != "subclassOf") {
                 if (!this.props[predicateName].primitive) {
                     this.query["@graph"][predicateName] = { "@id": `?${predicateName}URI` };
-                    this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`);
-                    if (predicateName in filters) {
+                    if (this.props[predicateName].required) {
+                        this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI`);
+                    } else {
+                        this.query["$where"].push(
+                            `OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`
+                        );
+                    }
+                    if (filters.hasOwnProperty(predicateName)) {
                         this.query["$filter"].push(`?${predicateName}URI=<${filters[predicateName]}>`);
                     }
                 } else {
                     this.query["@graph"][predicateName] = `?${predicateName}`;
-                    this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}`);
-                    if (predicateName in filters) {
+                    if (this.props[predicateName].required) {
+                        this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}`);
+                    } else {
+                        this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}}`);
+                    }
+                    if (filters.hasOwnProperty(predicateName)) {
                         this.query["$filter"].push(`?${predicateName}="${filters[predicateName]}"`);
                     }
                 }
@@ -84,8 +94,8 @@ export default class Resource {
         const q = new Query();
         q.setProto(this.query["@graph"]);
         q.setWhere(this.query["$where"]);
-        q.setOffset(this.query["$offset"]);
-        q.setLimit(this.query["$limit"]);
+        if (this.query["$offset"]) q.setOffset(this.query["$offset"]);
+        if (this.query["$limit"]) q.setLimit(this.query["$limit"]);
         q.setFilter(this.query["$filter"]);
         return q;
     }

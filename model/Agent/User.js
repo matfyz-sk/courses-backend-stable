@@ -1,16 +1,21 @@
 import { User } from "../../constants/classes";
-import { Node, Text } from "virtuoso-sparql-client";
+import { Node, Text, Data } from "virtuoso-sparql-client";
 import {
     firstName,
     lastName,
     email,
+    password,
     description,
     nickname,
     memberOf,
     requests,
     studentOf,
     understands,
-    useNickName
+    useNickName,
+    publicProfile,
+    showCourses,
+    showBadges,
+    allowContact
 } from "../../constants/predicates";
 import { agent } from "./Agent";
 
@@ -19,19 +24,25 @@ export const user = {
     subclassOf: agent,
     props: {
         [firstName.value]: {
-            required: false,
+            required: true,
             multiple: false,
             type: Text,
             primitive: true
         },
         [lastName.value]: {
-            required: false,
+            required: true,
             multiple: false,
             type: Text,
             primitive: true
         },
         [email.value]: {
-            required: false,
+            required: true,
+            multiple: false,
+            type: Text,
+            primitive: true
+        },
+        [password.value]: {
+            required: true,
             multiple: false,
             type: Text,
             primitive: true
@@ -48,6 +59,36 @@ export const user = {
             type: Text,
             primitive: true
         },
+
+        [publicProfile.value]: {
+            required: false,
+            multiple: false,
+            type: Data,
+            dataType: "xsd:boolean",
+            primitive: true
+        },
+        [showCourses.value]: {
+            required: false,
+            multiple: false,
+            type: Data,
+            dataType: "xsd:boolean",
+            primitive: true
+        },
+        [showBadges.value]: {
+            required: false,
+            multiple: false,
+            type: Data,
+            dataType: "xsd:boolean",
+            primitive: true
+        },
+        [allowContact.value]: {
+            required: false,
+            multiple: false,
+            type: Data,
+            dataType: "xsd:boolean",
+            primitive: true
+        },
+
         [memberOf.value]: {
             required: false,
             multiple: true,
@@ -74,9 +115,10 @@ export const user = {
         },
         [useNickName.value]: {
             required: false,
-            multiple: true,
-            type: Node,
-            primitive: false
+            multiple: false,
+            type: Data,
+            dataType: "xsd:boolean",
+            primitive: true
         }
     }
 };
