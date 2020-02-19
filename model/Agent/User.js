@@ -22,6 +22,7 @@ import { agent } from "./Agent";
 export const user = {
     type: User,
     subclassOf: agent,
+    subclasses: [],
     props: {
         [firstName.value]: {
             required: true,

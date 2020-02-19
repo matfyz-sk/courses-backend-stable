@@ -6,6 +6,7 @@ import { question } from "./Question";
 export const openQuestion = {
     type: OpenQuestion,
     subclassOf: question,
+    subclasses: [],
     props: {
         [regexp.value]: { required: false, multiple: false, type: Text, primitive: true }
     }

@@ -6,6 +6,7 @@ import { hasAnswer } from "../../constants/predicates";
 export const questionWithPredefinedAnswer = {
     type: QuestionWithPreddefinedAnswer,
     subclassOf: question,
+    subclasses: [],
     props: {
         [hasAnswer.value]: { required: false, multiple: false, type: Node, primitive: false }
     }

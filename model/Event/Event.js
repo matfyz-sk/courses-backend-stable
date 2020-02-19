@@ -4,6 +4,7 @@ import { name, location, description, startDate, endDate, uses, recommends, cove
 
 export const event = {
     type: Event,
+    subclasses: ["courseInstance", "block", "session", "taskEvent"],
     props: {
         [name.value]: { required: false, multiple: false, type: Text, primitive: true },
         [location.value]: { required: false, multiple: false, type: Text, primitive: true },

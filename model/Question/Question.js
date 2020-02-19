@@ -14,6 +14,7 @@ import {
 
 export const question = {
     type: Question,
+    subclasses: ["essayQuestion", "openQuestion", "questionWithPredefinedAnswer"],
     props: {
         [name.value]: { required: false, multiple: false, type: Text, primitive: true },
         [text.value]: { required: false, multiple: false, type: Text, primitive: true },

@@ -18,6 +18,7 @@ import { authSecret } from "../constants";
 import { db } from "../config/client";
 import { body, validationResult } from "express-validator";
 import * as jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const authRouter = express.Router();
 
@@ -78,10 +79,11 @@ authRouter.post(
                 if (data.results.bindings.length != 0) {
                     return res.status(400).send({ status: false, msg: "Email is already registered!", user: null });
                 }
+                const hash = bcrypt.hashSync(req.body.user.password, 10);
                 u.setPredicate(firstName.value, req.body.user.first_name);
                 u.setPredicate(lastName.value, req.body.user.last_name);
                 u.setPredicate(email.value, req.body.user.email);
-                u.setPredicate(password.value, req.body.user.password);
+                u.setPredicate(password.value, hash);
                 u.setPredicate(useNickName.value, req.body.privacy.use_nickname);
                 u.setPredicate(publicProfile.value, req.body.privacy.public_profile);
                 u.setPredicate(showCourses.value, req.body.privacy.show_courses);
@@ -117,7 +119,7 @@ authRouter.post("/login", [body("email").exists(), body("password").exists()], (
         return res.status(422).json({ errors: errors.array() });
     }
     const u = new Resource(user);
-    const query = u.generateQuery({ email: req.body.email, password: req.body.password });
+    const query = u.generateQuery({ email: req.body.email });
     query
         .run()
         .then(data => {
@@ -128,6 +130,12 @@ authRouter.post("/login", [body("email").exists(), body("password").exists()], (
                 });
             }
             const userData = data["@graph"][0];
+            if (!bcrypt.compareSync(req.body.password, userData.password)) {
+                return res.status(400).send({
+                    status: false,
+                    msg: "Credentials not valid"
+                });
+            }
             const splittedURI = userData["@id"].split("/");
             const userID = splittedURI[splittedURI.length - 1];
             let token = jwt.sign({ userID: userID, useNickname: userData.useNickName }, authSecret, { algorithm: "HS256" });

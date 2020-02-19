@@ -3,7 +3,7 @@ import * as Predicates from "../constants/predicates";
 import { db } from "../config/client";
 import { getNewNode, getAllProps } from "../helpers";
 import Query from "../query/Query";
-import { REMOVE } from "virtuoso-sparql-client/lib/triple";
+import * as Resources from "./index";
 
 export default class Resource {
     constructor(resource) {
@@ -54,37 +54,48 @@ export default class Resource {
         }
         this.query = {
             "@graph": {
-                "@id": resourceURI,
-                "@type": this.resource.type.value
+                "@id": resourceURI
             },
-            $where: [`${resourceURI} ${this._build(Predicates.type)} ${this._build(this.resource.type)}`],
+            $where: [],
             $filter: []
         };
+
+        if (this.resource.hasOwnProperty("subclasses")) {
+            this.query["@graph"]["@type"] = "?type";
+            this.query["$where"].push(`${resourceURI} rdf:type ?type`);
+            this.query["$where"].push(`?type rdfs:subClassOf* ${this._build(this.resource.type)}`);
+        } else {
+            this.query["@graph"]["@type"] = this.resource.type.value;
+            this.query["$where"].push(`${resourceURI} ${this._build(Predicates.type)} ${this._build(this.resource.type)}`);
+        }
 
         if (filters.hasOwnProperty("_offset")) this.query["$offset"] = filters._offset;
         if (filters.hasOwnProperty("_limit")) this.query["$limit"] = filters._limit;
 
         Object.keys(this.props).forEach(predicateName => {
-            if (predicateName != "type" && predicateName != "subclassOf") {
+            console.log(predicateName);
+            if (predicateName != "type" && predicateName != "subClassOf") {
                 if (!this.props[predicateName].primitive) {
                     this.query["@graph"][predicateName] = { "@id": `?${predicateName}URI` };
-                    if (this.props[predicateName].required) {
-                        this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI`);
-                    } else {
-                        this.query["$where"].push(
-                            `OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`
-                        );
-                    }
+                    this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`);
+                    // if (this.props[predicateName].required) {
+                    //     this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI`);
+                    // } else {
+                    //     this.query["$where"].push(
+                    //         `OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`
+                    //     );
+                    // }
                     if (filters.hasOwnProperty(predicateName)) {
                         this.query["$filter"].push(`?${predicateName}URI=<${filters[predicateName]}>`);
                     }
                 } else {
                     this.query["@graph"][predicateName] = `?${predicateName}`;
-                    if (this.props[predicateName].required) {
-                        this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}`);
-                    } else {
-                        this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}}`);
-                    }
+                    this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}}`);
+                    // if (this.props[predicateName].required) {
+                    //     this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}`);
+                    // } else {
+                    //     this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}}`);
+                    // }
                     if (filters.hasOwnProperty(predicateName)) {
                         this.query["$filter"].push(`?${predicateName}="${filters[predicateName]}"`);
                     }
@@ -102,11 +113,13 @@ export default class Resource {
 
     _prepareTriplesToStore() {
         this.props.type.value = new Triple(this.subject, this._build(Predicates.type), this._build(this.resource.type));
-        this.props.subclassOf.value = new Triple(
-            this.subject,
-            this._build(Predicates.subclassOf),
-            this._build(this.resource.subclassOf.type)
-        );
+        if (this.resource.hasOwnProperty("subclassOf")) {
+            this.props.subclassOf.value = new Triple(
+                this.subject,
+                this._build(Predicates.subclassOf),
+                this._build(this.resource.subclassOf.type)
+            );
+        }
         Object.keys(this.props).forEach(key => {
             const val = this.props[key].value;
             if (!val) {

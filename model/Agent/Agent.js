@@ -4,6 +4,7 @@ import { name, avatar, reviews } from "../../constants/predicates";
 
 export const agent = {
     type: Agent,
+    subclasses: ["user", "team"],
     props: {
         [name.value]: {
             required: false,

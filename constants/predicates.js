@@ -2,7 +2,7 @@ import * as Prefixes from "./prefixes";
 
 export const created = { prefix: Prefixes.courses, value: "created" };
 export const type = { prefix: Prefixes.rdf, value: "type" };
-export const subclassOf = { prefix: Prefixes.rdfs, value: "subclassOf" };
+export const subclassOf = { prefix: Prefixes.rdfs, value: "subClassOf" };
 export const label = { prefix: Prefixes.rdfs, value: "label" };
 export const description = { prefix: Prefixes.courses, value: "description" };
 export const abbreviation = { prefix: Prefixes.courses, value: "abbreviation" };
@@ -97,3 +97,5 @@ export const publicProfile = { prefix: Prefixes.courses, value: "publicProfile" 
 export const showCourses = { prefix: Prefixes.courses, value: "showCourses" };
 export const showBadges = { prefix: Prefixes.courses, value: "showBadges" };
 export const allowContact = { prefix: Prefixes.courses, value: "allowContact" };
+export const hasQuestion = { prefix: Prefixes.courses, value: "hasQuestion" };
+export const hasQuestionAssignment = { prefix: Prefixes.courses, value: "hasQuestionAssignment" };

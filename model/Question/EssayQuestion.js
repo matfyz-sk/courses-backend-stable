@@ -4,5 +4,6 @@ import { question } from "./Question";
 export const essayQuestion = {
     type: EssayQuestion,
     subclassOf: question,
+    subclasses: [],
     props: {}
 };

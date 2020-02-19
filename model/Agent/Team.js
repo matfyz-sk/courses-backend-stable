@@ -6,6 +6,7 @@ import { Team } from "../../constants/classes";
 export const team = {
     type: Team,
     subclassOf: agent,
+    subclasses: [],
     props: {
         [courseInstance.value]: {
             required: false,

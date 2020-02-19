@@ -25,6 +25,23 @@ export function getAllProps(resource) {
         });
         r = r.subclassOf;
     }
+
+    if (!resource.hasOwnProperty("subclasses") || !Array.isArray(resource.subclasses)) {
+        return props;
+    }
+
+    var subclasses = resource.subclasses;
+    while (subclasses.length > 0) {
+        const className = subclasses.shift();
+        r = Resources[className];
+        if (r) {
+            Object.keys(r.props).forEach(key => {
+                props[key] = r.props[key];
+            });
+            subclasses.concat(r.subclasses);
+        }
+    }
+
     return props;
 }
 
