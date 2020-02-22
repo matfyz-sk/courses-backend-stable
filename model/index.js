@@ -20,6 +20,25 @@ import { lab } from "./Event/Session/Lab";
 import { session } from "./Event/Session/Session";
 import { block } from "./Event/Block";
 import { courseInstance } from "./Event/CourseInstance";
+import { assignment } from "./Assignment";
+import { codeComment } from "./CodeComment";
+import { codeReview } from "./CodeReview";
+import { course } from "./Course";
+import { field } from "./Field";
+import { fieldType } from "./FieldType";
+import { generalComment } from "./GeneralComment";
+import { generatedQuizAssignment } from "./GeneratedQuizAssignment";
+import { manualQuizAssignment } from "./ManualQuizAssignment";
+import { material } from "./Material";
+import { questionAssignment } from "./QuestionAssignment";
+import { quizAssignment } from "./QuizAssignment";
+import { review } from "./Review";
+import { studentReview } from "./StudentReview";
+import { submission } from "./Submission";
+import { subbmittedField } from "./SubmittedField";
+import { teamReview } from "./TeamReview";
+import { topicAppearance } from "./TopicAppearance";
+import { toReview } from "./ToReview";
 
 module.exports = {
     agent,
@@ -43,5 +62,24 @@ module.exports = {
     lab,
     session,
     block,
-    courseInstance
+    courseInstance,
+    assignment,
+    codeComment,
+    codeReview,
+    course,
+    field,
+    fieldType,
+    generalComment,
+    generatedQuizAssignment,
+    manualQuizAssignment,
+    material,
+    questionAssignment,
+    quizAssignment,
+    review,
+    studentReview,
+    submission,
+    subbmittedField,
+    teamReview,
+    topicAppearance,
+    toReview
 };

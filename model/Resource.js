@@ -78,24 +78,12 @@ export default class Resource {
                 if (!this.props[predicateName].primitive) {
                     this.query["@graph"][predicateName] = { "@id": `?${predicateName}URI` };
                     this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`);
-                    // if (this.props[predicateName].required) {
-                    //     this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI`);
-                    // } else {
-                    //     this.query["$where"].push(
-                    //         `OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`
-                    //     );
-                    // }
                     if (filters.hasOwnProperty(predicateName)) {
                         this.query["$filter"].push(`?${predicateName}URI=<${filters[predicateName]}>`);
                     }
                 } else {
                     this.query["@graph"][predicateName] = `?${predicateName}`;
                     this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}}`);
-                    // if (this.props[predicateName].required) {
-                    //     this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}`);
-                    // } else {
-                    //     this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}}`);
-                    // }
                     if (filters.hasOwnProperty(predicateName)) {
                         this.query["$filter"].push(`?${predicateName}="${filters[predicateName]}"`);
                     }
