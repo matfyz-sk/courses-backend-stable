@@ -44,11 +44,11 @@ router.put("/:className/:id", (req, res) => {
     PutController.putResource(req, res);
 });
 
-router.patch("/:className/:id/:attributeName", (req, res) => {
+router.patch("/:className/:id", (req, res) => {
     PatchController.patchResource(req, res);
 });
 
-router.delete("/:className/:id/:attributeName?", (req, res) => {
+router.delete("/:className/:id/:attributeName", (req, res) => {
     DeleteController.deleteResource(req, res);
 });
 

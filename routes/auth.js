@@ -62,7 +62,7 @@ authRouter.post(
     (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ status: false, msg: "Fill required attributes!", user: null });
+            return res.status(200).json({ status: false, msg: "Fill required attributes!", user: null });
         }
         const u = new Resource(user);
         db.setQueryFormat("application/json");
@@ -77,7 +77,7 @@ authRouter.post(
         )
             .then(data => {
                 if (data.results.bindings.length != 0) {
-                    return res.status(400).send({ status: false, msg: "Email is already registered!", user: null });
+                    return res.status(200).send({ status: false, msg: "Email is already registered!", user: null });
                 }
                 const hash = bcrypt.hashSync(req.body.user.password, 10);
                 u.setPredicate(firstName.value, req.body.user.first_name);
@@ -108,7 +108,7 @@ authRouter.post(
             })
             .catch(err => {
                 console.log(err);
-                res.send(err);
+                res.status(500).send(err);
             });
     }
 );
@@ -116,7 +116,7 @@ authRouter.post(
 authRouter.post("/login", [body("email").exists(), body("password").exists()], (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
+        return res.status(200).json({ errors: errors.array() });
     }
     const u = new Resource(user);
     const query = u.generateQuery({ email: req.body.email });
@@ -124,14 +124,14 @@ authRouter.post("/login", [body("email").exists(), body("password").exists()], (
         .run()
         .then(data => {
             if (data["@graph"].length == 0) {
-                return res.status(400).send({
+                return res.status(200).send({
                     status: false,
                     msg: "Credentials not valid"
                 });
             }
             const userData = data["@graph"][0];
             if (!bcrypt.compareSync(req.body.password, userData.password)) {
-                return res.status(400).send({
+                return res.status(200).send({
                     status: false,
                     msg: "Credentials not valid"
                 });

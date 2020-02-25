@@ -36,14 +36,33 @@ export default class Resource {
     }
 
     setPredicateToDelete(predicateName, value) {
-        if (!this.props[predicateName].value) {
+        if (!this.props.hasOwnProperty(predicateName) || !this.props[predicateName].value) {
             return;
         }
-        if (this.props[predicateName].multiple) {
-            if (value) {
-            }
-        } else {
+        if (!this.props[predicateName].multiple) {
+            // delete single predicate value
             this.props[predicateName].value.setOperation(Triple.REMOVE);
+            return;
+        }
+        if (!value) {
+            // delete all values of predicate
+            for (var triple of this.props[predicateName].value) {
+                triple.setOperation(Triple.REMOVE);
+            }
+            return;
+        }
+        if (!Array.isArray(value)) {
+            value = [value];
+        }
+        for (var v of value) {
+            for (var triple of this.props[predicateName].value) {
+                if (
+                    (triple.obj.hasOwnProperty("iri") && triple.obj.iri == v) ||
+                    (triple.obj.hasOwnProperty("value") && triple.obj.value == v)
+                ) {
+                    triple.setOperation(Triple.REMOVE);
+                }
+            }
         }
     }
 
@@ -73,7 +92,6 @@ export default class Resource {
         if (filters.hasOwnProperty("_limit")) this.query["$limit"] = filters._limit;
 
         Object.keys(this.props).forEach(predicateName => {
-            console.log(predicateName);
             if (predicateName != "type" && predicateName != "subClassOf") {
                 if (!this.props[predicateName].primitive) {
                     this.query["@graph"][predicateName] = { "@id": `?${predicateName}URI` };
@@ -162,13 +180,14 @@ export default class Resource {
             }
             if (Array.isArray(val)) {
                 for (var t of val) {
-                    t.setOperation(Triple.REMOVE);
-                    this.triples.toRemove.push(t);
+                    if (t.getOperation() == Triple.REMOVE)
+                        // t.setOperation(Triple.REMOVE);
+                        this.triples.toRemove.push(t);
                 }
                 return;
             }
-            val.setOperation(Triple.REMOVE);
-            this.triples.toRemove.push(val);
+            // val.setOperation(Triple.REMOVE);
+            if (val.getOperation() == Triple.REMOVE) this.triples.toRemove.push(val);
         });
     }
 
@@ -216,6 +235,12 @@ export default class Resource {
         console.log("to remove:", this.triples.toRemove);
         console.log("to update:", this.triples.toUpdate);
 
+        if (this.triples.toRemove.length > 0) {
+            db.getLocalStore().empty();
+            db.getLocalStore().bulk(this.triples.toRemove);
+            await db.store(true);
+        }
+
         if (this.triples.toAdd.length > 0) {
             db.getLocalStore().empty();
             db.getLocalStore().bulk(this.triples.toAdd);
@@ -225,12 +250,6 @@ export default class Resource {
         if (this.triples.toUpdate.length > 0) {
             db.getLocalStore().empty();
             db.getLocalStore().bulk(this.triples.toUpdate);
-            await db.store(true);
-        }
-
-        if (this.triples.toRemove.length > 0) {
-            db.getLocalStore().empty();
-            db.getLocalStore().bulk(this.triples.toRemove);
             await db.store(true);
         }
     }
@@ -246,7 +265,7 @@ export default class Resource {
     delete() {
         this._prepareTriplesToDelete();
         db.getLocalStore().empty();
-        db.getLocalStore().bulk(this.triples.toRemove);
+        if (this.triples.toRemove.length > 0) db.getLocalStore().bulk(this.triples.toRemove);
         return db.store(true);
     }
 
@@ -296,6 +315,9 @@ export default class Resource {
         Object.keys(this.props).forEach(predicateName => {
             if (data.hasOwnProperty(predicateName)) {
                 if (this.props[predicateName].multiple) {
+                    if (!Array.isArray(data[predicateName])) {
+                        data[predicateName] = [data[predicateName]];
+                    }
                     this._setNewArrayProperty(Predicates[predicateName], data[predicateName], this.props[predicateName].type);
                 } else {
                     this._setNewProperty(Predicates[predicateName], new this.props[predicateName].type(data[predicateName]));
