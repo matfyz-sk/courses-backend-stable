@@ -69,10 +69,10 @@ authRouter.post(
         db.setQueryGraph("http://www.courses.matfyz.sk/data");
         db.query(
             `SELECT ?userURI
-    WHERE {
-      ?userURI rdf:type courses:User .
-      ?userURI courses:email "${req.body.user.email}"
-    }`,
+            WHERE {
+                ?userURI rdf:type courses:User .
+                ?userURI courses:email "${req.body.user.email}"
+            }`,
             true
         )
             .then(data => {
@@ -89,10 +89,12 @@ authRouter.post(
                 u.setPredicate(showCourses.value, req.body.privacy.show_courses);
                 u.setPredicate(showBadges.value, req.body.privacy.show_badges);
                 u.setPredicate(allowContact.value, req.body.privacy.allow_contact);
-                if (req.body.user.hasOwnProperty(description.value)) u.setPredicate(description.value, req.body.user.description);
-                if (req.body.privacy.hasOwnProperty(nickname.value)) u.setPredicate(nickname.value, req.body.privacy.nickname);
+                u.setPredicate(description.value, req.body.user.description);
+                u.setPredicate(nickname.value, req.body.privacy.nickname);
                 u.store().then(data => {
-                    let token = jwt.sign({ userID: u.subject.iri }, authSecret, { algorithm: "HS256" });
+                    let token = jwt.sign({ userID: getID(u.subject.iri), studentOf: [], instructorOf: [], memberOf: [] }, authSecret, {
+                        algorithm: "HS256"
+                    });
                     res.send({
                         status: true,
                         user: {
@@ -136,9 +138,6 @@ authRouter.post("/login", [body("email").exists(), body("password").exists()], (
                     msg: "Credentials not valid"
                 });
             }
-            const splittedURI = userData["@id"].split("/");
-            const userID = splittedURI[splittedURI.length - 1];
-            let token = jwt.sign({ userID: userID, useNickname: userData.useNickName }, authSecret, { algorithm: "HS256" });
             res.send({
                 status: true,
                 user: {
@@ -146,7 +145,7 @@ authRouter.post("/login", [body("email").exists(), body("password").exists()], (
                     type: "student",
                     avatar: null
                 },
-                _token: token
+                _token: generateToken(userData)
             });
         })
         .catch(err => {
@@ -154,5 +153,41 @@ authRouter.post("/login", [body("email").exists(), body("password").exists()], (
             res.status(500).send(err);
         });
 });
+
+function generateToken(userData) {
+    const userID = getID(userData["@id"]);
+    var studentOf = [];
+    var instructorOf = [];
+    var memberOf = [];
+    if (Array.isArray(userData.studentOf)) {
+        for (var courseInstance of userData.studentOf) {
+            studentOf.push(getID(courseInstance["@id"]));
+        }
+    } else if (userData.studentOf.hasOwnProperty("@id")) {
+        studentOf.push(getID(userData.studentOf["@id"]));
+    }
+    if (Array.isArray(userData.instructorOf)) {
+        for (var courseInstance of userData.instructorOf) {
+            instructorOf.push(getID(courseInstance["@id"]));
+        }
+    } else if (userData.instructorOf.hasOwnProperty("@id")) {
+        instructorOf.push(getID(userData.instructorOf["@id"]));
+    }
+    if (Array.isArray(userData.memberOf)) {
+        for (var team of userData.memberOf) {
+            memberOf.push(getID(team["@id"]));
+        }
+    } else if (userData.memberOf.hasOwnProperty("@id")) {
+        memberOf.push(getID(userData.memberOf["@id"]));
+    }
+    let token = jwt.sign({ userID, studentOf, instructorOf, memberOf }, authSecret, {
+        algorithm: "HS256"
+    });
+    return token;
+}
+
+function getID(uri) {
+    return uri.substring(uri.lastIndexOf("/") + 1);
+}
 
 export default authRouter;

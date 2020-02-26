@@ -14,8 +14,7 @@ export default class Resource {
         this.query = {};
         this.removeOld = true;
         this.subject = undefined;
-        this.props[Predicates.type.value] = { required: false, multiple: false, type: Text };
-        this.props[Predicates.subclassOf.value] = { required: false, multiple: false, type: Text };
+        this.props[Predicates.type.value] = { required: false, multiple: false, type: Node };
     }
 
     setSubject(id) {
@@ -24,12 +23,27 @@ export default class Resource {
     }
 
     setPredicate(predicateName, value) {
-        if (!this.props[predicateName]) {
-            console.error(`Predicate ${predicateName} is not relevant for this resource`);
+        if (value == undefined) {
+            if (this.props[predicateName].required) {
+                throw `Predicate name ${predicateName} is required, but not provided`;
+            }
             return;
         }
+        if (!this.props.hasOwnProperty(predicateName)) {
+            throw `Predicate name ${predicateName} is not acceptable for resource ${this.resource.type.value}`;
+        }
         if (!this.props[predicateName].multiple) {
-            this._setProperty(Predicates[predicateName], new this.props[predicateName].type(value, this.props[predicateName].dataType));
+            if (Array.isArray(value)) {
+                if (value.length > 1) {
+                    throw `Predicate name ${predicateName} accept only one value`;
+                }
+                this._setProperty(
+                    Predicates[predicateName],
+                    new this.props[predicateName].type(value[0], this.props[predicateName].dataType)
+                );
+            } else {
+                this._setProperty(Predicates[predicateName], new this.props[predicateName].type(value, this.props[predicateName].dataType));
+            }
         } else {
             this._setArrayProperty(Predicates[predicateName], value, this.props[predicateName].type);
         }
@@ -92,12 +106,18 @@ export default class Resource {
         if (filters.hasOwnProperty("_limit")) this.query["$limit"] = filters._limit;
 
         Object.keys(this.props).forEach(predicateName => {
-            if (predicateName != "type" && predicateName != "subClassOf") {
+            if (predicateName != "type") {
                 if (!this.props[predicateName].primitive) {
                     this.query["@graph"][predicateName] = { "@id": `?${predicateName}URI` };
-                    this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`);
                     if (filters.hasOwnProperty(predicateName)) {
-                        this.query["$filter"].push(`?${predicateName}URI=<${filters[predicateName]}>`);
+                        this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI`);
+                        this.query["$filter"].push(
+                            `?${predicateName}URI=<${this._buildURI(this.props[predicateName].resource, filters[predicateName])}>`
+                        );
+                    } else {
+                        this.query["$where"].push(
+                            `OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`
+                        );
                     }
                 } else {
                     this.query["@graph"][predicateName] = `?${predicateName}`;
@@ -117,15 +137,13 @@ export default class Resource {
         return q;
     }
 
+    _buildURI(resourceName, id) {
+        const uriPrefix = Resources[resourceName].type.uriPrefix;
+        return uriPrefix + id;
+    }
+
     _prepareTriplesToStore() {
-        this.props.type.value = new Triple(this.subject, this._build(Predicates.type), this._build(this.resource.type));
-        if (this.resource.hasOwnProperty("subclassOf")) {
-            this.props.subclassOf.value = new Triple(
-                this.subject,
-                this._build(Predicates.subclassOf),
-                this._build(this.resource.subclassOf.type)
-            );
-        }
+        this.props[Predicates.type.value].value = new Triple(this.subject, this._build(Predicates.type), this._build(this.resource.type));
         Object.keys(this.props).forEach(key => {
             const val = this.props[key].value;
             if (!val) {

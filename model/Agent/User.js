@@ -10,6 +10,7 @@ import {
     memberOf,
     requests,
     studentOf,
+    instructorOf,
     understands,
     useNickName,
     publicProfile,
@@ -22,7 +23,6 @@ import { agent } from "./Agent";
 export const user = {
     type: User,
     subclassOf: agent,
-    subclasses: [],
     props: {
         [firstName.value]: {
             required: true,
@@ -103,6 +103,12 @@ export const user = {
             primitive: false
         },
         [studentOf.value]: {
+            required: false,
+            multiple: true,
+            type: Node,
+            primitive: false
+        },
+        [instructorOf.value]: {
             required: false,
             multiple: true,
             type: Node,

@@ -152,3 +152,4 @@ export const submission = { prefix: Prefixes.courses, value: "submission" };
 export const assignment = { prefix: Prefixes.courses, value: "assignment" };
 export const user = { prefix: Prefixes.courses, value: "user" };
 export const team = { prefix: Prefixes.courses, value: "team" };
+export const instructorOf = { prefix: Prefixes.courses, value: "instructorOf" };

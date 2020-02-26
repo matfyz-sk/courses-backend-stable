@@ -26,10 +26,10 @@ export const question = {
             primitive: true
         },
         [hasQuestionState.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [ofTopic.value]: { required: false, multiple: false, type: Node, primitive: false },
-        [hasAuthor.value]: { required: false, multiple: false, type: Node, primitive: false },
-        [hasComment.value]: { required: false, multiple: true, type: Node, primitive: false },
-        [approver.value]: { required: false, multiple: false, type: Node, primitive: false },
+        [ofTopic.value]: { required: false, multiple: false, type: Node, primitive: false, resource: "topic" },
+        [hasAuthor.value]: { required: false, multiple: false, type: Node, primitive: false, resource: "user" },
+        [hasComment.value]: { required: false, multiple: true, type: Node, primitive: false, resource: "questionComment" },
+        [approver.value]: { required: false, multiple: false, type: Node, primitive: false, resource: "user" },
         [hasChangeEvent.value]: { required: false, multiple: false, type: Node, primitive: false }
     }
 };
