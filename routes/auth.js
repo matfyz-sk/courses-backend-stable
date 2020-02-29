@@ -20,6 +20,8 @@ import { body, validationResult } from "express-validator";
 import * as jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
+const axios = require("axios").default;
+
 const authRouter = express.Router();
 
 authRouter.post(
@@ -147,6 +149,29 @@ authRouter.post("/login", [body("email").exists(), body("password").exists()], (
                 },
                 _token: generateToken(userData)
             });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send(err);
+        });
+});
+
+authRouter.get("/github", (req, res) => {
+    const code = req.query.code;
+    axios
+        .post("https://github.com/login/oauth/access_token", {
+            client_id: "f937b5e763fd295e11b9",
+            client_secret: "B0cb4f40f0065a50f5ab671089de7208cf592614",
+            code
+        })
+        .then(resp => {
+            const access_token = resp.access_token;
+            return axios.get(`https://api.github.com/user?access_token=${access_token}`);
+        })
+        .then(resp => {
+            // dostalli sme user data
+            console.log(resp);
+            res.send(resp);
         })
         .catch(err => {
             console.log(err);
