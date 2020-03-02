@@ -166,8 +166,8 @@ authRouter.get("/github", (req, res) => {
             code
         })
         .then(resp => {
-            const access_token = resp.data.access_token;
-            console.log("RESPONSE", resp);
+            const access_token = resp.data.split("&")[0].split("=")[1];
+            console.log("RESPONSE", access_token);
             return axios.get(`https://api.github.com/user?access_token=${access_token}`);
         })
         .then(resp => {
