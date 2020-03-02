@@ -167,13 +167,39 @@ authRouter.get("/github", (req, res) => {
         })
         .then(resp => {
             const access_token = resp.data.split("&")[0].split("=")[1];
-            console.log("RESPONSE", access_token);
+            console.log("ACCESS TOKEN", access_token);
             return axios.get(`https://api.github.com/user?access_token=${access_token}`);
         })
         .then(resp => {
-            // dostalli sme user data
-            console.log(resp);
-            res.send(resp);
+            const email = resp.email;
+            console.log("USER EMAIL", email);
+            if (!email) {
+                return res.status(200).send({
+                    status: false,
+                    msg: "Empty email"
+                });
+            }
+            const u = new Resource(user);
+            const query = u.generateQuery({ email });
+            return query.run();
+        })
+        .then(data => {
+            if (data["@graph"].length == 0) {
+                return res.status(200).send({
+                    status: false,
+                    msg: "Credentials not valid"
+                });
+            }
+            const userData = data["@graph"][0];
+            res.send({
+                status: true,
+                user: {
+                    name: userData.useNickName ? userData.nickname : userData.firstName + " " + userData.lastName,
+                    type: "student",
+                    avatar: null
+                },
+                _token: generateToken(userData)
+            });
         })
         .catch(err => {
             console.log(err);
