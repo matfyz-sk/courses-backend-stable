@@ -64,7 +64,7 @@ authRouter.post(
     (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(200).json({ status: false, msg: "Fill required attributes!", user: null, errors, request: req });
+            return res.status(200).json({ status: false, msg: "Fill required attributes!", user: null });
         }
         const u = new Resource(user);
         db.setQueryFormat("application/json");
@@ -158,6 +158,7 @@ authRouter.post("/login", [body("email").exists(), body("password").exists()], (
 
 authRouter.get("/github", (req, res) => {
     const code = req.query.code;
+    console.log("CODE", code);
     axios
         .post("https://github.com/login/oauth/access_token", {
             client_id: "f937b5e763fd295e11b9",
@@ -166,6 +167,7 @@ authRouter.get("/github", (req, res) => {
         })
         .then(resp => {
             const access_token = resp.access_token;
+            console.log("ACCESS TOKEN", access_token);
             return axios.get(`https://api.github.com/user?access_token=${access_token}`);
         })
         .then(resp => {
