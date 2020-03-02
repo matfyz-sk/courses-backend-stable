@@ -162,7 +162,7 @@ authRouter.get("/github", (req, res) => {
     axios
         .post("https://github.com/login/oauth/access_token", {
             client_id: "f937b5e763fd295e11b9",
-            client_secret: "B0cb4f40f0065a50f5ab671089de7208cf592614",
+            client_secret: "b0cb4f40f0065a50f5ab671089de7208cf592614",
             code
         })
         .then(resp => {
