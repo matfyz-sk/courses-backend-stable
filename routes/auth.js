@@ -64,7 +64,7 @@ authRouter.post(
     (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(200).json({ status: false, msg: "Fill required attributes!", user: null });
+            return res.status(200).json({ status: false, msg: "Fill required attributes!", user: null, errors });
         }
         const u = new Resource(user);
         db.setQueryFormat("application/json");
