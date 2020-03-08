@@ -21,7 +21,7 @@ export function getAllProps(resource) {
     var r = resource;
     while (r) {
         Object.keys(r.props).forEach(key => {
-            props[key] = r.props[key];
+            props[key] = { ...r.props[key] };
         });
         r = r.subclassOf;
     }
@@ -30,13 +30,13 @@ export function getAllProps(resource) {
         return props;
     }
 
-    var subclasses = resource.subclasses;
+    var subclasses = [...resource.subclasses];
     while (subclasses.length > 0) {
         const className = subclasses.shift();
         r = Resources[className];
         if (r) {
             Object.keys(r.props).forEach(key => {
-                props[key] = r.props[key];
+                props[key] = { ...r.props[key] };
             });
             subclasses.concat(r.subclasses);
         }
