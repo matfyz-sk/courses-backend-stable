@@ -1,6 +1,18 @@
 import { Node, Text } from "virtuoso-sparql-client";
 import { Event } from "../../constants/classes";
-import { name, location, description, startDate, endDate, uses, recommends, covers, mentions, requires } from "../../constants/predicates";
+import {
+    name,
+    location,
+    description,
+    startDate,
+    endDate,
+    uses,
+    recommends,
+    covers,
+    mentions,
+    requires,
+    courseInstance
+} from "../../constants/predicates";
 
 export const event = {
     type: Event,
@@ -15,6 +27,8 @@ export const event = {
         [recommends.value]: { required: false, multiple: true, type: Node, primitive: false },
         [covers.value]: { required: false, multiple: true, type: Node, primitive: false },
         [mentions.value]: { required: false, multiple: true, type: Node, primitive: false },
-        [requires.value]: { required: false, multiple: true, type: Node, primitive: false }
-    }
+        [requires.value]: { required: false, multiple: true, type: Node, primitive: false },
+        [courseInstance.value]: { required: true, multiple: false, type: Node, primitive: false }
+    },
+    createPolicy: ["courseInstance:^instructorOf:{userURI}"]
 };

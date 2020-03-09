@@ -16,7 +16,12 @@ import Submission from "../constants/classes";
 export const submission = {
     type: Submission,
     props: {
-        [ofAssignment.value]: { required: false, multiple: false, type: Node, primitive: false },
+        [ofAssignment.value]: {
+            required: true,
+            multiple: false,
+            type: Node,
+            primitive: false
+        },
         [submittedField.value]: { required: false, multiple: false, type: Node, primitive: false },
         [submittedByStudent.value]: { required: false, multiple: false, type: Node, primitive: false },
         [submittedByTeam.value]: { required: false, multiple: false, type: Node, primitive: false },
@@ -26,5 +31,9 @@ export const submission = {
         [hasCodeReview.value]: { required: false, multiple: false, type: Node, primitive: false },
         [hasTeamReview.value]: { required: false, multiple: false, type: Node, primitive: false },
         [isComplete.value]: { required: false, multiple: false, type: Data, dataType: "xsd:boolean", primitive: true }
-    }
+    },
+    //
+    // <ofAssignment> belongsToCourseInstance/^studentOf ?userURI
+    // <ofQuizAssignment> assignedTo ?userURI
+    createPolicy: ["ofAssignment:courseInstance/^studentOf:{userURI}"]
 };

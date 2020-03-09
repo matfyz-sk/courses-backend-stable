@@ -10,5 +10,6 @@ export const courseInstance = {
         [year.value]: { required: false, multiple: false, type: Text, primitive: true },
         [instanceOf.value]: { required: false, multiple: false, type: Node, primitive: false },
         [hasInstructor.value]: { required: false, multiple: true, type: Node, primitive: false }
-    }
+    },
+    createPolicy: [""]
 };

@@ -26,10 +26,11 @@ export const question = {
             primitive: true
         },
         [hasQuestionState.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [ofTopic.value]: { required: false, multiple: false, type: Node, primitive: false, resource: "topic" },
-        [hasAuthor.value]: { required: false, multiple: false, type: Node, primitive: false, resource: "user" },
+        [ofTopic.value]: { required: true, multiple: false, type: Node, primitive: false, resource: "topic" },
+        [hasAuthor.value]: { required: true, multiple: false, type: Node, primitive: false, resource: "user" },
         [hasComment.value]: { required: false, multiple: true, type: Node, primitive: false, resource: "questionComment" },
-        [approver.value]: { required: false, multiple: false, type: Node, primitive: false, resource: "user" },
+        [approver.value]: { required: true, multiple: false, type: Node, primitive: false, resource: "user" },
         [hasChangeEvent.value]: { required: false, multiple: false, type: Node, primitive: false }
-    }
+    },
+    createPolicy: ["ofTopic:^covers/assignedTo:{userURI}"]
 };

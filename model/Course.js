@@ -11,5 +11,6 @@ export const course = {
         [hasPrerequisite.value]: { required: false, multiple: true, type: Node, primitive: false },
         [mentions.value]: { required: false, multiple: true, type: Node, primitive: false },
         [covers.value]: { required: false, multiple: true, type: Node, primitive: false }
-    }
+    },
+    createPolicy: ["{isSuperAdmin}"]
 };

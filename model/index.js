@@ -20,18 +20,18 @@ import { lab } from "./Event/Session/Lab";
 import { session } from "./Event/Session/Session";
 import { block } from "./Event/Block";
 import { courseInstance } from "./Event/CourseInstance";
-import { assignment } from "./Assignment";
+import { assignment } from "./Task/Assignment";
 import { codeComment } from "./CodeComment";
 import { codeReview } from "./CodeReview";
 import { course } from "./Course";
 import { field } from "./Field";
 import { fieldType } from "./FieldType";
 import { generalComment } from "./GeneralComment";
-import { generatedQuizAssignment } from "./GeneratedQuizAssignment";
-import { manualQuizAssignment } from "./ManualQuizAssignment";
+import { generatedQuizAssignment } from "./Task/QuizAssignment/GeneratedQuizAssignment";
+import { manualQuizAssignment } from "./Task/QuizAssignment/ManualQuizAssignment";
 import { material } from "./Material";
-import { questionAssignment } from "./QuestionAssignment";
-import { quizAssignment } from "./QuizAssignment";
+import { questionAssignment } from "./Task/QuestionAssignment";
+import { quizAssignment } from "./Task/QuizAssignment/QuizAssignment";
 import { review } from "./Review";
 import { studentReview } from "./StudentReview";
 import { submission } from "./Submission";
@@ -39,6 +39,7 @@ import { subbmittedField } from "./SubmittedField";
 import { teamReview } from "./TeamReview";
 import { topicAppearance } from "./TopicAppearance";
 import { toReview } from "./ToReview";
+import { task } from "./Task/Task";
 
 module.exports = {
     agent,
@@ -81,5 +82,6 @@ module.exports = {
     subbmittedField,
     teamReview,
     topicAppearance,
-    toReview
+    toReview,
+    task
 };

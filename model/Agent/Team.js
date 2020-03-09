@@ -8,10 +8,17 @@ export const team = {
     subclassOf: agent,
     props: {
         [courseInstance.value]: {
-            required: false,
-            multiple: false,
+            required: true, // povinny udaj pri vytvarani
+            multiple: false, // viacero hodnot
             type: Node,
-            primitive: false
+            primitive: false,
+            change: false // neda sa neskor menit
         }
-    }
+    },
+    createPolicy: [
+        // musi byt studentom kurzu
+        // nesmie byt uz clenom nejakeho timu v tomto kurze
+        "courseInstance:^memberOf:{userURI}",
+        "-({userURI}:memberOf:?teamURI)"
+    ]
 };

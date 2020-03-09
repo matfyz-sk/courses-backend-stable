@@ -14,5 +14,8 @@ export function storeResource(req, res) {
     resource
         .store()
         .then(data => res.status(201).send({ status: true, resource: resource.subject }))
-        .catch(err => res.status(500).send({ status: false, msg: err }));
+        .catch(err => {
+            console.log(err);
+            res.status(500).send({ status: false, msg: err });
+        });
 }
