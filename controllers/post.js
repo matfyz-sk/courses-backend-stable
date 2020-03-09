@@ -11,6 +11,13 @@ export function storeResource(req, res) {
     if (errors.length > 0) {
         return res.status(422).send({ status: false, msg: errors });
     }
+
+    console.log("user data:", req.user);
+
+    resource.isAbleToCreate(req.user);
+
+    return res.send();
+
     resource
         .store()
         .then(data => res.status(201).send({ status: true, resource: resource.subject }))

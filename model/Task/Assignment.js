@@ -38,7 +38,7 @@ import {
     teamReviewPeriod,
     hasAuthor
 } from "../../constants/predicates";
-import Assignment from "../../constants/classes";
+import { Assignment } from "../../constants/classes";
 import { task } from "./Task";
 
 export const assignment = {
@@ -56,7 +56,7 @@ export const assignment = {
         // [submissionOpenTime.value]: { required: false, multiple: false, type: Text, primitive: true },
         // [submissionDeadline.value]: { required: false, multiple: false, type: Text, primitive: true },
         // [submissionExtraTime.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [initialSubmissionPeriod.value]: { required: true, multiple: false, type: Node, primitive: false },
+        [initialSubmissionPeriod.value]: { required: false, multiple: false, type: Node, primitive: false },
 
         [submissionImprovedSubmission.value]: { required: false, multiple: false, type: Data, dataType: "xsd:boolean", primitive: true },
 

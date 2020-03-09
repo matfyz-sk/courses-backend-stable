@@ -208,7 +208,8 @@ authRouter.get("/github", (req, res) => {
 });
 
 function generateToken(userData) {
-    const userID = getID(userData["@id"]);
+    //const userID = getID(userData["@id"]);
+    const userID = userData["@id"];
     var studentOf = [];
     var instructorOf = [];
     var memberOf = [];
@@ -233,7 +234,7 @@ function generateToken(userData) {
     } else if (userData.memberOf.hasOwnProperty("@id")) {
         memberOf.push(getID(userData.memberOf["@id"]));
     }
-    let token = jwt.sign({ userID, studentOf, instructorOf, memberOf }, authSecret, {
+    let token = jwt.sign({ userURI: userID, studentOf, instructorOf, memberOf }, authSecret, {
         algorithm: "HS256"
     });
     return token;

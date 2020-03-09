@@ -11,5 +11,5 @@ export const courseInstance = {
         [instanceOf.value]: { required: false, multiple: false, type: Node, primitive: false },
         [hasInstructor.value]: { required: false, multiple: true, type: Node, primitive: false }
     },
-    createPolicy: [""]
+    createPolicy: ["{isAdmin}"]
 };

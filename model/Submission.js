@@ -35,5 +35,5 @@ export const submission = {
     //
     // <ofAssignment> belongsToCourseInstance/^studentOf ?userURI
     // <ofQuizAssignment> assignedTo ?userURI
-    createPolicy: ["ofAssignment:courseInstance/^studentOf:{userURI}"]
+    createPolicy: ["ofAssignment.courses:courseInstance/^courses:studentOf.{userURI}"]
 };

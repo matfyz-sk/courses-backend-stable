@@ -17,6 +17,77 @@ export default class Resource {
         this.props[Predicates.type.value] = { required: false, multiple: false, type: Node };
     }
 
+    getResourceCreatePolicy() {
+        if (this.resource.hasOwnProperty("createPolicy")) {
+            // console.log("hasownproperty");
+            return this.resource.createPolicy;
+        }
+        var r = this.resource.subclassOf;
+        // console.log("r", r);
+        while (r) {
+            if (r.hasOwnProperty("createPolicy")) {
+                return r.createPolicy;
+            }
+            r = r.subclassOf;
+        }
+        return [];
+    }
+
+    isAbleToCreate(accessToken) {
+        console.log("resource:", this.resource);
+        const policies = this.getResourceCreatePolicy();
+        console.log(policies);
+        var promises = [];
+        db.setQueryFormat("application/json");
+        db.setQueryGraph("http://www.courses.matfyz.sk/data");
+
+        var result = true;
+
+        policies.forEach(async policy => {
+            const policyParts = policy.split(".");
+
+            var subject = policyParts[0];
+            var propertyPath = policyParts[1];
+            var object = policyParts[2];
+
+            if (subject.startsWith("{") && subject.endsWith("}")) {
+                // udaj z tokena
+                subject = accessToken[subject.substring(1, subject.length - 1)];
+            } else {
+                // udaj ktory poslal pouzivatel z props
+                subject = this.props[subject].value.obj.iri;
+            }
+
+            if (object.startsWith("{") && object.endsWith("}")) {
+                // udaj z tokena
+                object = accessToken[object.substring(1, object.length - 1)];
+            } else {
+                // udaj ktory poslal pouzivatel z props
+                object = this.props[object].value.obj.iri;
+            }
+
+            const query = `SELECT <${subject}> WHERE {<${subject}> ${propertyPath} <${object}>}`;
+
+            promises.push(
+                db
+                    .query(query, true)
+                    .then(data => {
+                        console.log(data.results.bindings);
+                        if (data.results.bindings.length == 0) {
+                            result = false;
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    })
+            );
+        });
+
+        Promise.all(promises).then(() => console.log("query completed, result: ", result));
+
+        // console.log("result:", result);
+    }
+
     setSubject(id) {
         this.subject = new Node(this.resource.type.uriPrefix + id);
         this.id = id;

@@ -8,7 +8,7 @@ export const session = {
     subclassOf: event,
     subclasses: ["lecture", "lab"],
     props: {
-        [courseInstance.value]: { required: false, multiple: false, type: Node, primitive: false },
+        // [courseInstance.value]: { required: false, multiple: false, type: Node, primitive: false },
         [hasInstructor.value]: { required: false, multiple: true, type: Node, primitive: false }
     }
 };

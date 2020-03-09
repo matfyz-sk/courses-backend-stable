@@ -17,7 +17,7 @@ app.use(
     })
 );
 
-app.use("/data", /*expressJWT({ secret: authSecret }),*/ router);
+app.use("/data", expressJWT({ secret: authSecret }), router);
 app.use("/auth", authRouter);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

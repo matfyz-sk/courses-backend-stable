@@ -30,5 +30,5 @@ export const event = {
         [requires.value]: { required: false, multiple: true, type: Node, primitive: false },
         [courseInstance.value]: { required: true, multiple: false, type: Node, primitive: false }
     },
-    createPolicy: ["courseInstance:^instructorOf:{userURI}"]
+    createPolicy: ["courseInstance.^courses:instructorOf.{userURI}"]
 };
