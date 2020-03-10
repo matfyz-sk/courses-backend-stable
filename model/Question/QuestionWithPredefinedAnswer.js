@@ -1,13 +1,16 @@
-import { QuestionWithPreddefinedAnswer } from "../../constants/classes";
+import { QuestionWithPreddefinedAnswer, UserAnswer } from "../../constants/classes";
 import { question } from "./Question";
-import { Node } from "virtuoso-sparql-client";
 import { hasAnswer } from "../../constants/predicates";
 
 export const questionWithPredefinedAnswer = {
     type: QuestionWithPreddefinedAnswer,
     subclassOf: question,
-    subclasses: [],
     props: {
-        [hasAnswer.value]: { required: false, multiple: false, type: Node, primitive: false }
+        [hasAnswer.value]: {
+            required: true,
+            multiple: false,
+            dataType: "node",
+            objectClass: UserAnswer
+        }
     }
 };

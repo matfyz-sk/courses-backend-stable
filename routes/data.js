@@ -24,6 +24,7 @@ router.use("/:className/:id", (req, res, next) => {
                     msg: `Resource with ID ${req.params.id} and class name ${req.params.className} does not exist`
                 });
             }
+            console.log("fetched data: ", data.results.bindings);
             res.locals.resource.fill(data);
             next();
         })
@@ -46,7 +47,7 @@ router.patch("/:className/:id", (req, res) => {
     PatchController.patchResource(req, res);
 });
 
-router.delete("/:className/:id/:attributeName", (req, res) => {
+router.delete("/:className/:id/:attributeName?", (req, res) => {
     DeleteController.deleteResource(req, res);
 });
 

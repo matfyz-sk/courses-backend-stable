@@ -41,3 +41,4 @@ export const quizTakePrototypeURI = graphURI + "/quizTakePrototype/";
 export const questionCommentURI = graphURI + "/questionComment/";
 export const essayQuestionURI = graphURI + "/essayQuestion/";
 export const directAnswerURI = graphURI + "/directAnswer/";
+export const changeEventURI = graphURI + "/changeEvent/";

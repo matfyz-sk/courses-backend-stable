@@ -1,11 +1,41 @@
 import * as Constants from "../constants";
 import * as Classes from "../constants/classes";
-import { Node } from "virtuoso-sparql-client";
+import { Node, Data, Text } from "virtuoso-sparql-client";
 import * as ID from "../lib/virtuoso-uid";
 import Query from "../query/Query";
 import { type } from "../constants/predicates";
 import { body, param, validationResult } from "express-validator";
 import * as Resources from "../model";
+import { db } from "../config/client";
+
+// async function resourceExists(resourceURI, resourceClass) {
+//     db.setQueryFormat("application/json");
+//     db.setQueryGraph("http://www.courses.matfyz.sk/data");
+//     const results = await db.query(
+//         `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ${resourceClass.prefix.name}:${resourceClass.value}}`,
+//         true
+//     );
+
+// }
+
+export function getTripleObjectType(objectTypeName, objectValue) {
+    switch (objectTypeName) {
+        case "node":
+            return new Node(objectValue);
+        case "integer":
+            return new Data(objectValue, "xsd:integer");
+        case "float":
+            return new Data(objectValue, "xsd:float");
+        case "boolean":
+            return new Data(objectValue, "xsd:boolean");
+        case "dateTime":
+            return new Data(objectValue, "xsd:dateTimeStamp");
+        case "string":
+            return new Text(objectValue);
+        default:
+            return null;
+    }
+}
 
 export function getResourceObject(resourceName, resourceID = "") {
     if (!Resources[resourceName]) return undefined;
@@ -82,14 +112,6 @@ export function prepareQueryUri(uri, type) {
     if (uri.charAt(0) != "<") uri = "<" + uri;
     if (uri.charAt(uri.length - 1) != ">") uri = uri + ">";
     return uri;
-}
-
-export function resourceExists(resourceURI, expectedType) {
-    return findByURI(resourceURI, expectedType).then(data => {
-        if (emptyResult(data)) {
-            return Promise.reject(`Resource with URI ${resourceURI} and type ${expectedType} does not exists`);
-        }
-    });
 }
 
 export function findByURI(resourceURI, expectedType) {

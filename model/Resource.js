@@ -1,7 +1,7 @@
 import { Triple, Node, Text } from "virtuoso-sparql-client";
 import * as Predicates from "../constants/predicates";
 import { db } from "../config/client";
-import { getNewNode, getAllProps } from "../helpers";
+import { getNewNode, getAllProps, getTripleObjectType } from "../helpers";
 import Query from "../query/Query";
 import * as Resources from "./index";
 
@@ -15,6 +15,7 @@ export default class Resource {
         this.removeOld = true;
         this.subject = undefined;
         this.props[Predicates.type.value] = { required: false, multiple: false, type: Node };
+        this.props[Predicates.createdBy.value] = {};
     }
 
     getResourceCreatePolicy() {
@@ -93,30 +94,34 @@ export default class Resource {
         this.id = id;
     }
 
-    setPredicate(predicateName, value) {
+    async setInputPredicates(data) {
+        for (var predicateName in this.props) {
+            if (this.props.hasOwnProperty(predicateName)) {
+                await this.setPredicate(predicateName, data[predicateName]);
+            }
+        }
+    }
+
+    async setPredicate(predicateName, value) {
         if (value == undefined) {
             if (this.props[predicateName].required) {
-                throw `Predicate name ${predicateName} is required, but not provided`;
+                throw `Attribute '${predicateName}' is required`;
             }
             return;
         }
         if (!this.props.hasOwnProperty(predicateName)) {
-            throw `Predicate name ${predicateName} is not acceptable for resource ${this.resource.type.value}`;
+            throw `Attribute '${predicateName}' is not acceptable for resource ${this.resource.type.value}`;
         }
         if (!this.props[predicateName].multiple) {
             if (Array.isArray(value)) {
                 if (value.length > 1) {
-                    throw `Predicate name ${predicateName} accept only one value`;
+                    throw `Attribute '${predicateName}' accepts only one value`;
                 }
-                this._setProperty(
-                    Predicates[predicateName],
-                    new this.props[predicateName].type(value[0], this.props[predicateName].dataType)
-                );
-            } else {
-                this._setProperty(Predicates[predicateName], new this.props[predicateName].type(value, this.props[predicateName].dataType));
+                value = value[0];
             }
+            await this._setProperty(Predicates[predicateName], value);
         } else {
-            this._setArrayProperty(Predicates[predicateName], value, this.props[predicateName].type);
+            await this._setArrayProperty(Predicates[predicateName], value);
         }
     }
 
@@ -177,28 +182,45 @@ export default class Resource {
         if (filters.hasOwnProperty("_limit")) this.query["$limit"] = filters._limit;
 
         Object.keys(this.props).forEach(predicateName => {
-            if (predicateName != "type") {
-                if (!this.props[predicateName].primitive) {
-                    this.query["@graph"][predicateName] = { "@id": `?${predicateName}URI` };
-                    if (filters.hasOwnProperty(predicateName)) {
-                        this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI`);
-                        this.query["$filter"].push(
-                            `?${predicateName}URI=<${this._buildURI(this.props[predicateName].resource, filters[predicateName])}>`
-                        );
-                    } else {
-                        this.query["$where"].push(
-                            `OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`
-                        );
-                    }
+            if (predicateName === "type") {
+                return;
+            }
+            if (this.props[predicateName].dataType === "node") {
+                this.query["@graph"][predicateName] = { "@id": `?${predicateName}URI` };
+                if (filters.hasOwnProperty(predicateName)) {
+                    this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI`);
+                    console.log(predicateName);
+                    this.query["$filter"].push(
+                        `?${predicateName}URI=<${this._buildURI(this.props[predicateName].resource, filters[predicateName])}>`
+                    );
                 } else {
-                    this.query["@graph"][predicateName] = `?${predicateName}`;
-                    this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}}`);
-                    if (filters.hasOwnProperty(predicateName)) {
-                        this.query["$filter"].push(`?${predicateName}="${filters[predicateName]}"`);
-                    }
+                    this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`);
                 }
+                return;
+            }
+            this.query["@graph"][predicateName] = `?${predicateName}`;
+            this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}}`);
+            if (filters.hasOwnProperty(predicateName)) {
+                this.query["$filter"].push(`?${predicateName}="${filters[predicateName]}"`);
             }
         });
+
+        // predikaty ktore vstupuju do resource
+        Object.keys(filters).forEach(predicateName => {
+            if (
+                predicateName === "id" ||
+                predicateName === "_offset" ||
+                predicateName === "_limit" ||
+                predicateName === "_join" ||
+                this.props.hasOwnProperty(predicateName)
+            ) {
+                return;
+            }
+            this.query["$where"].push(`<${filters[predicateName]}> ${this._build(Predicates[predicateName])} ${resourceURI}`);
+        });
+
+        // join
+
         const q = new Query();
         q.setProto(this.query["@graph"]);
         q.setWhere(this.query["$where"]);
@@ -213,23 +235,44 @@ export default class Resource {
         return uriPrefix + id;
     }
 
-    _prepareTriplesToStore() {
+    async _prepareTriplesToStore(userURI) {
+        this.subject = await getNewNode(this.resource.type.uriPrefix);
+
         this.props[Predicates.type.value].value = new Triple(this.subject, this._build(Predicates.type), this._build(this.resource.type));
-        Object.keys(this.props).forEach(key => {
-            const val = this.props[key].value;
-            if (!val) {
-                return;
-            }
-            if (Array.isArray(val)) {
-                for (var t of val) {
-                    t.subj = this.subject;
-                    this.triples.toAdd.push(t);
+        this.props[Predicates.createdBy.value].value = new Triple(this.subject, this._build(Predicates.createdBy), new Node(userURI));
+
+        for (var predicateName in this.props) {
+            if (this.props.hasOwnProperty(predicateName)) {
+                const val = this.props[predicateName].value;
+                if (!val) {
+                    continue;
                 }
-                return;
+                if (Array.isArray(val)) {
+                    for (var t of val) {
+                        if (t instanceof Triple) {
+                            t.subj = this.subject;
+                            this.triples.toAdd.push(t);
+                        } else {
+                            await t._prepareTriplesToStore(userURI);
+                            this.triples.toAdd = this.triples.toAdd.concat(t.triples.toAdd);
+                            this.triples.toAdd.push(new Triple(this.subject, this._build(Predicates[predicateName]), t.subject));
+                        }
+                    }
+                    continue;
+                }
+
+                if (val instanceof Triple) {
+                    val.subj = this.subject;
+                    this.triples.toAdd.push(val);
+                } else {
+                    await val._prepareTriplesToStore(userURI);
+                    this.triples.toAdd = this.triples.toAdd.concat(val.triples.toAdd);
+                    this.triples.toAdd.push(new Triple(this.subject, this._build(Predicates[predicateName]), val.subject));
+                }
             }
-            val.subj = this.subject;
-            this.triples.toAdd.push(val);
-        });
+        }
+
+        console.log("Triples of resource " + this.resource.type, this.triples.toAdd);
     }
 
     _prepareTriplesToUpdate() {
@@ -269,13 +312,10 @@ export default class Resource {
             }
             if (Array.isArray(val)) {
                 for (var t of val) {
-                    if (t.getOperation() == Triple.REMOVE)
-                        // t.setOperation(Triple.REMOVE);
-                        this.triples.toRemove.push(t);
+                    if (t.getOperation() == Triple.REMOVE) this.triples.toRemove.push(t);
                 }
                 return;
             }
-            // val.setOperation(Triple.REMOVE);
             if (val.getOperation() == Triple.REMOVE) this.triples.toRemove.push(val);
         });
     }
@@ -284,38 +324,84 @@ export default class Resource {
         return val.prefix.name + ":" + val.value;
     }
 
-    _setProperty(predicate, object) {
-        if (!this.props[predicate.value].value) {
-            this.props[predicate.value].value = new Triple(this.subject, this._build(predicate), object);
+    _resourceExists(resourceURI, resourceClass) {
+        db.setQueryFormat("application/json");
+        db.setQueryGraph("http://www.courses.matfyz.sk/data");
+        return db.query(
+            `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ${resourceClass.prefix.name}:${resourceClass.value}}`,
+            true
+        );
+    }
+
+    async _setProperty(predicate, objectValue) {
+        // objectValue moze byt: STRING alebo OBJEKT
+
+        const objectValueType = typeof objectValue;
+
+        if (objectValueType == "string") {
+            const object = getTripleObjectType(this.props[predicate.value].dataType, objectValue);
+
+            if (this.props[predicate.value].dataType === "node") {
+                const objectClass = this.props[predicate.value].objectClass;
+                const data = await this._resourceExists(objectValue, objectClass);
+                if (data.results.bindings.length == 0) {
+                    throw `Resource with URI ${objectValue} does not exists`;
+                }
+            }
+            if (!this.props[predicate.value].value) {
+                this.props[predicate.value].value = new Triple(this.subject, this._build(predicate), object);
+            } else {
+                this.props[predicate.value].value.setOperation(Triple.ADD);
+                this.props[predicate.value].value.updateObject(object);
+            }
         } else {
-            this.props[predicate.value].value.setOperation(Triple.ADD);
-            this.props[predicate.value].value.updateObject(object);
+            // objectValue je objekt
+            const r = new Resource(Resources[objectValue.type]);
+            delete objectValue["type"];
+            r.setInputPredicates(objectValue);
+            this.props[predicate.value].value = r;
         }
     }
 
-    _setArrayProperty(predicate, objectValue, objectType) {
+    async _setArrayProperty(predicate, objectValue) {
         if (this.props[predicate.value].value && this.removeOld) {
             for (var triple of this.props[predicate.value].value) {
                 triple.setOperation(Triple.REMOVE);
             }
         }
-        if (!this.props[predicate.value].value) {
+        if (!this.props[predicate.value].hasOwnProperty("value")) {
             this.props[predicate.value].value = [];
         }
-        for (var value of objectValue) {
-            this.props[predicate.value].value.push(new Triple(this.subject, this._build(predicate), new objectType(value)));
+
+        if (this.props[predicate.value].dataType === "node") {
+            const objectClass = this.props[predicate.value].objectClass;
+            for (var value of objectValue) {
+                const data = await this._resourceExists(value, objectClass);
+                if (data.results.bindings.length == 0) {
+                    throw `Resource with URI ${objectValue} does not exists`;
+                }
+                const object = getTripleObjectType(this.props[predicate.value].dataType, value);
+                this.props[predicate.value].value.push(new Triple(this.subject, this._build(predicate), object));
+            }
+        } else {
+            for (var value of objectValue) {
+                const object = getTripleObjectType(this.props[predicate.value].dataType, value);
+                this.props[predicate.value].value.push(new Triple(this.subject, this._build(predicate), object));
+            }
         }
     }
 
-    _setNewProperty(predicate, object) {
+    _setNewProperty(predicate, objectValue) {
+        const object = getTripleObjectType(this.props[predicate.value].dataType, objectValue);
         this.props[predicate.value].value = new Triple(this.subject, this._build(predicate), object, "nothing");
     }
 
-    _setNewArrayProperty(predicate, objectArrayValue, objectType) {
+    _setNewArrayProperty(predicate, objectValue) {
         this.props[predicate.value].value = [];
-        if (!objectArrayValue) return;
-        for (var value of objectArrayValue) {
-            this.props[predicate.value].value.push(new Triple(this.subject, this._build(predicate), new objectType(value), "nothing"));
+        if (!objectValue) return;
+        for (var value of objectValue) {
+            const object = getTripleObjectType(this.props[predicate.value].dataType, value);
+            this.props[predicate.value].value.push(new Triple(this.subject, this._build(predicate), object, "nothing"));
         }
     }
 
@@ -343,9 +429,13 @@ export default class Resource {
         }
     }
 
-    async store() {
-        this.subject = await getNewNode(this.resource.type.uriPrefix);
-        this._prepareTriplesToStore();
+    async store(userURI) {
+        await this._prepareTriplesToStore(userURI);
+
+        // console.log(this.triples.toAdd);
+
+        // return new Promise(1);
+
         db.getLocalStore().empty();
         db.getLocalStore().bulk(this.triples.toAdd);
         return db.store(true);
@@ -356,6 +446,16 @@ export default class Resource {
         db.getLocalStore().empty();
         if (this.triples.toRemove.length > 0) db.getLocalStore().bulk(this.triples.toRemove);
         return db.store(true);
+    }
+
+    completeDelete() {
+        db.setQueryFormat("application/json");
+        db.setQueryGraph("http://www.courses.matfyz.sk/data");
+        return db.query(`DELETE WHERE {<${this.resource.type.uriPrefix + this.id}> ?p ?o}`, true).then(() => {
+            db.setQueryFormat("application/json");
+            db.setQueryGraph("http://www.courses.matfyz.sk/data");
+            return db.query(`DELETE WHERE {?s ?p <${this.resource.type.uriPrefix + this.id}>}`, true);
+        });
     }
 
     patch() {
@@ -407,9 +507,9 @@ export default class Resource {
                     if (!Array.isArray(data[predicateName])) {
                         data[predicateName] = [data[predicateName]];
                     }
-                    this._setNewArrayProperty(Predicates[predicateName], data[predicateName], this.props[predicateName].type);
+                    this._setNewArrayProperty(Predicates[predicateName], data[predicateName]);
                 } else {
-                    this._setNewProperty(Predicates[predicateName], new this.props[predicateName].type(data[predicateName]));
+                    this._setNewProperty(Predicates[predicateName], data[predicateName]);
                 }
             }
         });

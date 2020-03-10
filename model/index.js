@@ -11,8 +11,8 @@ import { orderedAnswer } from "./UserAnswer/OrderedAnswer";
 import { orderedQuestion } from "./OrderedQuestion";
 import { predefinedAnswer } from "./PredefinedAnswer";
 import { questionComment } from "./QuestionComment";
-import { quizTake } from "./QuizTake";
-import { quizTakePrototype } from "./QuizTakePrototype";
+import { quizTake } from "./QuizTake/QuizTake";
+import { quizTakePrototype } from "./QuizTake/QuizTakePrototype";
 import { topic } from "./Topic";
 import { event } from "./Event/Event";
 import { lecture } from "./Event/Session/Lecture";
@@ -40,6 +40,8 @@ import { teamReview } from "./TeamReview";
 import { topicAppearance } from "./TopicAppearance";
 import { toReview } from "./ToReview";
 import { task } from "./Task/Task";
+import { taskEvent } from "./Event/TaskEvent/TaskEvent";
+import { assignmentPeriod } from "./Event/TaskEvent/AssignmentPeriod";
 
 module.exports = {
     agent,
@@ -83,5 +85,7 @@ module.exports = {
     teamReview,
     topicAppearance,
     toReview,
-    task
+    task,
+    taskEvent,
+    assignmentPeriod
 };

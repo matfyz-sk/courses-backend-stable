@@ -4,6 +4,5 @@ import { session } from "./Session";
 export const lab = {
     type: Lab,
     subclassOf: session,
-    subclasses: [],
     props: {}
 };

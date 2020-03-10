@@ -1,5 +1,4 @@
-import { Node, Text } from "virtuoso-sparql-client";
-import { Event } from "../../constants/classes";
+import { Event, Material, Topic, CourseInstance } from "../../constants/classes";
 import {
     name,
     location,
@@ -18,17 +17,67 @@ export const event = {
     type: Event,
     subclasses: ["courseInstance", "block", "session", "taskEvent"],
     props: {
-        [name.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [location.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [description.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [startDate.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [endDate.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [uses.value]: { required: false, multiple: true, type: Node, primitive: false },
-        [recommends.value]: { required: false, multiple: true, type: Node, primitive: false },
-        [covers.value]: { required: false, multiple: true, type: Node, primitive: false },
-        [mentions.value]: { required: false, multiple: true, type: Node, primitive: false },
-        [requires.value]: { required: false, multiple: true, type: Node, primitive: false },
-        [courseInstance.value]: { required: true, multiple: false, type: Node, primitive: false }
+        [name.value]: {
+            required: true,
+            multiple: false,
+            dataType: "string"
+        },
+        [location.value]: {
+            required: false,
+            multiple: false,
+            dataType: "string"
+        },
+        [description.value]: {
+            required: false,
+            multiple: false,
+            dataType: "string"
+        },
+        [startDate.value]: {
+            required: true,
+            multiple: false,
+            dataType: "dateTime"
+        },
+        [endDate.value]: {
+            required: true,
+            multiple: false,
+            dataType: "dateTime"
+        },
+        [uses.value]: {
+            required: false,
+            multiple: true,
+            dataType: "node",
+            objectClass: Material
+        },
+        [recommends.value]: {
+            required: false,
+            multiple: true,
+            dataType: "node",
+            objectClass: Material
+        },
+        [covers.value]: {
+            required: false,
+            multiple: true,
+            dataType: "node",
+            objectClass: Topic
+        },
+        [mentions.value]: {
+            required: false,
+            multiple: true,
+            dataType: "node",
+            objectClass: Topic
+        },
+        [requires.value]: {
+            required: false,
+            multiple: true,
+            dataType: "node",
+            objectClass: Topic
+        }
+        // [courseInstance.value]: {
+        //     required: true,
+        //     multiple: false,
+        //     dataType: "node",
+        //     objectClass: CourseInstance
+        // }
     },
     createPolicy: ["courseInstance.^courses:instructorOf.{userURI}"]
 };

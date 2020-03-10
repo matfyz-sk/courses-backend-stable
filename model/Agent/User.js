@@ -1,5 +1,4 @@
-import { User } from "../../constants/classes";
-import { Node, Text, Data } from "virtuoso-sparql-client";
+import { User, Team, CourseInstance, Topic } from "../../constants/classes";
 import {
     firstName,
     lastName,
@@ -25,107 +24,89 @@ export const user = {
     subclassOf: agent,
     props: {
         [firstName.value]: {
-            required: true,
+            required: false,
             multiple: false,
-            type: Text,
-            primitive: true
+            dataType: "string"
         },
         [lastName.value]: {
-            required: true,
+            required: false,
             multiple: false,
-            type: Text,
-            primitive: true
+            dataType: "string"
         },
         [email.value]: {
             required: true,
             multiple: false,
-            type: Text,
-            primitive: true
+            dataType: "string"
         },
         [password.value]: {
             required: true,
             multiple: false,
-            type: Text,
-            primitive: true
+            dataType: "string"
         },
         [description.value]: {
             required: false,
             multiple: false,
-            type: Text,
-            primitive: true
+            dataType: "string"
         },
         [nickname.value]: {
             required: false,
             multiple: false,
-            type: Text,
-            primitive: true
+            dataType: "string"
         },
-
         [publicProfile.value]: {
-            required: false,
+            required: true,
             multiple: false,
-            type: Data,
-            dataType: "xsd:boolean",
-            primitive: true
+            dataType: "boolean"
         },
         [showCourses.value]: {
-            required: false,
+            required: true,
             multiple: false,
-            type: Data,
-            dataType: "xsd:boolean",
-            primitive: true
+            dataType: "boolean"
         },
         [showBadges.value]: {
-            required: false,
+            required: true,
             multiple: false,
-            type: Data,
-            dataType: "xsd:boolean",
-            primitive: true
+            dataType: "boolean"
         },
         [allowContact.value]: {
-            required: false,
+            required: true,
             multiple: false,
-            type: Data,
-            dataType: "xsd:boolean",
-            primitive: true
+            dataType: "boolean"
         },
-
         [memberOf.value]: {
             required: false,
             multiple: true,
-            type: Node,
-            primitive: false
+            dataType: "node",
+            objectClass: Team
         },
         [requests.value]: {
             required: false,
             multiple: true,
-            type: Node,
-            primitive: false
+            dataType: "node",
+            objectClass: CourseInstance
         },
         [studentOf.value]: {
             required: false,
             multiple: true,
-            type: Node,
-            primitive: false
+            dataType: "node",
+            objectClass: "courseInstance" // ako resource
         },
         [instructorOf.value]: {
             required: false,
             multiple: true,
-            type: Node,
-            primitive: false
+            dataType: "node",
+            objectClass: CourseInstance
         },
         [understands.value]: {
             required: false,
             multiple: true,
-            type: Node,
-            primitive: false
+            dataType: "node",
+            objectClass: Topic
         },
         [useNickName.value]: {
             required: false,
-            multiple: false,
-            type: Data,
-            dataType: "xsd:boolean",
-            primitive: true
+            multiple: true,
+            dataType: "boolean"
         }
     }
 };

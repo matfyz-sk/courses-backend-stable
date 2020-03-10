@@ -45,3 +45,6 @@ export const QuestionWithPreddefinedAnswer = {
     value: "QuestionWithPreddefinedAnswer",
     uriPrefix: URIPrefixes.questionWithPreddefinedAnswerURI
 };
+export const Material = { prefix: Prefixes.courses, value: "Material", uriPrefix: URIPrefixes.materialURI };
+export const ChangeEvent = { prefix: Prefixes.courses, value: "ChangeEvent", uriPrefix: URIPrefixes.changeEventURI };
+export const TaskEvent = { prefix: Prefixes.courses, value: "TaskEvent", uriPrefix: URIPrefixes.taskEventURI };

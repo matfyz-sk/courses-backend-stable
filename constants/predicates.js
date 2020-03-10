@@ -155,3 +155,4 @@ export const team = { prefix: Prefixes.courses, value: "team" };
 export const instructorOf = { prefix: Prefixes.courses, value: "instructorOf" };
 export const ofQuestion = { prefix: Prefixes.courses, value: "ofQuestion" };
 export const ofSubmission = { prefix: Prefixes.courses, value: "ofSubmission" };
+export const ofQuizAssignment = { prefix: Prefixes.courses, value: "ofQuizAssignment" };

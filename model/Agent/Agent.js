@@ -1,28 +1,19 @@
 import { Agent } from "../../constants/classes";
-import { Node, Text } from "virtuoso-sparql-client";
-import { name, avatar, reviews } from "../../constants/predicates";
+import { name, avatar } from "../../constants/predicates";
 
 export const agent = {
     type: Agent,
     subclasses: ["user", "team"],
     props: {
         [name.value]: {
-            required: false,
+            required: true,
             multiple: false,
-            type: Text,
-            primitive: true
+            dataType: "string"
         },
         [avatar.value]: {
             required: false,
             multiple: false,
-            type: Text,
-            primitive: true
-        },
-        [reviews.value]: {
-            required: false,
-            multiple: true,
-            type: Node,
-            primitive: false
+            dataType: "string"
         }
     }
 };

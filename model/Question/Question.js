@@ -1,5 +1,4 @@
-import { Question } from "../../constants/classes";
-import { Node, Text, Data } from "virtuoso-sparql-client";
+import { Question, Topic, User, QuestionComment, ChangeEvent } from "../../constants/classes";
 import {
     name,
     text,
@@ -16,21 +15,56 @@ export const question = {
     type: Question,
     subclasses: ["essayQuestion", "openQuestion", "questionWithPredefinedAnswer"],
     props: {
-        [name.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [text.value]: { required: false, multiple: false, type: Text, primitive: true },
+        [name.value]: {
+            required: true,
+            multiple: false,
+            dataType: "string"
+        },
+        [text.value]: {
+            required: true,
+            multiple: false,
+            dataType: "string"
+        },
         [visibilityIsRestricted.value]: {
             required: false,
             multiple: false,
-            type: Data,
-            dataType: "xsd:boolean",
-            primitive: true
+            dataType: "boolean"
         },
-        [hasQuestionState.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [ofTopic.value]: { required: true, multiple: false, type: Node, primitive: false, resource: "topic" },
-        [hasAuthor.value]: { required: true, multiple: false, type: Node, primitive: false, resource: "user" },
-        [hasComment.value]: { required: false, multiple: true, type: Node, primitive: false, resource: "questionComment" },
-        [approver.value]: { required: true, multiple: false, type: Node, primitive: false, resource: "user" },
-        [hasChangeEvent.value]: { required: false, multiple: false, type: Node, primitive: false }
+        [hasQuestionState.value]: {
+            required: false,
+            multiple: false,
+            dataType: "string"
+        },
+        [ofTopic.value]: {
+            required: true,
+            multiple: false,
+            dataType: "node",
+            objectClass: Topic
+        },
+        [hasAuthor.value]: {
+            required: true,
+            multiple: false,
+            dataType: "node",
+            objectClass: User
+        },
+        [hasComment.value]: {
+            required: false,
+            multiple: true,
+            dataType: "node",
+            objectClass: QuestionComment
+        },
+        [approver.value]: {
+            required: false,
+            multiple: false,
+            dataType: "node",
+            objectClass: User
+        },
+        [hasChangeEvent.value]: {
+            required: false,
+            multiple: false,
+            dataType: "node",
+            objectClass: ChangeEvent
+        }
     },
     createPolicy: ["ofTopic:^covers/assignedTo:{userURI}"]
 };
