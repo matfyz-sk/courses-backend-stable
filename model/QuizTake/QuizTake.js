@@ -1,6 +1,5 @@
-import { QuizTake, QuizAssignment, User } from "../../constants/classes";
-import { Node, Text } from "virtuoso-sparql-client";
-import { startDate, endDate, submitedDate, reviewedDate, hasAuthor, ofQuizAssignment } from "../../constants/predicates";
+import { QuizTake } from "../../constants/classes";
+import { reviewedDate, ofQuizAssignment } from "../../constants/predicates";
 
 export const quizTake = {
     type: QuizTake,
@@ -29,7 +28,7 @@ export const quizTake = {
             required: true,
             multiple: false,
             dataType: "node",
-            objectClass: QuizAssignment
+            objectClass: "quizAssignment"
         }
     },
     create: "[this].ofQuizAssignment/assignedTo.{userURI}"

@@ -1,4 +1,4 @@
-import { Question, Topic, User, QuestionComment, ChangeEvent } from "../../constants/classes";
+import { Question } from "../../constants/classes";
 import {
     name,
     text,
@@ -39,31 +39,31 @@ export const question = {
             required: true,
             multiple: false,
             dataType: "node",
-            objectClass: Topic
+            objectClass: "topic"
         },
         [hasAuthor.value]: {
             required: true,
             multiple: false,
             dataType: "node",
-            objectClass: User
+            objectClass: "user"
         },
         [hasComment.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: QuestionComment
+            objectClass: "questionComment"
         },
         [approver.value]: {
             required: false,
             multiple: false,
             dataType: "node",
-            objectClass: User
+            objectClass: "user"
         },
         [hasChangeEvent.value]: {
             required: false,
             multiple: false,
             dataType: "node",
-            objectClass: ChangeEvent
+            objectClass: "changeEvent"
         }
     },
     createPolicy: ["ofTopic:^covers/assignedTo:{userURI}"]

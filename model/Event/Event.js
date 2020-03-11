@@ -1,4 +1,4 @@
-import { Event, Material, Topic, CourseInstance } from "../../constants/classes";
+import { Event } from "../../constants/classes";
 import {
     name,
     location,
@@ -46,31 +46,31 @@ export const event = {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Material
+            objectClass: "material"
         },
         [recommends.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Material
+            objectClass: "material"
         },
         [covers.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Topic
+            objectClass: "topic"
         },
         [mentions.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Topic
+            objectClass: "topic"
         },
         [requires.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Topic
+            objectClass: "topic"
         }
         // [courseInstance.value]: {
         //     required: true,

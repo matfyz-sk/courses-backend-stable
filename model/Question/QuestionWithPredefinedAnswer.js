@@ -1,4 +1,4 @@
-import { QuestionWithPreddefinedAnswer, UserAnswer } from "../../constants/classes";
+import { QuestionWithPreddefinedAnswer } from "../../constants/classes";
 import { question } from "./Question";
 import { hasAnswer } from "../../constants/predicates";
 
@@ -10,7 +10,7 @@ export const questionWithPredefinedAnswer = {
             required: true,
             multiple: false,
             dataType: "node",
-            objectClass: UserAnswer
+            objectClass: "userAnswer"
         }
     }
 };

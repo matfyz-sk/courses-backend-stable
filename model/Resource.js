@@ -2,7 +2,6 @@ import { Triple, Node, Text } from "virtuoso-sparql-client";
 import * as Predicates from "../constants/predicates";
 import { db } from "../config/client";
 import { getNewNode, getAllProps, getTripleObjectType } from "../helpers";
-import Query from "../query/Query";
 import * as Resources from "./index";
 
 export default class Resource {
@@ -156,85 +155,6 @@ export default class Resource {
         }
     }
 
-    generateQuery(filters) {
-        var resourceURI = "?resourceURI";
-        if (filters.id) {
-            resourceURI = `<${this.resource.type.uriPrefix + filters.id}>`;
-        }
-        this.query = {
-            "@graph": {
-                "@id": resourceURI
-            },
-            $where: [],
-            $filter: []
-        };
-
-        if (this.resource.hasOwnProperty("subclasses")) {
-            this.query["@graph"]["@type"] = "?type";
-            this.query["$where"].push(`${resourceURI} rdf:type ?type`);
-            this.query["$where"].push(`?type rdfs:subClassOf* ${this._build(this.resource.type)}`);
-        } else {
-            this.query["@graph"]["@type"] = this.resource.type.value;
-            this.query["$where"].push(`${resourceURI} ${this._build(Predicates.type)} ${this._build(this.resource.type)}`);
-        }
-
-        if (filters.hasOwnProperty("_offset")) this.query["$offset"] = filters._offset;
-        if (filters.hasOwnProperty("_limit")) this.query["$limit"] = filters._limit;
-
-        Object.keys(this.props).forEach(predicateName => {
-            if (predicateName === "type") {
-                return;
-            }
-            if (this.props[predicateName].dataType === "node") {
-                this.query["@graph"][predicateName] = { "@id": `?${predicateName}URI` };
-                if (filters.hasOwnProperty(predicateName)) {
-                    this.query["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI`);
-                    console.log(predicateName);
-                    this.query["$filter"].push(
-                        `?${predicateName}URI=<${this._buildURI(this.props[predicateName].resource, filters[predicateName])}>`
-                    );
-                } else {
-                    this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`);
-                }
-                return;
-            }
-            this.query["@graph"][predicateName] = `?${predicateName}`;
-            this.query["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}}`);
-            if (filters.hasOwnProperty(predicateName)) {
-                this.query["$filter"].push(`?${predicateName}="${filters[predicateName]}"`);
-            }
-        });
-
-        // predikaty ktore vstupuju do resource
-        Object.keys(filters).forEach(predicateName => {
-            if (
-                predicateName === "id" ||
-                predicateName === "_offset" ||
-                predicateName === "_limit" ||
-                predicateName === "_join" ||
-                this.props.hasOwnProperty(predicateName)
-            ) {
-                return;
-            }
-            this.query["$where"].push(`<${filters[predicateName]}> ${this._build(Predicates[predicateName])} ${resourceURI}`);
-        });
-
-        // join
-
-        const q = new Query();
-        q.setProto(this.query["@graph"]);
-        q.setWhere(this.query["$where"]);
-        if (this.query["$offset"]) q.setOffset(this.query["$offset"]);
-        if (this.query["$limit"]) q.setLimit(this.query["$limit"]);
-        q.setFilter(this.query["$filter"]);
-        return q;
-    }
-
-    _buildURI(resourceName, id) {
-        const uriPrefix = Resources[resourceName].type.uriPrefix;
-        return uriPrefix + id;
-    }
-
     async _prepareTriplesToStore(userURI) {
         this.subject = await getNewNode(this.resource.type.uriPrefix);
 
@@ -328,7 +248,7 @@ export default class Resource {
         db.setQueryFormat("application/json");
         db.setQueryGraph("http://www.courses.matfyz.sk/data");
         return db.query(
-            `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ${resourceClass.prefix.name}:${resourceClass.value}}`,
+            `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ${Resources[resourceClass].type.prefix.name}:${Resources[resourceClass].type.value}}`,
             true
         );
     }

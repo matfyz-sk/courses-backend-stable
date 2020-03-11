@@ -1,6 +1,6 @@
 import { orderedQuestion } from "../../constants/predicates";
 import { quizTake } from "./QuizTake";
-import { QuizTakePrototype, OrderedQuestion } from "../../constants/classes";
+import { QuizTakePrototype } from "../../constants/classes";
 
 export const quizTakePrototype = {
     type: QuizTakePrototype,
@@ -10,7 +10,7 @@ export const quizTakePrototype = {
             required: true,
             multiple: true,
             dataType: "node",
-            objectClass: OrderedQuestion,
+            objectClass: "orderedQuestion",
             change: "[this].createdBy.{userURI}"
         }
     }

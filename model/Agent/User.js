@@ -77,31 +77,31 @@ export const user = {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Team
+            objectClass: "team"
         },
         [requests.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: CourseInstance
+            objectClass: "courseInstance"
         },
         [studentOf.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: "courseInstance" // ako resource
+            objectClass: "courseInstance"
         },
         [instructorOf.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: CourseInstance
+            objectClass: "courseInstance"
         },
         [understands.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Topic
+            objectClass: "topic"
         },
         [useNickName.value]: {
             required: false,

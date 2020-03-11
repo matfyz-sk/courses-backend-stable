@@ -1,4 +1,4 @@
-import { Course, Topic } from "../constants/classes";
+import { Course } from "../constants/classes";
 import { name, description, abbreviation, hasPrerequisite, mentions, covers } from "../constants/predicates";
 
 export const course = {
@@ -23,19 +23,19 @@ export const course = {
             required: false,
             multiple: false,
             dataType: "node",
-            objectClass: Course
+            objectClass: "course"
         },
         [mentions.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Topic
+            objectClass: "topic"
         },
         [covers.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Topic
+            objectClass: "topic"
         }
     },
     createPolicy: ["{isSuperAdmin}"]

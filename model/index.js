@@ -21,12 +21,11 @@ import { session } from "./Event/Session/Session";
 import { block } from "./Event/Block";
 import { courseInstance } from "./Event/CourseInstance";
 import { assignment } from "./Task/Assignment";
-import { codeComment } from "./CodeComment";
+import { codeComment } from "./Comment/CodeComment";
 import { codeReview } from "./CodeReview";
 import { course } from "./Course";
 import { field } from "./Field";
 import { fieldType } from "./FieldType";
-import { generalComment } from "./GeneralComment";
 import { generatedQuizAssignment } from "./Task/QuizAssignment/GeneratedQuizAssignment";
 import { manualQuizAssignment } from "./Task/QuizAssignment/ManualQuizAssignment";
 import { material } from "./Material";
@@ -72,7 +71,6 @@ module.exports = {
     course,
     field,
     fieldType,
-    generalComment,
     generatedQuizAssignment,
     manualQuizAssignment,
     material,

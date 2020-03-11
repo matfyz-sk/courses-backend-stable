@@ -2,6 +2,7 @@ import lib from "sparql-transformer";
 import { ontologyURI, virtuosoEndpoint, dcTermsURI } from "../constants";
 import { getAllProps } from "../helpers";
 import * as Resources from "../model";
+import * as Predicates from "../constants/predicates";
 
 const defaultOptions = {
     context: "http://www.courses.matfyz.sk/ontology#",
@@ -15,13 +16,20 @@ const defaultPrefixes = {
 };
 
 class Query {
-    constructor(options = defaultOptions, resource) {
-        this.q = {};
-        this.options = options;
+    constructor(resource) {
+        this.options = defaultOptions;
         this.sparqlTransformer = lib.default;
-        this.setPrefixes(defaultPrefixes);
         this.resource = resource;
-        this.props = getAllPropsrops(resource);
+        this.props = getAllProps(resource);
+        this.resourceURI = "?resourcerURI";
+        this.q = {
+            "@graph": {
+                "@id": this.resourceURI
+            },
+            $where: [],
+            $filter: []
+        };
+        this.setPrefixes(defaultPrefixes);
     }
 
     _build(val) {
@@ -29,55 +37,55 @@ class Query {
     }
 
     generateQuery(filters) {
-        var resourceURI = "?resourceURI";
         if (filters.id) {
-            resourceURI = `<${this.resource.type.uriPrefix + filters.id}>`;
+            this.resourceURI = `<${this.resource.type.uriPrefix + filters.id}>`;
         }
-        this.q = {
-            "@graph": {
-                "@id": resourceURI
-            },
-            $where: [],
-            $filter: []
-        };
 
         if (this.resource.hasOwnProperty("subclasses")) {
             this.q["@graph"]["@type"] = "?type";
-            this.q["$where"].push(`${resourceURI} rdf:type ?type`);
-            this.q["$where"].push(`?type rdfs:subClassOf* ${this._build(this.resource.type)}`);
+            this.pushWhere(`${this.resourceURI} ${this._build(Predicates.type)} ?type`);
+            this.pushWhere(`?type rdfs:subClassOf* ${this._build(this.resource.type)}`);
         } else {
             this.q["@graph"]["@type"] = this.resource.type.value;
-            this.q["$where"].push(`${resourceURI} ${this._build(Predicates.type)} ${this._build(this.resource.type)}`);
+            this.pushWhere(`${this.resourceURI} ${this._build(Predicates.type)} ${this._build(this.resource.type)}`);
         }
 
-        if (filters.hasOwnProperty("_offset")) this.q["$offset"] = filters._offset;
-        if (filters.hasOwnProperty("_limit")) this.q["$limit"] = filters._limit;
+        this.setOffset(filters._offset);
+        this.setLimit(filters._limit);
+
+        const joins =
+            filters.hasOwnProperty("_join") && typeof filters._join == "string" ? filters._join.split(",").map(e => e.trim()) : [];
 
         Object.keys(this.props).forEach(predicateName => {
-            if (predicateName === "type") {
-                return;
-            }
+            var objectVar = `?${predicateName}`;
             if (this.props[predicateName].dataType === "node") {
-                this.q["@graph"][predicateName] = { "@id": `?${predicateName}URI` };
+                objectVar += "URI";
+                this.q["@graph"][predicateName] = { "@id": objectVar };
+
+                if (joins.includes(predicateName)) {
+                    this.generatQueryPart(predicateName);
+                }
                 if (filters.hasOwnProperty(predicateName)) {
-                    this.q["$where"].push(`${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI`);
-                    console.log(predicateName);
-                    this.q["$filter"].push(
-                        `?${predicateName}URI=<${this._buildURI(this.props[predicateName].resource, filters[predicateName])}>`
-                    );
+                    this.pushWhere(`${this.resourceURI} ${this._build(Predicates[predicateName])} ${objectVar}`);
+                    const objectClass = Resources[this.props[predicateName].objectClass].type;
+                    this.pushFilter(`${objectVar}=<${objectClass.uriPrefix + filters[predicateName]}>`);
                 } else {
-                    this.q["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}URI}`);
+                    this.pushWhere(`OPTIONAL {${this.resourceURI} ${this._build(Predicates[predicateName])} ${objectVar}}`);
                 }
                 return;
             }
-            this.q["@graph"][predicateName] = `?${predicateName}`;
-            this.q["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[predicateName])} ?${predicateName}}`);
+            this.q["@graph"][predicateName] = objectVar;
             if (filters.hasOwnProperty(predicateName)) {
-                this.q["$filter"].push(`?${predicateName}="${filters[predicateName]}"`);
+                this.pushWhere(`${this.resourceURI} ${this._build(Predicates[predicateName])} ${objectVar}`);
+                if (this.props[predicateName].dataType == "string") {
+                    this.pushFilter(`${objectVar}="${filters[predicateName]}"`);
+                } else {
+                    this.pushFilter(`${objectVar}=${filters[predicateName]}`);
+                }
+            } else {
+                this.pushWhere(`OPTIONAL {${this.resourceURI} ${this._build(Predicates[predicateName])} ${objectVar}}`);
             }
         });
-
-        // predikaty ktore vstupuju do resource
         Object.keys(filters).forEach(predicateName => {
             if (
                 predicateName === "id" ||
@@ -88,70 +96,41 @@ class Query {
             ) {
                 return;
             }
-            this.q["$where"].push(`<${filters[predicateName]}> ${this._build(Predicates[predicateName])} ${resourceURI}`);
+            this.pushWhere(`<${filters[predicateName]}> ${this._build(Predicates[predicateName])} ${this.resourceURI}`);
         });
-
-        // join
-        if (filters.hasOwnProperty("_join")) {
-            const parts = filters["_join"].split(",");
-            for (var predicateName of parts) {
-                predicateName = predicateName.trim();
-                this.generatQueryPart(predicateName, this.q["@graph"][predicateName]);
-            }
-        }
-
-        // const q = new Query();
-        // q.setProto(this.q["@graph"]);
-        // q.setWhere(this.q["$where"]);
-        // if (this.q["$offset"]) q.setOffset(this.q["$offset"]);
-        // if (this.q["$limit"]) q.setLimit(this.q["$limit"]);
-        // q.setFilter(this.q["$filter"]);
-        return q;
     }
 
-    generatQueryPart(predicateName, queryPart) {
+    generatQueryPart(predicateName) {
         const resource = Resources[this.props[predicateName].objectClass];
         const resourceProps = getAllProps(resource);
+        const queryPart = this.q["@graph"][predicateName];
+        const partURI = queryPart["@id"];
+
+        var where = `OPTIONAL { ${this.resourceURI} ${this._build(Predicates[predicateName])} ${partURI} . ${partURI} ${this._build(
+            Predicates.type
+        )} ${this._build(resource.type)} . `;
+
         Object.keys(resourceProps).forEach(p => {
-            if (p === "type") {
-                return;
-            }
-            if (resourceProps[p].dataType === "node") {
-                queryPart[p] = { "@id": `?${p}2URI` };
-                // if (filters.hasOwnProperty(p)) {
-                //     this.q["$where"].push(`${resourceURI} ${this._build(Predicates[p])} ?${p}URI`);
-                //     console.log(p);
-                //     this.q["$filter"].push(
-                //         `?${p}URI=<${this._buildURI(this.props[p].resource, filters[p])}>`
-                //     );
-                // } else {
-                this.q["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[p])} ?${p}URI}`);
-                // }
-                return;
-            }
-            queryPart[p] = `?${p}`;
-            this.q["$where"].push(`OPTIONAL {${resourceURI} ${this._build(Predicates[p])} ?${p}}`);
-            if (filters.hasOwnProperty(p)) {
-                this.q["$filter"].push(`?${p}="${filters[p]}"`);
-            }
+            // if (resourceProps[p].dataType === "node") {
+            //     const objectVar = partURI + p + "URI";
+            //     queryPart[p] = { "@id": objectVar };
+            //     where += `OPTIONAL {${partURI} ${this._build(Predicates[p])} ${objectVar}} . `;
+            //     return;
+            // }
+            queryPart[p] = `${partURI + p}`;
+            where += `OPTIONAL {${partURI} ${this._build(Predicates[p])} ${partURI + p}} . `;
         });
+        where = where.substring(0, where.length - 2);
+        where += "}";
+        this.pushWhere(where);
     }
 
-    setProto(proto) {
-        this.q["@graph"] = proto;
-    }
-
-    setWhere(where) {
-        this.q["$where"] = where;
-    }
-
-    appendWhere(where) {
-        if (this.q.$where == null) this.q["$where"] = [];
+    pushWhere(where) {
         this.q.$where.push(where);
     }
 
-    setFilter(filter) {
-        this.q["$filter"] = filter;
+    pushFilter(filter) {
+        this.q.$filter.push(filter);
     }
 
     setPrefixes(prefixes) {
@@ -159,27 +138,19 @@ class Query {
     }
 
     setLimit(limit) {
-        this.q["$limit"] = limit;
+        if (limit) this.q["$limit"] = limit;
     }
 
     setOffset(offset) {
-        this.q["$offset"] = offset;
+        if (offset) this.q["$offset"] = offset;
     }
 
     setOrderBy(orderBy) {
-        this.q["$orderBy"] = orderBy;
+        if (orderBy) this.q["$orderBy"] = orderBy;
     }
 
     run() {
         return this.sparqlTransformer(this.q, this.options);
-    }
-
-    prepare() {
-        this.q = {};
-    }
-
-    setOptions(options) {
-        this.options = options;
     }
 }
 

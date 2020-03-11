@@ -1,42 +1,23 @@
-import { Node, Text, Data } from "virtuoso-sparql-client";
 import {
-    courseInstance,
-    createdBy,
-    infoName,
-    infoDescription,
-    infoShortDescription,
-    infoDocuments,
     hasField,
     submissionAnonymousSubmission,
-    submissionOpenTime,
-    submissionDeadline,
-    submissionExtraTime,
     submissionImprovedSubmission,
-    submissionImprovedDeadline,
-    submissionImprovedExtraTime,
-    submissionImprovedOpenTime,
     teamsDisabled,
     teamsSubmittedAsTeam,
     teamsMinimumInTeam,
     teamsMaximumInTeam,
     teamsMultipleSubmissions,
     reviewsDisabled,
-    reviewsDeadline,
-    reviewsExtraTime,
     reviewsPerSubmission,
-    reviewsOpenTime,
     reviewedByTeam,
     reviewsVisibility,
-    reviewsQuestions,
     teamReviewsDisabled,
-    teamReviewsDeadline,
-    teamReviewsExtraTime,
-    teamReviewsOpenTime,
     initialSubmissionPeriod,
     peerReviewPeriod,
     improvedSubmissionPeriod,
     teamReviewPeriod,
-    hasAuthor
+    shortDescription,
+    hasDocument
 } from "../../constants/predicates";
 import { Assignment } from "../../constants/classes";
 import { task } from "./Task";
@@ -45,47 +26,106 @@ export const assignment = {
     type: Assignment,
     subclassOf: task,
     props: {
-        [hasAuthor.value]: { required: false, multiple: false, type: Node, primitive: false },
-        [infoName.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [infoDescription.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [infoShortDescription.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [infoDocuments.value]: { required: false, multiple: false, type: Node, primitive: false },
-        [hasField.value]: { required: false, multiple: false, type: Node, primitive: false },
-        [submissionAnonymousSubmission.value]: { required: false, multiple: false, type: Data, dataType: "xsd:boolean", primitive: true },
-
-        // [submissionOpenTime.value]: { required: false, multiple: false, type: Text, primitive: true },
-        // [submissionDeadline.value]: { required: false, multiple: false, type: Text, primitive: true },
-        // [submissionExtraTime.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [initialSubmissionPeriod.value]: { required: false, multiple: false, type: Node, primitive: false },
-
-        [submissionImprovedSubmission.value]: { required: false, multiple: false, type: Data, dataType: "xsd:boolean", primitive: true },
-
-        // [submissionImprovedOpenTime.value]: { required: false, multiple: false, type: Text, primitive: true },
-        // [submissionImprovedDeadline.value]: { required: false, multiple: false, type: Text, primitive: true },
-        // [submissionImprovedExtraTime.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [improvedSubmissionPeriod.value]: { required: false, multiple: false, type: Node, primitive: false },
-
-        [teamsDisabled.value]: { required: false, multiple: false, type: Data, dataType: "xsd:boolean", primitive: true },
-        [teamsSubmittedAsTeam.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [teamsMinimumInTeam.value]: { required: false, multiple: false, type: Data, dataType: "xsd:integer", primitive: true },
-        [teamsMaximumInTeam.value]: { required: false, multiple: false, type: Data, dataType: "xsd:integer", primitive: true },
-        [teamsMultipleSubmissions.value]: { required: false, multiple: false, type: Data, dataType: "xsd:boolean", primitive: true },
-
-        // [reviewsDisabled.value]: { required: false, multiple: false, type: Data, dataType: "xsd:boolean", primitive: true },
-        // [reviewsOpenTime.value]: { required: false, multiple: false, type: Text, primitive: true },
-        // [reviewsDeadline.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [peerReviewPeriod.value]: { required: false, multiple: false, type: Node, primitive: false },
-
-        [reviewsExtraTime.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [reviewsPerSubmission.value]: { required: false, multiple: false, type: Data, dataType: "xsd:integer", primitive: true },
-        [reviewedByTeam.value]: { required: false, multiple: false, type: Data, dataType: "xsd:boolean", primitive: true },
-        [reviewsVisibility.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [reviewsQuestions.value]: { required: false, multiple: false, type: Node, primitive: false },
-        [teamReviewsDisabled.value]: { required: false, multiple: false, type: Data, dataType: "xsd:boolean", primitive: true },
-
-        // [teamReviewsOpenTime.value]: { required: false, multiple: false, type: Text, primitive: true },
-        // [teamReviewsDeadline.value]: { required: false, multiple: false, type: Text, primitive: true },
-        // [teamReviewsExtraTime.value]: { required: false, multiple: false, type: Text, primitive: true },
-        [teamReviewPeriod.value]: { required: false, multiple: false, type: Node, primitive: false }
+        [shortDescription.value]: {
+            required: false,
+            multiple: false,
+            dataType: "string"
+        },
+        [hasDocument.value]: {
+            required: false,
+            multiple: true,
+            dataType: "node",
+            objectClass: "document"
+        },
+        [hasField.value]: {
+            required: false,
+            multiple: true,
+            dataType: "node",
+            objectClass: "field"
+        },
+        [submissionAnonymousSubmission.value]: {
+            required: false,
+            multiple: false,
+            dataType: "boolean"
+        },
+        [initialSubmissionPeriod.value]: {
+            required: false,
+            multiple: false,
+            dataType: "node",
+            objectClass: "assignmentPeriod"
+        },
+        [submissionImprovedSubmission.value]: {
+            required: false,
+            multiple: false,
+            dataType: "boolean"
+        },
+        [improvedSubmissionPeriod.value]: {
+            required: false,
+            multiple: false,
+            dataType: "node",
+            objectClass: "assignmentPeriod"
+        },
+        [teamsDisabled.value]: {
+            required: false,
+            multiple: false,
+            dataType: "boolean"
+        },
+        [teamsSubmittedAsTeam.value]: {
+            required: false,
+            multiple: false,
+            dataType: "string"
+        },
+        [teamsMinimumInTeam.value]: {
+            required: false,
+            multiple: false,
+            dataType: "integer"
+        },
+        [teamsMaximumInTeam.value]: {
+            required: false,
+            multiple: false,
+            dataType: "integer"
+        },
+        [teamsMultipleSubmissions.value]: {
+            required: false,
+            multiple: false,
+            dataType: "boolean"
+        },
+        [peerReviewPeriod.value]: {
+            required: false,
+            multiple: false,
+            dataType: "node",
+            objectClass: "assignmentPeriod"
+        },
+        [reviewsDisabled.value]: {
+            required: false,
+            multiple: false,
+            dataType: "boolean"
+        },
+        [reviewsPerSubmission.value]: {
+            required: false,
+            multiple: false,
+            dataType: "integer"
+        },
+        [reviewedByTeam.value]: {
+            required: false,
+            multiple: false,
+            dataType: "boolean"
+        },
+        [reviewsVisibility.value]: {
+            required: false,
+            multiple: false,
+            type: "string"
+        },
+        [teamReviewsDisabled.value]: {
+            required: false,
+            multiple: false,
+            dataType: "boolean"
+        },
+        [teamReviewPeriod.value]: {
+            required: false,
+            multiple: false,
+            dataType: "node",
+            objectClass: "assignmentPeriod"
+        }
     }
 };

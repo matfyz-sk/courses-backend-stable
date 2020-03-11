@@ -1,4 +1,4 @@
-import { Task, Topic, CourseInstance } from "../../constants/classes";
+import { Task } from "../../constants/classes";
 import { courseInstance, covers, mentions, requires, name, description } from "../../constants/predicates";
 
 export const task = {
@@ -19,25 +19,25 @@ export const task = {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Topic
+            objectClass: "topic"
         },
         [mentions.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Topic
+            objectClass: "topic"
         },
         [requires.value]: {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: Topic
+            objectClass: "topic"
         },
         [courseInstance.value]: {
             required: true,
             multiple: false,
             dataType: "node",
-            objectClass: CourseInstance
+            objectClass: "courseInstance"
         }
     },
     createPolicy: ["courseInstance.^courses:instructorOf.{userURI}"]

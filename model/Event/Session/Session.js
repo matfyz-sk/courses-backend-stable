@@ -1,4 +1,4 @@
-import { Session, User } from "../../../constants/classes";
+import { Session } from "../../../constants/classes";
 import { hasInstructor } from "../../../constants/predicates";
 import { event } from "../Event";
 
@@ -11,7 +11,7 @@ export const session = {
             required: false,
             multiple: true,
             dataType: "node",
-            objectClass: User
+            objectClass: "user"
         }
     },
     create: "teacher",

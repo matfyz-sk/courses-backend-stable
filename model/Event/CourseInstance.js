@@ -1,4 +1,4 @@
-import { CourseInstance, Course } from "../../constants/classes";
+import { CourseInstance } from "../../constants/classes";
 import { year, instanceOf } from "../../constants/predicates";
 import { event } from "./Event";
 
@@ -15,7 +15,7 @@ export const courseInstance = {
             required: true,
             multiple: false,
             dataType: "node",
-            objectClass: Course
+            objectClass: "course"
         }
     },
     createPolicy: ["{isAdmin}"]

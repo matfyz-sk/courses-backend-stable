@@ -12,7 +12,7 @@ export const team = {
             multiple: false,
             change: false,
             dataType: "node",
-            objectClass: CourseInstance
+            objectClass: "courseInstance"
         }
     },
     createPolicy: [
