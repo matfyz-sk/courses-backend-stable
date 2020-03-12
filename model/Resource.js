@@ -8,7 +8,7 @@ export default class Resource {
     constructor(resource) {
         this.id = 0;
         this.resource = resource;
-        this.props = getAllProps(resource);
+        this.props = getAllProps(resource, false);
         this.triples = { toAdd: [], toUpdate: [], toRemove: [] };
         this.query = {};
         this.removeOld = true;
@@ -191,8 +191,6 @@ export default class Resource {
                 }
             }
         }
-
-        console.log("Triples of resource " + this.resource.type, this.triples.toAdd);
     }
 
     _prepareTriplesToUpdate() {
@@ -248,7 +246,7 @@ export default class Resource {
         db.setQueryFormat("application/json");
         db.setQueryGraph("http://www.courses.matfyz.sk/data");
         return db.query(
-            `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ${Resources[resourceClass].type.prefix.name}:${Resources[resourceClass].type.value}}`,
+            `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ?type . ?type rdfs:subClassOf* ${resourceClass.prefix.name}:${resourceClass.value}}`,
             true
         );
     }
@@ -262,7 +260,7 @@ export default class Resource {
             const object = getTripleObjectType(this.props[predicate.value].dataType, objectValue);
 
             if (this.props[predicate.value].dataType === "node") {
-                const objectClass = this.props[predicate.value].objectClass;
+                const objectClass = Resources[this.props[predicate.value].objectClass].type;
                 const data = await this._resourceExists(objectValue, objectClass);
                 if (data.results.bindings.length == 0) {
                     throw `Resource with URI ${objectValue} does not exists`;

@@ -46,7 +46,7 @@ export function prepareClassName(className) {
     return className.charAt(0).toLowerCase() + className.slice(1);
 }
 
-export function getAllProps(resource) {
+export function getAllProps(resource, includeSubclasses = true) {
     var props = {};
     var r = resource;
     while (r) {
@@ -56,7 +56,7 @@ export function getAllProps(resource) {
         r = r.subclassOf;
     }
 
-    if (!resource.hasOwnProperty("subclasses") || !Array.isArray(resource.subclasses)) {
+    if (!resource.hasOwnProperty("subclasses") || !Array.isArray(resource.subclasses) || !includeSubclasses) {
         return props;
     }
 

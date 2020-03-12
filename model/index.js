@@ -41,6 +41,7 @@ import { toReview } from "./ToReview";
 import { task } from "./Task/Task";
 import { taskEvent } from "./Event/TaskEvent/TaskEvent";
 import { assignmentPeriod } from "./Event/TaskEvent/AssignmentPeriod";
+import { comment } from "./Comment/Comment";
 
 module.exports = {
     agent,
@@ -85,5 +86,6 @@ module.exports = {
     toReview,
     task,
     taskEvent,
-    assignmentPeriod
+    assignmentPeriod,
+    comment
 };

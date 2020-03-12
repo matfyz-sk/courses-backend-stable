@@ -1,16 +1,14 @@
-export function patchResource(req, res) {
+export async function patchResource(req, res) {
     const resource = res.locals.resource;
     resource.removeOld = true;
-    var errors = [];
-    Object.keys(req.body).forEach(predicateName => {
-        try {
-            resource.setPredicate(predicateName, req.body[predicateName]);
-        } catch (err) {
-            errors.push(err);
+    for (var predicateName in req.body) {
+        if (req.body.hasOwnProperty(predicateName)) {
+            try {
+                await resource.setPredicate(predicateName, req.body[predicateName]);
+            } catch (err) {
+                return res.status(422).send({ status: false, msg: err });
+            }
         }
-    });
-    if (errors.length > 0) {
-        return res.status(422).send({ status: false, msg: errors });
     }
     resource
         .patch()
