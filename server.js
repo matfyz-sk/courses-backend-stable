@@ -1,9 +1,9 @@
 import express from "express";
 import bodyParser from "body-parser";
-import router from "./routes/data";
+import dataRouter from "./routes/data";
 import authRouter from "./routes/auth";
 import { authSecret } from "./constants";
-var expressJWT = require("express-jwt");
+import expressJWT from "express-jwt";
 import cors from "cors";
 
 const app = express();
@@ -17,7 +17,20 @@ app.use(
     })
 );
 
-app.use("/data", expressJWT({ secret: authSecret }), router);
+app.use(
+    "/data",
+    expressJWT({ secret: authSecret }),
+    (err, req, res, next) => {
+        if (err.name === "UnauthorizedError") {
+            res.status(401).send({ message: err.message });
+            // logger.error(err);
+            return;
+        }
+        next();
+    },
+    dataRouter
+);
+
 app.use("/auth", authRouter);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

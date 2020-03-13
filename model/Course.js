@@ -1,37 +1,37 @@
-import { Course } from "../constants/classes";
-import { name, description, abbreviation, hasPrerequisite, mentions, covers } from "../constants/predicates";
+// import { Course } from "../constants/classes";
+// import { name, description, abbreviation, hasPrerequisite, mentions, covers } from "../constants/predicates";
 
 export const course = {
-    type: Course,
+    type: "course",
     props: {
-        [name.value]: {
+        name: {
             required: true,
             multiple: false,
             dataType: "string"
         },
-        [description.value]: {
+        description: {
             required: false,
             multiple: false,
             dataType: "string"
         },
-        [abbreviation.value]: {
+        abbreviation: {
             required: false,
             multiple: false,
             dataType: "string"
         },
-        [hasPrerequisite.value]: {
+        hasPrerequisite: {
             required: false,
             multiple: false,
             dataType: "node",
             objectClass: "course"
         },
-        [mentions.value]: {
+        mentions: {
             required: false,
             multiple: true,
             dataType: "node",
             objectClass: "topic"
         },
-        [covers.value]: {
+        covers: {
             required: false,
             multiple: true,
             dataType: "node",

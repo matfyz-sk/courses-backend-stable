@@ -8,7 +8,8 @@
     },
     "main": "server.js",
     "scripts": {
-        "start": "nodemon --exec babel-node server.js"
+        "start": "nodemon --exec babel-node server.js",
+        "debug": "nodemon --inspect --exec babel-node  server.js"
     },
     "author": "Milan Cifra",
     "license": "ISC",

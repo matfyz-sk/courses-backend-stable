@@ -1,10 +1,10 @@
 import { PostController, GetController, PutController, PatchController, DeleteController } from "../controllers";
 import { getResourceObject, prepareClassName } from "../helpers";
 import express from "express";
-const router = express.Router();
+const dataRouter = express.Router();
 import Resource from "../model/Resource";
 
-router.use("/:className", (req, res, next) => {
+dataRouter.use("/:className", (req, res, next) => {
     const resource = getResourceObject(prepareClassName(req.params.className));
     if (!resource) {
         return res.status(400).send({ status: false, msg: `Resource with class name ${req.params.className} is not supported` });
@@ -13,7 +13,7 @@ router.use("/:className", (req, res, next) => {
     next();
 });
 
-router.use("/:className/:id", (req, res, next) => {
+dataRouter.use("/:className/:id", (req, res, next) => {
     res.locals.resource.setSubject(req.params.id);
     res.locals.resource
         .fetch()
@@ -24,31 +24,20 @@ router.use("/:className/:id", (req, res, next) => {
                     msg: `Resource with ID ${req.params.id} and class name ${req.params.className} does not exist`
                 });
             }
-            console.log("fetched data: ", data.results.bindings);
             res.locals.resource.fill(data);
             next();
         })
         .catch(err => res.status(500).send({ status: false, msg: err }));
 });
 
-router.post("/:className", (req, res) => {
-    PostController.storeResource(req, res);
-});
+dataRouter.post("/:className", PostController.storeResource);
 
-router.get("/:className/:id?", (req, res) => {
-    GetController.runQuery(req, res);
-});
+dataRouter.get("/:className/:id?", GetController.runQuery);
 
-router.put("/:className/:id", (req, res) => {
-    PutController.putResource(req, res);
-});
+dataRouter.put("/:className/:id", PutController.putResource);
 
-router.patch("/:className/:id", (req, res) => {
-    PatchController.patchResource(req, res);
-});
+dataRouter.patch("/:className/:id", PatchController.patchResource);
 
-router.delete("/:className/:id/:attributeName?", (req, res) => {
-    DeleteController.deleteResource(req, res);
-});
+dataRouter.delete("/:className/:id/:attributeName?", DeleteController.deleteResource);
 
-export default router;
+export default dataRouter;

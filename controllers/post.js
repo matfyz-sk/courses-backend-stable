@@ -8,6 +8,10 @@ export async function storeResource(req, res) {
         return res.status(422).send({ status: false, msg: err });
     }
 
+    // console.log(resource.props);
+
+    // return res.send();
+
     //console.log(resource.props.initialSubmissionPeriod.value.props);
 
     //return res.send();

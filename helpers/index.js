@@ -159,3 +159,13 @@ export function validateRequest(req, res, next) {
         res.status(422).json({ errors: errors.array() });
     } else next();
 }
+
+export function classPrefix(className) {
+    const lowerCaseClassName = className.charAt(0).toLowerCase() + className.slice(1);
+    return Constants.graphURI + "/" + lowerCaseClassName + "/";
+}
+
+export function className(className, includePrefix = false) {
+    const upperCaseClassName = className.charAt(0).toUpperCase() + className.slice(1);
+    return includePrefix ? "courses:" + upperCaseClassName : upperCaseClassName;
+}

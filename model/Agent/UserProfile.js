@@ -1,4 +1,4 @@
-import { User, Team, CourseInstance, Topic } from "../../constants/classes";
+import { User } from "../../constants/classes";
 import {
     firstName,
     lastName,
@@ -6,67 +6,23 @@ import {
     password,
     description,
     nickname,
-    memberOf,
-    requests,
-    studentOf,
-    instructorOf,
-    understands,
-    useNickName,
     publicProfile,
     showCourses,
     showBadges,
-    allowContact
+    allowContact,
+    useNickName
 } from "../../constants/predicates";
-import { agent } from "./Agent";
 
-export const user = {
+export const userProfile = {
     type: User,
-    subclassOf: agent,
     props: {
-        [memberOf.value]: {
-            required: false,
-            multiple: true,
-            dataType: "node",
-            objectClass: "team"
-        },
-        [requests.value]: {
-            required: false,
-            multiple: true,
-            dataType: "node",
-            objectClass: "courseInstance"
-        },
-        [studentOf.value]: {
-            required: false,
-            multiple: true,
-            dataType: "node",
-            objectClass: "courseInstance"
-        },
-        [instructorOf.value]: {
-            required: false,
-            multiple: true,
-            dataType: "node",
-            objectClass: "courseInstance"
-        },
-        [understands.value]: {
-            required: false,
-            multiple: true,
-            dataType: "node",
-            objectClass: "topic"
-        },
-        [useNickName.value]: {
-            required: false,
-            multiple: true,
-            dataType: "boolean"
-        }
-    },
-    profile: {
         [firstName.value]: {
-            required: false,
+            required: true,
             multiple: false,
             dataType: "string"
         },
         [lastName.value]: {
-            required: false,
+            required: true,
             multiple: false,
             dataType: "string"
         },
@@ -81,12 +37,12 @@ export const user = {
             dataType: "string"
         },
         [description.value]: {
-            required: false,
+            required: true,
             multiple: false,
             dataType: "string"
         },
         [nickname.value]: {
-            required: false,
+            required: true,
             multiple: false,
             dataType: "string"
         },
@@ -109,6 +65,11 @@ export const user = {
             required: true,
             multiple: false,
             dataType: "boolean"
+        },
+        [useNickName.value]: {
+            required: true,
+            multiple: false,
+            dataType: "string"
         }
     }
 };

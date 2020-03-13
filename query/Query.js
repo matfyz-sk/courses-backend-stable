@@ -1,11 +1,11 @@
 import lib from "sparql-transformer";
 import { ontologyURI, virtuosoEndpoint, dcTermsURI } from "../constants";
-import { getAllProps } from "../helpers";
+import { getAllProps, classPrefix, className } from "../helpers";
 import * as Resources from "../model";
 import * as Predicates from "../constants/predicates";
 
 const defaultOptions = {
-    context: "http://www.courses.matfyz.sk/ontology#",
+    context: ontologyURI,
     endpoint: virtuosoEndpoint,
     debug: true
 };
@@ -30,24 +30,20 @@ class Query {
         this.setPrefixes(defaultPrefixes);
     }
 
-    _build(val) {
-        return val.prefix.name + ":" + val.value;
-    }
-
     generateQuery(filters) {
         if (filters.id) {
-            this.resourceURI = `<${this.resource.type.uriPrefix + filters.id}>`;
+            this.resourceURI = `<${classPrefix(this.resource.type) + filters.id}>`;
         }
 
         this.q["@graph"]["@id"] = this.resourceURI;
 
         if (this.resource.hasOwnProperty("subclasses")) {
             this.q["@graph"]["@type"] = "?type";
-            this.pushWhere(`${this.resourceURI} ${this._build(Predicates.type)} ?type`);
-            this.pushWhere(`?type rdfs:subClassOf* ${this._build(this.resource.type)}`);
+            this.pushWhere(`${this.resourceURI} rdf:type ?type`);
+            this.pushWhere(`?type rdfs:subClassOf* ${className(this.resource.type, true)}`);
         } else {
-            this.q["@graph"]["@type"] = this.resource.type.value;
-            this.pushWhere(`${this.resourceURI} ${this._build(Predicates.type)} ${this._build(this.resource.type)}`);
+            this.q["@graph"]["@type"] = className(this.resource.type);
+            this.pushWhere(`${this.resourceURI} rdf:type ${className(this.resource.type, true)}`);
         }
 
         this.q["@graph"]["createdBy"] = "?createdBy";
@@ -71,24 +67,24 @@ class Query {
                     this.generatQueryPart(predicateName);
                 }
                 if (filters.hasOwnProperty(predicateName)) {
-                    this.pushWhere(`${this.resourceURI} ${this._build(Predicates[predicateName])} ${objectVar}`);
+                    this.pushWhere(`${this.resourceURI} courses:${predicateName} ${objectVar}`);
                     const objectClass = Resources[this.props[predicateName].objectClass].type;
-                    this.pushFilter(`${objectVar}=<${objectClass.uriPrefix + filters[predicateName]}>`);
+                    this.pushFilter(`${objectVar}=<${classPrefix(objectClass) + filters[predicateName]}>`);
                 } else {
-                    this.pushWhere(`OPTIONAL {${this.resourceURI} ${this._build(Predicates[predicateName])} ${objectVar}}`);
+                    this.pushWhere(`OPTIONAL {${this.resourceURI} courses:${predicateName} ${objectVar}}`);
                 }
                 return;
             }
             this.q["@graph"][predicateName] = objectVar;
             if (filters.hasOwnProperty(predicateName)) {
-                this.pushWhere(`${this.resourceURI} ${this._build(Predicates[predicateName])} ${objectVar}`);
+                this.pushWhere(`${this.resourceURI} courses:${predicateName} ${objectVar}`);
                 if (this.props[predicateName].dataType == "string") {
                     this.pushFilter(`${objectVar}="${filters[predicateName]}"`);
                 } else {
                     this.pushFilter(`${objectVar}=${filters[predicateName]}`);
                 }
             } else {
-                this.pushWhere(`OPTIONAL {${this.resourceURI} ${this._build(Predicates[predicateName])} ${objectVar}}`);
+                this.pushWhere(`OPTIONAL {${this.resourceURI} courses:${predicateName} ${objectVar}}`);
             }
         });
         Object.keys(filters).forEach(predicateName => {
@@ -101,7 +97,7 @@ class Query {
             ) {
                 return;
             }
-            this.pushWhere(`<${filters[predicateName]}> ${this._build(Predicates[predicateName])} ${this.resourceURI}`);
+            this.pushWhere(`<${filters[predicateName]}> courses:${predicateName} ${this.resourceURI}`);
         });
         console.log(this.q);
     }
@@ -116,10 +112,11 @@ class Query {
         queryPart["createdBy"] = partURI + "createdBy";
         queryPart["createdAt"] = partURI + "createdAt";
 
-        var where = `OPTIONAL { ${this.resourceURI} ${this._build(
-            Predicates[predicateName]
-        )} ${partURI} . ${partURI} rdf:type ${partURI}type . ${partURI}type rdfs:subClassOf* ${this._build(
-            resource.type
+        var where = `OPTIONAL { ${
+            this.resourceURI
+        } ${predicateName} ${partURI} . ${partURI} rdf:type ${partURI}type . ${partURI}type rdfs:subClassOf* ${className(
+            resource.type,
+            true
         )} . OPTIONAL {${partURI} courses:createdBy ${partURI}createdBy} . OPTIONAL {${partURI} dc:created ${partURI}createdAt} . `;
 
         Object.keys(resourceProps).forEach(p => {
@@ -130,7 +127,7 @@ class Query {
             //     return;
             // }
             queryPart[p] = `${partURI + p}`;
-            where += `OPTIONAL {${partURI} ${this._build(Predicates[p])} ${partURI + p}} . `;
+            where += `OPTIONAL {${partURI} courses:${p} ${partURI + p}} . `;
         });
 
         where = where.substring(0, where.length - 2);

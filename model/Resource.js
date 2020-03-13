@@ -1,20 +1,18 @@
 import { Triple, Node, Text } from "virtuoso-sparql-client";
 import * as Predicates from "../constants/predicates";
 import { db } from "../config/client";
-import { getNewNode, getAllProps, getTripleObjectType } from "../helpers";
+import { getNewNode, getAllProps, getTripleObjectType, classPrefix, className } from "../helpers";
 import * as Resources from "./index";
 
 export default class Resource {
     constructor(resource) {
-        this.id = 0;
         this.resource = resource;
         this.props = getAllProps(resource, false);
         this.triples = { toAdd: [], toUpdate: [], toRemove: [] };
-        this.query = {};
         this.removeOld = true;
         this.subject = undefined;
-        this.props[Predicates.type.value] = { required: false, multiple: false, type: Node };
-        this.props[Predicates.createdBy.value] = {};
+        this.props.type = {};
+        this.props.createdBy = {};
     }
 
     getResourceCreatePolicy() {
@@ -88,9 +86,12 @@ export default class Resource {
         // console.log("result:", result);
     }
 
-    setSubject(id) {
-        this.subject = new Node(this.resource.type.uriPrefix + id);
-        this.id = id;
+    setSubject(uri) {
+        if (uri.startsWith("http://")) {
+            this.subject = new Node(uri);
+        } else {
+            this.subject = new Node(classPrefix(this.resource.type) + uri);
+        }
     }
 
     async setInputPredicates(data) {
@@ -109,7 +110,7 @@ export default class Resource {
             return;
         }
         if (!this.props.hasOwnProperty(predicateName)) {
-            throw `Attribute '${predicateName}' is not acceptable for resource ${this.resource.type.value}`;
+            throw `Attribute '${predicateName}' is not acceptable for resource '${this.resource.type}'`;
         }
         if (!this.props[predicateName].multiple) {
             if (Array.isArray(value)) {
@@ -118,9 +119,9 @@ export default class Resource {
                 }
                 value = value[0];
             }
-            await this._setProperty(Predicates[predicateName], value);
+            await this._setProperty(predicateName, value);
         } else {
-            await this._setArrayProperty(Predicates[predicateName], value);
+            await this._setArrayProperty(predicateName, value);
         }
     }
 
@@ -156,10 +157,10 @@ export default class Resource {
     }
 
     async _prepareTriplesToStore(userURI) {
-        this.subject = await getNewNode(this.resource.type.uriPrefix);
+        this.subject = await getNewNode(classPrefix(this.resource.type));
 
-        this.props[Predicates.type.value].value = new Triple(this.subject, this._build(Predicates.type), this._build(this.resource.type));
-        this.props[Predicates.createdBy.value].value = new Triple(this.subject, this._build(Predicates.createdBy), new Node(userURI));
+        this.props.type.value = new Triple(this.subject, "rdf:type", className(this.resource.type, true));
+        this.props.createdBy.value = new Triple(this.subject, "courses:createdBy", new Node(userURI));
 
         for (var predicateName in this.props) {
             if (this.props.hasOwnProperty(predicateName)) {
@@ -175,7 +176,7 @@ export default class Resource {
                         } else {
                             await t._prepareTriplesToStore(userURI);
                             this.triples.toAdd = this.triples.toAdd.concat(t.triples.toAdd);
-                            this.triples.toAdd.push(new Triple(this.subject, this._build(Predicates[predicateName]), t.subject));
+                            this.triples.toAdd.push(new Triple(this.subject, `courses:${predicateName}`, t.subject));
                         }
                     }
                     continue;
@@ -187,7 +188,7 @@ export default class Resource {
                 } else {
                     await val._prepareTriplesToStore(userURI);
                     this.triples.toAdd = this.triples.toAdd.concat(val.triples.toAdd);
-                    this.triples.toAdd.push(new Triple(this.subject, this._build(Predicates[predicateName]), val.subject));
+                    this.triples.toAdd.push(new Triple(this.subject, `courses:${predicateName}`, val.subject));
                 }
             }
         }
@@ -246,7 +247,7 @@ export default class Resource {
         db.setQueryFormat("application/json");
         db.setQueryGraph("http://www.courses.matfyz.sk/data");
         return db.query(
-            `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ?type . ?type rdfs:subClassOf* ${resourceClass.prefix.name}:${resourceClass.value}}`,
+            `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ?type . ?type rdfs:subClassOf* ${className(resourceClass, true)}}`,
             true
         );
     }
@@ -256,78 +257,74 @@ export default class Resource {
 
         const objectValueType = typeof objectValue;
 
-        if (objectValueType == "string") {
-            const object = getTripleObjectType(this.props[predicate.value].dataType, objectValue);
+        if (objectValueType == "string" || objectValueType == "number" || objectValueType == "boolean") {
+            const object = getTripleObjectType(this.props[predicate].dataType, objectValue);
 
-            if (this.props[predicate.value].dataType === "node") {
-                const objectClass = Resources[this.props[predicate.value].objectClass].type;
+            if (this.props[predicate].dataType === "node") {
+                const objectClass = this.props[predicate].objectClass;
                 const data = await this._resourceExists(objectValue, objectClass);
                 if (data.results.bindings.length == 0) {
                     throw `Resource with URI ${objectValue} does not exists`;
                 }
             }
-            if (!this.props[predicate.value].value) {
-                this.props[predicate.value].value = new Triple(this.subject, this._build(predicate), object);
+            if (!this.props[predicate].value) {
+                this.props[predicate].value = new Triple(this.subject, `courses:${predicate}`, object);
             } else {
-                this.props[predicate.value].value.setOperation(Triple.ADD);
-                this.props[predicate.value].value.updateObject(object);
+                this.props[predicate].value.setOperation(Triple.ADD);
+                this.props[predicate].value.updateObject(object);
             }
         } else {
             // objectValue je objekt
             const r = new Resource(Resources[objectValue.type]);
             delete objectValue["type"];
             r.setInputPredicates(objectValue);
-            this.props[predicate.value].value = r;
+            this.props[predicate].value = r;
         }
     }
 
     async _setArrayProperty(predicate, objectValue) {
-        if (this.props[predicate.value].value && this.removeOld) {
-            for (var triple of this.props[predicate.value].value) {
+        if (this.props[predicate].value && this.removeOld) {
+            for (var triple of this.props[predicate].value) {
                 triple.setOperation(Triple.REMOVE);
             }
         }
-        if (!this.props[predicate.value].hasOwnProperty("value")) {
-            this.props[predicate.value].value = [];
+        if (!this.props[predicate].hasOwnProperty("value")) {
+            this.props[predicate].value = [];
         }
 
-        if (this.props[predicate.value].dataType === "node") {
-            const objectClass = this.props[predicate.value].objectClass;
+        if (this.props[predicate].dataType === "node") {
+            const objectClass = this.props[predicate].objectClass;
             for (var value of objectValue) {
                 const data = await this._resourceExists(value, objectClass);
                 if (data.results.bindings.length == 0) {
                     throw `Resource with URI ${objectValue} does not exists`;
                 }
-                const object = getTripleObjectType(this.props[predicate.value].dataType, value);
-                this.props[predicate.value].value.push(new Triple(this.subject, this._build(predicate), object));
+                const object = getTripleObjectType(this.props[predicate].dataType, value);
+                this.props[predicate].value.push(new Triple(this.subject, `courses:${predicate}`, object));
             }
         } else {
             for (var value of objectValue) {
-                const object = getTripleObjectType(this.props[predicate.value].dataType, value);
-                this.props[predicate.value].value.push(new Triple(this.subject, this._build(predicate), object));
+                const object = getTripleObjectType(this.props[predicate].dataType, value);
+                this.props[predicate].value.push(new Triple(this.subject, `courses:${predicate}`, object));
             }
         }
     }
 
     _setNewProperty(predicate, objectValue) {
-        const object = getTripleObjectType(this.props[predicate.value].dataType, objectValue);
-        this.props[predicate.value].value = new Triple(this.subject, this._build(predicate), object, "nothing");
+        const object = getTripleObjectType(this.props[predicate].dataType, objectValue);
+        this.props[predicate].value = new Triple(this.subject, `courses:${predicate}`, object, "nothing");
     }
 
     _setNewArrayProperty(predicate, objectValue) {
-        this.props[predicate.value].value = [];
+        this.props[predicate].value = [];
         if (!objectValue) return;
         for (var value of objectValue) {
-            const object = getTripleObjectType(this.props[predicate.value].dataType, value);
-            this.props[predicate.value].value.push(new Triple(this.subject, this._build(predicate), object, "nothing"));
+            const object = getTripleObjectType(this.props[predicate].dataType, value);
+            this.props[predicate].value.push(new Triple(this.subject, `courses:${predicate}`, object, "nothing"));
         }
     }
 
     async _storeTriples() {
-        console.log("to add:", this.triples.toAdd);
-        console.log("to remove:", this.triples.toRemove);
-        console.log("to update:", this.triples.toUpdate);
-
         if (this.triples.toRemove.length > 0) {
             db.getLocalStore().empty();
             db.getLocalStore().bulk(this.triples.toRemove);
@@ -348,15 +345,15 @@ export default class Resource {
     }
 
     async store(userURI) {
-        await this._prepareTriplesToStore(userURI);
-
-        // console.log(this.triples.toAdd);
-
-        // return new Promise(1);
-
-        db.getLocalStore().empty();
-        db.getLocalStore().bulk(this.triples.toAdd);
-        return db.store(true);
+        try {
+            await this._prepareTriplesToStore(userURI);
+            console.log(this.triples.toAdd);
+            db.getLocalStore().empty();
+            db.getLocalStore().bulk(this.triples.toAdd);
+            return db.store(true);
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     delete() {
@@ -369,10 +366,10 @@ export default class Resource {
     completeDelete() {
         db.setQueryFormat("application/json");
         db.setQueryGraph("http://www.courses.matfyz.sk/data");
-        return db.query(`DELETE WHERE {<${this.resource.type.uriPrefix + this.id}> ?p ?o}`, true).then(() => {
+        return db.query(`DELETE WHERE {<${this.subject.iri}> ?p ?o}`, true).then(() => {
             db.setQueryFormat("application/json");
             db.setQueryGraph("http://www.courses.matfyz.sk/data");
-            return db.query(`DELETE WHERE {?s ?p <${this.resource.type.uriPrefix + this.id}>}`, true);
+            return db.query(`DELETE WHERE {?s ?p <${this.subject.iri}>}`, true);
         });
     }
 
@@ -389,7 +386,7 @@ export default class Resource {
     fetch() {
         db.setQueryFormat("application/json");
         db.setQueryGraph("http://www.courses.matfyz.sk/data");
-        return db.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this.resource.type.uriPrefix + this.id}>}`, true);
+        return db.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this.subject.iri}>}`, true);
     }
 
     _prepareData(data) {
@@ -425,9 +422,9 @@ export default class Resource {
                     if (!Array.isArray(data[predicateName])) {
                         data[predicateName] = [data[predicateName]];
                     }
-                    this._setNewArrayProperty(Predicates[predicateName], data[predicateName]);
+                    this._setNewArrayProperty(predicateName, data[predicateName]);
                 } else {
-                    this._setNewProperty(Predicates[predicateName], data[predicateName]);
+                    this._setNewProperty(predicateName, data[predicateName]);
                 }
             }
         });
