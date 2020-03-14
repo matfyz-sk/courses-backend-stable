@@ -2,11 +2,12 @@ import lib from "sparql-transformer";
 import { ontologyURI, virtuosoEndpoint, dcTermsURI } from "../constants";
 import { getAllProps, classPrefix, className } from "../helpers";
 import * as Resources from "../model";
+import * as Constants from "../constants";
 
 const sparqlOptions = {
    context: ontologyURI,
    endpoint: virtuosoEndpoint,
-   debug: true
+   debug: false
 };
 
 const sparqlPrefixes = {
@@ -14,7 +15,7 @@ const sparqlPrefixes = {
    dc: dcTermsURI
 };
 
-function generateQuery(resource, filters) {
+function generateQuery(resource, filters, user) {
    var query = {
       "@graph": {},
       $where: [],
@@ -22,18 +23,19 @@ function generateQuery(resource, filters) {
       $prefixes: sparqlPrefixes
    };
 
+   query["@graph"]["@id"] = resource.uri;
+
    if (filters.id) {
       resource.uri = `<${classPrefix(resource.obj.type) + filters.id}>`;
+      query["@graph"]["@id"] = classPrefix(resource.obj.type) + filters.id;
    }
-
-   query["@graph"]["@id"] = resource.uri;
 
    if (resource.obj.hasOwnProperty("subclasses")) {
       query["@graph"]["@type"] = "?type";
       query.$where.push(`${resource.uri} rdf:type ?type`);
       query.$where.push(`?type rdfs:subClassOf* ${className(resource.obj.type, true)}`);
    } else {
-      query["@graph"]["@type"] = className(resource.obj.type);
+      query["@graph"]["@type"] = Constants.ontologyURI + className(resource.obj.type);
       query.$where.push(`${resource.uri} rdf:type ${className(resource.obj.type, true)}`);
    }
 

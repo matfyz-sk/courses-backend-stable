@@ -7,15 +7,10 @@ export const team = {
       courseInstance: {
          required: true,
          multiple: false,
-         change: false,
          dataType: "node",
-         objectClass: "courseInstance"
+         objectClass: "courseInstance",
+         change: ["admin"]
       }
    },
-   createPolicy: [
-      // musi byt studentom kurzu
-      // nesmie byt uz clenom nejakeho timu v tomto kurze
-      "courseInstance:^memberOf:{userURI}",
-      "-({userURI}:memberOf:?teamURI)"
-   ]
+   create: ["[this].courseInstance/^studentOf.{userURI}"]
 };

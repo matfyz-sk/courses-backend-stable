@@ -6,13 +6,14 @@ export const quizTake = {
          required: false,
          multiple: false,
          dataType: "dateTime",
-         change: "[this].ofQuizAssignment/courseInstance/^instructorOf.{userURI}"
+         change: ["[this].ofQuizAssignment/courseInstance/^instructorOf.{userURI}"]
       },
       ofQuizAssignment: {
          required: true,
          multiple: false,
          dataType: "node",
-         objectClass: "quizAssignment"
+         objectClass: "quizAssignment",
+         change: ["admin"]
       }
    },
    create: "[this].ofQuizAssignment/assignedTo.{userURI}"

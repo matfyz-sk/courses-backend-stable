@@ -17,5 +17,7 @@ export const field = {
          dataType: "node",
          objectClass: "fieldType"
       }
-   }
+   },
+   create: "admin",
+   completeDelete: "superAdmin"
 };

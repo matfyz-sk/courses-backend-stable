@@ -34,9 +34,9 @@ dataRouter.post("/:className", DataController.createResource);
 
 dataRouter.get("/:className/:id?", DataController.getResource);
 
-dataRouter.put("/:className/:id", DataController.putResource);
+dataRouter.put("/:className/:id", DataController.updateResource);
 
-dataRouter.patch("/:className/:id", DataController.patchResource);
+dataRouter.patch("/:className/:id", DataController.updateResource);
 
 dataRouter.delete("/:className/:id/:attributeName?", DataController.deleteResource);
 

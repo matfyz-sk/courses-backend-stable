@@ -23,5 +23,6 @@ export const topic = {
          dataType: "node",
          objectClass: "topic"
       }
-   }
+   },
+   create: "[this].^covers/^instanceOf/^instructorOf.{userURI}"
 };

@@ -7,22 +7,26 @@ export const codeComment = {
       commentedText: {
          required: true,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         change: ["[this].ofSubmission.ofAssignment.courseInstance.^instructorOf.{userURI}"]
       },
       commentedTextFrom: {
          required: true,
          multiple: false,
-         dataType: "integer"
+         dataType: "integer",
+         change: ["[this].ofSubmission.ofAssignment.courseInstance.^instructorOf.{userURI}"]
       },
       commentedTextTo: {
          required: true,
          multiple: false,
-         dataType: "integer"
+         dataType: "integer",
+         change: ["[this].ofSubmission.ofAssignment.courseInstance.^instructorOf.{userURI}"]
       },
       filePath: {
          required: false,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         change: ["[this].ofSubmission.ofAssignment.courseInstance.^instructorOf.{userURI}"]
       }
    }
 };

@@ -9,7 +9,7 @@ export const quizTakePrototype = {
          multiple: true,
          dataType: "node",
          objectClass: "orderedQuestion",
-         change: "[this].createdBy.{userURI}"
+         change: ["owner"]
       }
    }
 };

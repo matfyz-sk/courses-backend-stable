@@ -268,6 +268,7 @@ export default class Resource {
       const objectValueType = typeof objectValue;
 
       if (objectValueType == "string" || objectValueType == "number" || objectValueType == "boolean") {
+         console.log("here", predicate);
          const object = getTripleObjectType(this.props[predicate].dataType, objectValue);
 
          if (this.props[predicate].dataType === "node") {
@@ -285,6 +286,7 @@ export default class Resource {
          }
       } else {
          // objectValue je objekt
+         console.log("here");
          const r = new Resource(Resources[objectValue.type]);
          delete objectValue["type"];
          r.setInputPredicates(objectValue);
@@ -383,12 +385,7 @@ export default class Resource {
       });
    }
 
-   patch() {
-      this._prepareTriplesToUpdate();
-      return this._storeTriples();
-   }
-
-   put() {
+   update() {
       this._prepareTriplesToUpdate();
       return this._storeTriples();
    }

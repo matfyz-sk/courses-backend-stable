@@ -5,25 +5,29 @@ export const comment = {
       commentText: {
          required: true,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         change: ["owner"]
       },
       ofSubmission: {
          required: false,
          multiple: false,
          dataType: "node",
-         objectClass: "submission"
+         objectClass: "submission",
+         change: ["superAdmin"]
       },
       ofQuestion: {
          required: false,
          multiple: false,
          dataType: "node",
-         objectClass: "question"
+         objectClass: "question",
+         change: ["superAdmin"]
       },
       ofComment: {
          required: false,
          multiple: false,
          dataType: "node",
-         objectClass: "comment"
+         objectClass: "comment",
+         change: ["superAdmin"]
       }
    }
 };

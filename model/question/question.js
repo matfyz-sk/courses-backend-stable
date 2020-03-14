@@ -5,53 +5,60 @@ export const question = {
       name: {
          required: true,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         change: ["owner"]
       },
       text: {
          required: true,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         change: ["owner"]
       },
       visibilityIsRestricted: {
          required: false,
          multiple: false,
-         dataType: "boolean"
+         dataType: "boolean",
+         change: ["owner"]
       },
       hasQuestionState: {
          required: false,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         change: ["owner"]
       },
       ofTopic: {
          required: true,
          multiple: false,
          dataType: "node",
-         objectClass: "topic"
+         objectClass: "topic",
+         change: ["owner"]
       },
-      hasAuthor: {
-         required: true,
-         multiple: false,
-         dataType: "node",
-         objectClass: "user"
-      },
-      hasComment: {
-         required: false,
-         multiple: true,
-         dataType: "node",
-         objectClass: "questionComment"
-      },
+      // hasAuthor: {
+      //    required: true,
+      //    multiple: false,
+      //    dataType: "node",
+      //    objectClass: "user"
+      // },
+      // hasComment: {
+      //    required: false,
+      //    multiple: true,
+      //    dataType: "node",
+      //    objectClass: "questionComment"
+      // },
       approver: {
          required: false,
          multiple: false,
          dataType: "node",
-         objectClass: "user"
+         objectClass: "user",
+         change: ["[this].ofTopic.^covers/courseInstance/^instructorOf.{userURI}"]
       },
       hasChangeEvent: {
          required: false,
          multiple: false,
          dataType: "node",
-         objectClass: "changeEvent"
+         objectClass: "changeEvent",
+         change: ["owner"]
       }
    },
-   createPolicy: ["ofTopic:^covers/assignedTo:{userURI}"]
+   createPolicy: ["[this].ofTopic/^covers/assignedTo.{userURI}"]
 };

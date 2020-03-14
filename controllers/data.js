@@ -17,17 +17,26 @@ export function deleteResource(req, res) {
 }
 
 export function getResource(req, res) {
+   req.user.superAdmin = true;
+
+   if (Object.keys(req.query).length == 0 && req.params.id == undefined) {
+      if (!req.user.superAdmin) {
+         return res.status(401).send({ status: false, msg: "Request is not allowed" });
+      }
+   }
+
    if (req.params.id) {
       req.query["id"] = req.params.id;
    }
+
    runQuery(res.locals.resource.resource, req.query)
       .then(data => res.status(200).send(data))
       .catch(err => res.status(500).send({ status: false, msg: err }));
 }
 
-export async function patchResource(req, res) {
+export async function updateResource(req, res) {
    const resource = res.locals.resource;
-   resource.removeOld = true;
+   resource.removeOld = req.method == "PATCH" ? true : false;
    for (var predicateName in req.body) {
       if (req.body.hasOwnProperty(predicateName)) {
          try {
@@ -38,25 +47,7 @@ export async function patchResource(req, res) {
       }
    }
    resource
-      .patch()
-      .then(data => res.status(200).send({ status: true }))
-      .catch(err => res.status(500).send({ status: false, msg: err }));
-}
-
-export async function putResource(req, res) {
-   const resource = res.locals.resource;
-   resource.removeOld = false;
-   for (var predicateName in req.body) {
-      if (req.body.hasOwnProperty(predicateName)) {
-         try {
-            await resource.setPredicate(predicateName, req.body[predicateName]);
-         } catch (err) {
-            return res.status(422).send({ status: false, msg: err });
-         }
-      }
-   }
-   resource
-      .put()
+      .update()
       .then(data => res.status(200).send({ status: true }))
       .catch(err => res.status(500).send({ status: false, msg: err }));
 }

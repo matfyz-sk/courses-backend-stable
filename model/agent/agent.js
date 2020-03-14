@@ -5,12 +5,14 @@ export const agent = {
       name: {
          required: true,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         name: ["admin"]
       },
       avatar: {
          required: false,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         change: ["owner"]
       }
    }
 };

@@ -5,37 +5,43 @@ export const task = {
       name: {
          required: true,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         change: ["[this].courseInstance/^instructorOf.{userURI}"]
       },
       description: {
          required: false,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         change: ["[this].courseInstance/^instructorOf.{userURI}"]
       },
       covers: {
          required: false,
          multiple: true,
          dataType: "node",
-         objectClass: "topic"
+         objectClass: "topic",
+         change: ["[this].courseInstance/^instructorOf.{userURI}"]
       },
       mentions: {
          required: false,
          multiple: true,
          dataType: "node",
-         objectClass: "topic"
+         objectClass: "topic",
+         change: ["[this].courseInstance/^instructorOf.{userURI}"]
       },
       requires: {
          required: false,
          multiple: true,
          dataType: "node",
-         objectClass: "topic"
+         objectClass: "topic",
+         change: ["[this].courseInstance/^instructorOf.{userURI}"]
       },
       courseInstance: {
          required: true,
          multiple: false,
          dataType: "node",
-         objectClass: "courseInstance"
+         objectClass: "courseInstance",
+         change: ["owner,admin"]
       }
    },
-   createPolicy: ["courseInstance.^courses:instructorOf.{userURI}"]
+   create: ["[this].courseInstance/^instructorOf.{userURI}"]
 };

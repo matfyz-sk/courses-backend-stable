@@ -36,5 +36,5 @@ export const submission = {
          dataType: "boolean"
       }
    },
-   createPolicy: ["ofAssignment.courses:courseInstance/^courses:studentOf.{userURI}"]
+   create: ["[this].ofAssignment/courseInstance/^studentOf.{userURI}"]
 };

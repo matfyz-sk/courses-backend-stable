@@ -7,7 +7,8 @@ export const openQuestion = {
       regexp: {
          required: false,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
+         change: ["owner"]
       }
    }
 };
