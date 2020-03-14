@@ -1,14 +1,10 @@
-import Query from "../query/Query";
+import runQuery from "../query";
 
-export function runQuery(req, res) {
+export function getResource(req, res) {
    if (req.params.id) {
       req.query["id"] = req.params.id;
    }
-
-   const query = new Query(res.locals.resource.resource);
-   query.generateQuery(req.query);
-   query
-      .run()
+   runQuery(res.locals.resource.resource, req.query)
       .then(data => res.status(200).send(data))
       .catch(err => res.status(500).send({ status: false, msg: err }));
 }

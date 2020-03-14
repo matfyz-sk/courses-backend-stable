@@ -12,23 +12,22 @@ const port = 3010;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(
-  cors({
-    origin: "*"
-  })
+   cors({
+      origin: "*"
+   })
 );
 
 app.use(
-  "/data",
-  expressJWT({ secret: authSecret }),
-  (err, req, res, next) => {
-    if (err.name === "UnauthorizedError") {
-      res.status(401).send({ message: err.message });
-      // logger.error(err);
-      return;
-    }
-    next();
-  },
-  dataRouter
+   "/data",
+   expressJWT({ secret: authSecret }),
+   (err, req, res, next) => {
+      if (err.name === "UnauthorizedError") {
+         res.status(401).send({ message: err.message });
+         return;
+      }
+      next();
+   },
+   dataRouter
 );
 
 app.use("/auth", authRouter);

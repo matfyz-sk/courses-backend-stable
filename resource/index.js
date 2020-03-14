@@ -1,8 +1,7 @@
 import { Triple, Node, Text } from "virtuoso-sparql-client";
-import * as Predicates from "../constants/predicates";
 import { db } from "../config/client";
 import { getNewNode, getAllProps, getTripleObjectType, classPrefix, className } from "../helpers";
-import * as Resources from "./index";
+import * as Resources from "../model";
 
 export default class Resource {
    constructor(resource) {

@@ -1,4 +1,4 @@
-import Resource from "../model/Resource";
+import Resource from "../resource";
 import { userProfile } from "../model/agent/userProfile";
 import { db } from "../config/client";
 import { validationResult } from "express-validator";
@@ -19,7 +19,7 @@ import {
    nickname
 } from "../constants/predicates";
 import { authSecret } from "../constants";
-import Query from "../query/Query";
+import query from "../query";
 
 export function checkValidation(req, res, next) {
    const errors = validationResult(req);
