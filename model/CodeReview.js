@@ -3,9 +3,9 @@
 // import { hasGeneralComment, hasCodeComment } from "../constants/predicates";
 
 // export const codeReview = {
-//     type: CodeReview,
+//     type: "CodeReview",
 //     props: {
-//         [hasGeneralComment.value]: { required: false, multiple: false, type: Node, primitive: false },
-//         [hasCodeComment.value]: { required: false, multiple: false, type: Node, primitive: false }
+//         hasGeneralComment: { required: false, multiple: false, type: "Node", primitive: false },
+//         hasCodeComment: { required: false, multiple: false, type: "Node", primitive: false }
 //     }
 // };

@@ -1,91 +1,95 @@
-import { agent } from "./Agent/Agent";
-import { user } from "./Agent/User";
-import { team } from "./Agent/Team";
-import { question } from "./Question/Question";
-import { essayQuestion } from "./Question/EssayQuestion";
-import { openQuestion } from "./Question/OpenQuestion";
-import { questionWithPredefinedAnswer } from "./Question/QuestionWithPredefinedAnswer";
-import { userAnswer } from "./UserAnswer/UserAnswer";
-import { directAnswer } from "./UserAnswer/DirectAnswer";
-import { orderedAnswer } from "./UserAnswer/OrderedAnswer";
-import { orderedQuestion } from "./OrderedQuestion";
-import { predefinedAnswer } from "./PredefinedAnswer";
+// export { agent } from "./agent/agent";
+// import { user } from "./agent/user";
+// import { team } from "./agent/team";
+import * as Agent from "./agent";
+import { question } from "./question/question";
+import { essayQuestion } from "./question/essayQuestion";
+import { openQuestion } from "./question/openQuestion";
+import { questionWithPredefinedAnswer } from "./question/questionWithPredefinedAnswer";
+import { userAnswer } from "./userAnswer/userAnswer";
+import { directAnswer } from "./userAnswer/directAnswer";
+import { orderedAnswer } from "./userAnswer/orderedAnswer";
+import { orderedQuestion } from "./orderedQuestion";
+import { predefinedAnswer } from "./predefinedAnswer";
 import { questionComment } from "./QuestionComment";
-import { quizTake } from "./QuizTake/QuizTake";
-import { quizTakePrototype } from "./QuizTake/QuizTakePrototype";
-import { topic } from "./Topic";
-import { event } from "./Event/Event";
-import { lecture } from "./Event/Session/Lecture";
-import { lab } from "./Event/Session/Lab";
-import { session } from "./Event/Session/Session";
-import { block } from "./Event/Block";
-import { courseInstance } from "./Event/CourseInstance";
-import { assignment } from "./Task/Assignment";
-import { codeComment } from "./Comment/CodeComment";
+import { quizTake } from "./quizTake/quizTake";
+import { quizTakePrototype } from "./quizTake/quizTakePrototype";
+import { topic } from "./topic";
+import { event } from "./event/event";
+import { lecture } from "./event/session/lecture";
+import { lab } from "./event/session/lab";
+import { session } from "./event/session/session";
+import { block } from "./event/block";
+import { courseInstance } from "./event/courseInstance";
+import { assignment } from "./task/assignment";
+import { codeComment } from "./comment/codeComment";
 import { codeReview } from "./CodeReview";
-import { course } from "./Course";
-import { field } from "./Field";
-import { fieldType } from "./FieldType";
-import { generatedQuizAssignment } from "./Task/QuizAssignment/GeneratedQuizAssignment";
-import { manualQuizAssignment } from "./Task/QuizAssignment/ManualQuizAssignment";
-import { material } from "./Material";
-import { questionAssignment } from "./Task/QuestionAssignment";
-import { quizAssignment } from "./Task/QuizAssignment/QuizAssignment";
-import { review } from "./Review";
+import { course } from "./course";
+import { field } from "./field";
+import { fieldType } from "./fieldType";
+import { generatedQuizAssignment } from "./task/quizAssignment/generatedQuizAssignment";
+import { manualQuizAssignment } from "./task/quizAssignment/manualQuizAssignment";
+import { material } from "./material";
+import { questionAssignment } from "./task/questionAssignment";
+import { quizAssignment } from "./task/quizAssignment/quizAssignment";
+import { review } from "./review";
 import { studentReview } from "./StudentReview";
-import { submission } from "./Submission";
-import { subbmittedField } from "./SubmittedField";
-import { teamReview } from "./TeamReview";
-import { topicAppearance } from "./TopicAppearance";
+import { submission } from "./submission";
+import { subbmittedField } from "./submittedField";
+import { teamReview } from "./teamReview";
+import { topicAppearance } from "./topicAppearance";
 import { toReview } from "./ToReview";
-import { task } from "./Task/Task";
-import { taskEvent } from "./Event/TaskEvent/TaskEvent";
-import { assignmentPeriod } from "./Event/TaskEvent/AssignmentPeriod";
-import { comment } from "./Comment/Comment";
+import { task } from "./task/task";
+import { taskEvent } from "./event/taskEvent/taskEvent";
+import { assignmentPeriod } from "./event/taskEvent/assignmentPeriod";
+import { comment } from "./comment/comment";
+
+console.log(Agent);
 
 module.exports = {
-    agent,
-    user,
-    team,
-    question,
-    essayQuestion,
-    openQuestion,
-    questionWithPredefinedAnswer,
-    userAnswer,
-    directAnswer,
-    orderedAnswer,
-    orderedQuestion,
-    predefinedAnswer,
-    questionComment,
-    quizTake,
-    quizTakePrototype,
-    topic,
-    event,
-    lecture,
-    lab,
-    session,
-    block,
-    courseInstance,
-    assignment,
-    codeComment,
-    codeReview,
-    course,
-    field,
-    fieldType,
-    generatedQuizAssignment,
-    manualQuizAssignment,
-    material,
-    questionAssignment,
-    quizAssignment,
-    review,
-    studentReview,
-    submission,
-    subbmittedField,
-    teamReview,
-    topicAppearance,
-    toReview,
-    task,
-    taskEvent,
-    assignmentPeriod,
-    comment
+   Agent,
+   //    agent,
+   //    user,
+   //    team,
+   question,
+   essayQuestion,
+   openQuestion,
+   questionWithPredefinedAnswer,
+   userAnswer,
+   directAnswer,
+   orderedAnswer,
+   orderedQuestion,
+   predefinedAnswer,
+   questionComment,
+   quizTake,
+   quizTakePrototype,
+   topic,
+   event,
+   lecture,
+   lab,
+   session,
+   block,
+   courseInstance,
+   assignment,
+   codeComment,
+   codeReview,
+   course,
+   field,
+   fieldType,
+   generatedQuizAssignment,
+   manualQuizAssignment,
+   material,
+   questionAssignment,
+   quizAssignment,
+   review,
+   studentReview,
+   submission,
+   subbmittedField,
+   teamReview,
+   topicAppearance,
+   toReview,
+   task,
+   taskEvent,
+   assignmentPeriod,
+   comment
 };

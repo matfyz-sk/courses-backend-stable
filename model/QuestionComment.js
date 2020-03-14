@@ -3,28 +3,28 @@
 // import { commentText, hasAuthor, created, ofQuestion } from "../constants/predicates";
 
 // export const questionComment = {
-//     type: QuestionComment,
+//     type: "QuestionComment",
 //     props: {
-//         [commentText.value]: {
+//         commentText: {
 //             required: true,
 //             multiple: false,
 //             dataType: "string",
 //             change: "[this].hasAuthor.{userURI}"
 //         },
-//         [hasAuthor.value]: {
+//         hasAuthor: {
 //             required: true,
 //             multiple: false,
 //             dataType: "node",
 //             objectClass: User,
 //             fillOnCreate: true
 //         },
-//         [created.value]: {
+//         created: {
 //             required: false,
 //             multiple: false,
 //             dataType: "dateTime",
 //             fillOnCreate: true
 //         },
-//         [ofQuestion.value]: {
+//         ofQuestion: {
 //             required: true,
 //             multiple: false,
 //             dataType: "node",

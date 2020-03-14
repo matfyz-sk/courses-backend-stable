@@ -3,7 +3,7 @@ import * as Constants from "../constants";
 
 const db = new Client(Constants.virtuosoEndpoint);
 db.addPrefixes({
-    courses: Constants.ontologyURI
+   courses: Constants.ontologyURI
 });
 db.setQueryFormat("application/json");
 db.setQueryGraph(Constants.graphURI);

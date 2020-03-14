@@ -6,10 +6,10 @@ import * as PatchController from "./patch";
 import * as AuthController from "./auth";
 
 module.exports = {
-    PostController,
-    GetController,
-    DeleteController,
-    PutController,
-    PatchController,
-    AuthController
+   PostController,
+   GetController,
+   DeleteController,
+   PutController,
+   PatchController,
+   AuthController
 };

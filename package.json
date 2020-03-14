@@ -1,35 +1,35 @@
 {
-    "name": "courses-backend",
-    "version": "1.0.0",
-    "description": "Backend of web application",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/mcifra/courses-backend"
-    },
-    "main": "server.js",
-    "scripts": {
-        "start": "nodemon --exec babel-node server.js",
-        "debug": "nodemon --inspect --exec babel-node  server.js"
-    },
-    "author": "Milan Cifra",
-    "license": "ISC",
-    "dependencies": {
-        "axios": "^0.19.2",
-        "bcrypt": "^3.0.8",
-        "body-parser": "^1.19.0",
-        "cors": "^2.8.5",
-        "express": "^4.17.1",
-        "express-jwt": "^5.3.1",
-        "express-validator": "^6.2.0",
-        "jsonwebtoken": "^8.5.1",
-        "sparql-transformer": "^2.1.1",
-        "virtuoso-sparql-client": "^0.2.2",
-        "virtuoso-uid": "^1.0.7"
-    },
-    "devDependencies": {
-        "@babel/core": "^7.6.4",
-        "@babel/node": "^7.6.3",
-        "@babel/preset-env": "^7.6.3",
-        "nodemon": "^1.19.4"
-    }
+   "name": "courses-backend",
+   "version": "1.0.0",
+   "description": "Backend of web application",
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/mcifra/courses-backend"
+   },
+   "main": "server.js",
+   "scripts": {
+      "start": "nodemon --exec babel-node server.js",
+      "debug": "nodemon --inspect --exec babel-node  server.js"
+   },
+   "author": "Milan Cifra",
+   "license": "ISC",
+   "dependencies": {
+      "axios": "^0.19.2",
+      "bcrypt": "^3.0.8",
+      "body-parser": "^1.19.0",
+      "cors": "^2.8.5",
+      "express": "^4.17.1",
+      "express-jwt": "^5.3.1",
+      "express-validator": "^6.2.0",
+      "jsonwebtoken": "^8.5.1",
+      "sparql-transformer": "^2.1.1",
+      "virtuoso-sparql-client": "^0.2.2",
+      "virtuoso-uid": "^1.0.7"
+   },
+   "devDependencies": {
+      "@babel/core": "^7.6.4",
+      "@babel/node": "^7.6.3",
+      "@babel/preset-env": "^7.6.3",
+      "nodemon": "^1.19.4"
+   }
 }
