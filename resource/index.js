@@ -1,17 +1,28 @@
-import { Triple, Node, Text } from "virtuoso-sparql-client";
-import { db } from "../config/client";
+import { Client, Triple, Node } from "virtuoso-sparql-client";
 import { getNewNode, getAllProps, getTripleObjectType, classPrefix, className } from "../helpers";
 import * as Resources from "../model";
+import * as Constants from "../constants";
 
 export default class Resource {
    constructor(resource) {
       this.resource = resource;
       this.props = getAllProps(resource, false);
       this.triples = { toAdd: [], toUpdate: [], toRemove: [] };
+      this.db = new Client(Constants.virtuosoEndpoint);
+      this._setupVirtuosoClient();
       this.removeOld = true;
       this.subject = undefined;
       this.props.type = {};
       this.props.createdBy = {};
+   }
+
+   _setupVirtuosoClient() {
+      this.db.addPrefixes({
+         courses: Constants.ontologyURI
+      });
+      this.db.setQueryFormat("application/json");
+      this.db.setQueryGraph(Constants.graphURI);
+      this.db.setDefaultGraph(Constants.graphURI);
    }
 
    getResourceCreatePolicy() {
@@ -35,8 +46,8 @@ export default class Resource {
       const policies = this.getResourceCreatePolicy();
       console.log(policies);
       var promises = [];
-      db.setQueryFormat("application/json");
-      db.setQueryGraph("http://www.courses.matfyz.sk/data");
+      this.db.setQueryFormat("application/json");
+      this.db.setQueryGraph(Constants.graphURI);
 
       var result = true;
 
@@ -66,7 +77,7 @@ export default class Resource {
          const query = `SELECT <${subject}> WHERE {<${subject}> ${propertyPath} <${object}>}`;
 
          promises.push(
-            db
+            this.db
                .query(query, true)
                .then(data => {
                   console.log(data.results.bindings);
@@ -243,9 +254,9 @@ export default class Resource {
    }
 
    _resourceExists(resourceURI, resourceClass) {
-      db.setQueryFormat("application/json");
-      db.setQueryGraph("http://www.courses.matfyz.sk/data");
-      return db.query(
+      this.db.setQueryFormat("application/json");
+      this.db.setQueryGraph(Constants.graphURI);
+      return this.db.query(
          `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ?type . ?type rdfs:subClassOf* ${className(resourceClass, true)}}`,
          true
       );
@@ -325,21 +336,21 @@ export default class Resource {
 
    async _storeTriples() {
       if (this.triples.toRemove.length > 0) {
-         db.getLocalStore().empty();
-         db.getLocalStore().bulk(this.triples.toRemove);
-         await db.store(true);
+         this.db.getLocalStore().empty();
+         this.db.getLocalStore().bulk(this.triples.toRemove);
+         await this.db.store(true);
       }
 
       if (this.triples.toAdd.length > 0) {
-         db.getLocalStore().empty();
-         db.getLocalStore().bulk(this.triples.toAdd);
-         await db.store(true);
+         this.db.getLocalStore().empty();
+         this.db.getLocalStore().bulk(this.triples.toAdd);
+         await this.db.store(true);
       }
 
       if (this.triples.toUpdate.length > 0) {
-         db.getLocalStore().empty();
-         db.getLocalStore().bulk(this.triples.toUpdate);
-         await db.store(true);
+         this.db.getLocalStore().empty();
+         this.db.getLocalStore().bulk(this.triples.toUpdate);
+         await this.db.store(true);
       }
    }
 
@@ -347,9 +358,9 @@ export default class Resource {
       try {
          await this._prepareTriplesToStore(userURI);
          console.log(this.triples.toAdd);
-         db.getLocalStore().empty();
-         db.getLocalStore().bulk(this.triples.toAdd);
-         return db.store(true);
+         this.db.getLocalStore().empty();
+         this.db.getLocalStore().bulk(this.triples.toAdd);
+         return this.db.store(true);
       } catch (err) {
          console.log(err);
       }
@@ -357,18 +368,18 @@ export default class Resource {
 
    delete() {
       this._prepareTriplesToDelete();
-      db.getLocalStore().empty();
-      if (this.triples.toRemove.length > 0) db.getLocalStore().bulk(this.triples.toRemove);
-      return db.store(true);
+      this.db.getLocalStore().empty();
+      if (this.triples.toRemove.length > 0) this.db.getLocalStore().bulk(this.triples.toRemove);
+      return this.db.store(true);
    }
 
    completeDelete() {
-      db.setQueryFormat("application/json");
-      db.setQueryGraph("http://www.courses.matfyz.sk/data");
-      return db.query(`DELETE WHERE {<${this.subject.iri}> ?p ?o}`, true).then(() => {
-         db.setQueryFormat("application/json");
-         db.setQueryGraph("http://www.courses.matfyz.sk/data");
-         return db.query(`DELETE WHERE {?s ?p <${this.subject.iri}>}`, true);
+      this.db.setQueryFormat("application/json");
+      this.db.setQueryGraph(Constants.graphURI);
+      return this.db.query(`DELETE WHERE {<${this.subject.iri}> ?p ?o}`, true).then(() => {
+         this.db.setQueryFormat("application/json");
+         this.db.setQueryGraph(Constants.graphURI);
+         return this.db.query(`DELETE WHERE {?s ?p <${this.subject.iri}>}`, true);
       });
    }
 
@@ -383,9 +394,9 @@ export default class Resource {
    }
 
    fetch() {
-      db.setQueryFormat("application/json");
-      db.setQueryGraph("http://www.courses.matfyz.sk/data");
-      return db.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this.subject.iri}>}`, true);
+      this.db.setQueryFormat("application/json");
+      this.db.setQueryGraph(Constants.graphURI);
+      return this.db.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this.subject.iri}>}`, true);
    }
 
    _prepareData(data) {

@@ -1,7 +1,6 @@
-// export { agent } from "./agent/agent";
-// import { user } from "./agent/user";
-// import { team } from "./agent/team";
-import * as Agent from "./agent";
+import { agent } from "./agent/agent";
+import { user } from "./agent/user";
+import { team } from "./agent/team";
 import { question } from "./question/question";
 import { essayQuestion } from "./question/essayQuestion";
 import { openQuestion } from "./question/openQuestion";
@@ -44,13 +43,10 @@ import { taskEvent } from "./event/taskEvent/taskEvent";
 import { assignmentPeriod } from "./event/taskEvent/assignmentPeriod";
 import { comment } from "./comment/comment";
 
-console.log(Agent);
-
 module.exports = {
-   Agent,
-   //    agent,
-   //    user,
-   //    team,
+   agent,
+   user,
+   team,
    question,
    essayQuestion,
    openQuestion,

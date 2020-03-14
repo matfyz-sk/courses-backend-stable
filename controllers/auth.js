@@ -1,25 +1,11 @@
 import Resource from "../resource";
 import { userProfile } from "../model/agent/userProfile";
-import { db } from "../config/client";
-import { validationResult } from "express-validator";
+import { body, validationResult } from "express-validator";
 import * as jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 const axios = require("axios").default;
-import {
-   firstName,
-   lastName,
-   email,
-   password,
-   useNickName,
-   publicProfile,
-   showBadges,
-   showCourses,
-   allowContact,
-   description,
-   nickname
-} from "../constants/predicates";
 import { authSecret } from "../constants";
-import query from "../query";
+import runQuery from "../query";
 
 export function checkValidation(req, res, next) {
    const errors = validationResult(req);
@@ -30,20 +16,9 @@ export function checkValidation(req, res, next) {
 }
 
 export function emailIsFree(req, res, next) {
-   console.log("checking if email is free");
-
-   db.setQueryFormat("application/json");
-   db.setQueryGraph("http://www.courses.matfyz.sk/data");
-   db.query(
-      `SELECT ?userURI
-            WHERE {
-                ?userURI rdf:type courses:User .
-                ?userURI courses:email "${req.body.user.email}"
-            }`,
-      true
-   )
+   runQuery(userProfile, { email: req.body.user.email })
       .then(data => {
-         if (data.results.bindings.length != 0) {
+         if (data["@graph"].length != 0) {
             return res.status(200).send({ status: false, msg: "Email is already registered!", user: null });
          }
          next();
@@ -55,20 +30,19 @@ export function emailIsFree(req, res, next) {
 
 export async function createUser(req, res) {
    const user = new Resource(userProfile);
-
    const hash = bcrypt.hashSync(req.body.user.password, 10);
    try {
-      await user.setPredicate(firstName.value, req.body.user.first_name);
-      await user.setPredicate(lastName.value, req.body.user.last_name);
-      await user.setPredicate(email.value, req.body.user.email);
-      await user.setPredicate(password.value, hash);
-      await user.setPredicate(useNickName.value, req.body.privacy.use_nickname);
-      await user.setPredicate(publicProfile.value, req.body.privacy.public_profile);
-      await user.setPredicate(showCourses.value, req.body.privacy.show_courses);
-      await user.setPredicate(showBadges.value, req.body.privacy.show_badges);
-      await user.setPredicate(allowContact.value, req.body.privacy.allow_contact);
-      await user.setPredicate(description.value, req.body.user.description);
-      await user.setPredicate(nickname.value, req.body.privacy.nickname);
+      await user.setPredicate("firstName", req.body.user.first_name);
+      await user.setPredicate("lastName", req.body.user.last_name);
+      await user.setPredicate("email", req.body.user.email);
+      await user.setPredicate("password", hash);
+      await user.setPredicate("useNickName", req.body.privacy.use_nickname);
+      await user.setPredicate("publicProfile", req.body.privacy.public_profile);
+      await user.setPredicate("showCourses", req.body.privacy.show_courses);
+      await user.setPredicate("showBadges", req.body.privacy.show_badges);
+      await user.setPredicate("allowContact", req.body.privacy.allow_contact);
+      await user.setPredicate("description", req.body.user.description);
+      await user.setPredicate("nickname", req.body.privacy.nickname);
    } catch (err) {
       console.log(err);
       return res.status(200).send({ status: false, msg: err, user: null });
@@ -102,10 +76,7 @@ function generateToken({ userURI, email }) {
 }
 
 export function login(req, res) {
-   const query = new Query(userProfile);
-   query.generateQuery({ email: req.body.email });
-   query
-      .run()
+   runQuery(userProfile, { email: req.body.email })
       .then(data => {
          if (data["@graph"].length == 0) {
             return res.status(200).send({
@@ -159,9 +130,7 @@ export function githubLogin(req, res) {
                msg: "Empty email"
             });
          }
-         const u = new Resource(user);
-         const query = u.generateQuery({ email });
-         return query.run();
+         return runQuery(userProfile, { email });
       })
       .then(data => {
          if (data["@graph"].length == 0) {
@@ -209,5 +178,43 @@ export async function patchUser(req, res) {
       .then(data => res.status(200).send({ status: true }))
       .catch(err => res.status(500).send({ status: false, msg: err }));
 }
+
+export const registrationValidate = [
+   body("user").exists(),
+   body("user.first_name")
+      .exists()
+      .isString(),
+   body("user.last_name")
+      .exists()
+      .isString(),
+   body("user.email")
+      .exists()
+      .isEmail(),
+   body("user.password")
+      .exists()
+      .isString(),
+   body("privacy").exists(),
+   body("privacy.use_nickname")
+      .exists()
+      .isBoolean(),
+   body("privacy.public_profile")
+      .exists()
+      .isBoolean(),
+   body("privacy.show_courses")
+      .exists()
+      .isBoolean(),
+   body("privacy.show_badges")
+      .exists()
+      .isBoolean(),
+   body("privacy.allow_contact")
+      .exists()
+      .isBoolean(),
+   body("privacy.nickname")
+      .if(body("privacy.use_nickname").custom(value => value === true))
+      .exists()
+      .isString()
+];
+
+export const loginValidate = [body("email").exists(), body("password").exists()];
 
 export function deleteUser() {}

@@ -2,7 +2,7 @@ import { getResourceObject, prepareClassName } from "../helpers";
 import express from "express";
 const dataRouter = express.Router();
 import Resource from "../resource";
-import * as DataController from "../controllers/data";
+import { DataController } from "../controllers";
 
 dataRouter.use("/:className", (req, res, next) => {
    const resource = getResourceObject(prepareClassName(req.params.className));
