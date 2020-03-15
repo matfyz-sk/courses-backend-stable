@@ -58,5 +58,5 @@ export const event = {
          objectClass: "topic"
       }
    },
-   createPolicy: ["courseInstance.^courses:instructorOf.{userURI}"]
+   create: ["admin"]
 };

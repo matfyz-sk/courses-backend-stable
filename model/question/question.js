@@ -33,12 +33,6 @@ export const question = {
          objectClass: "topic",
          change: ["owner"]
       },
-      // hasAuthor: {
-      //    required: true,
-      //    multiple: false,
-      //    dataType: "node",
-      //    objectClass: "user"
-      // },
       // hasComment: {
       //    required: false,
       //    multiple: true,
@@ -60,5 +54,5 @@ export const question = {
          change: ["owner"]
       }
    },
-   createPolicy: ["[this].ofTopic/^covers/assignedTo.{userURI}"]
+   create: ["[this].ofTopic/^covers/assignedTo.{userURI}"]
 };

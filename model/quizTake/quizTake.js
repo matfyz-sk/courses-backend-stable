@@ -16,5 +16,5 @@ export const quizTake = {
          change: ["admin"]
       }
    },
-   create: "[this].ofQuizAssignment/assignedTo.{userURI}"
+   create: ["[this].ofQuizAssignment/assignedTo.{userURI}"]
 };

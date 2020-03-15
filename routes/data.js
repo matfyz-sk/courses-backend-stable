@@ -9,7 +9,7 @@ dataRouter.use("/:className", (req, res, next) => {
    if (!resource) {
       return res.status(400).send({ status: false, msg: `Resource with class name ${req.params.className} is not supported` });
    }
-   res.locals.resource = new Resource(resource);
+   res.locals.resource = new Resource(resource, req.user);
    next();
 });
 
@@ -27,7 +27,9 @@ dataRouter.use("/:className/:id", (req, res, next) => {
          res.locals.resource.fill(data);
          next();
       })
-      .catch(err => res.status(500).send({ status: false, msg: err }));
+      .catch(err => {
+         res.status(500).send({ status: false, msg: err });
+      });
 });
 
 dataRouter.post("/:className", DataController.createResource);

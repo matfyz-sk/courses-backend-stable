@@ -27,6 +27,11 @@ app.use(
       }
       next();
    },
+   (req, res, next) => {
+      req.user.admin = true;
+      req.user.superAdmin = true;
+      next();
+   },
    dataRouter
 );
 

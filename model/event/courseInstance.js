@@ -15,6 +15,5 @@ export const courseInstance = {
          dataType: "node",
          objectClass: "course"
       }
-   },
-   createPolicy: ["{isAdmin}"]
+   }
 };

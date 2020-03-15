@@ -10,11 +10,13 @@ export const session = {
          multiple: true,
          dataType: "node",
          objectClass: "user"
+      },
+      courseInstance: {
+         required: true,
+         multiple: false,
+         dataType: "node",
+         objectClass: "courseInstance"
       }
    },
-   create: "teacher",
-   roles: {
-      teacher: "[this].courseInstance/^instructorOf.{userURI}",
-      student: "[this].courseInstance/^studentOf.{userURI}"
-   }
+   create: ["[this].courseInstance/^instructorOf.{userURI}"]
 };

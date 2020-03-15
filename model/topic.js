@@ -24,5 +24,5 @@ export const topic = {
          objectClass: "topic"
       }
    },
-   create: "[this].^covers/^instanceOf/^instructorOf.{userURI}"
+   create: ["{userURI}.instructorOf.?courseInstance"]
 };

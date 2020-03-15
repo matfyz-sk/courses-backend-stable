@@ -4,8 +4,9 @@ import * as Resources from "../model";
 import * as Constants from "../constants";
 
 export default class Resource {
-   constructor(resource) {
+   constructor(resource, user) {
       this.resource = resource;
+      this.user = user;
       this.props = getAllProps(resource, false);
       this.triples = { toAdd: [], toUpdate: [], toRemove: [] };
       this.db = new Client(Constants.virtuosoEndpoint);
@@ -25,75 +26,30 @@ export default class Resource {
       this.db.setDefaultGraph(Constants.graphURI);
    }
 
-   getResourceCreatePolicy() {
-      if (this.resource.hasOwnProperty("createPolicy")) {
-         // console.log("hasownproperty");
-         return this.resource.createPolicy;
+   _getResourceCreateRules() {
+      if (this.resource.hasOwnProperty("create")) {
+         return this.resource.create;
       }
       var r = this.resource.subclassOf;
-      // console.log("r", r);
       while (r) {
-         if (r.hasOwnProperty("createPolicy")) {
-            return r.createPolicy;
+         if (r.hasOwnProperty("create")) {
+            return r.create;
          }
          r = r.subclassOf;
       }
       return [];
    }
 
-   isAbleToCreate(accessToken) {
-      console.log("resource:", this.resource);
-      const policies = this.getResourceCreatePolicy();
-      console.log(policies);
-      var promises = [];
-      this.db.setQueryFormat("application/json");
-      this.db.setQueryGraph(Constants.graphURI);
-
-      var result = true;
-
-      policies.forEach(async policy => {
-         const policyParts = policy.split(".");
-
-         var subject = policyParts[0];
-         var propertyPath = policyParts[1];
-         var object = policyParts[2];
-
-         if (subject.startsWith("{") && subject.endsWith("}")) {
-            // udaj z tokena
-            subject = accessToken[subject.substring(1, subject.length - 1)];
-         } else {
-            // udaj ktory poslal pouzivatel z props
-            subject = this.props[subject].value.obj.iri;
+   async isAbleToCreate() {
+      const createRules = this._getResourceCreateRules();
+      for (var rule of createRules) {
+         const res = await this._resolveAuthRule(rule);
+         console.log(res);
+         if (!res) {
+            throw `You can't create resource '${this.resource.type}'`;
          }
-
-         if (object.startsWith("{") && object.endsWith("}")) {
-            // udaj z tokena
-            object = accessToken[object.substring(1, object.length - 1)];
-         } else {
-            // udaj ktory poslal pouzivatel z props
-            object = this.props[object].value.obj.iri;
-         }
-
-         const query = `SELECT <${subject}> WHERE {<${subject}> ${propertyPath} <${object}>}`;
-
-         promises.push(
-            this.db
-               .query(query, true)
-               .then(data => {
-                  console.log(data.results.bindings);
-                  if (data.results.bindings.length == 0) {
-                     result = false;
-                  }
-               })
-               .catch(err => {
-                  console.log(err);
-               })
-         );
-      });
-
-      Promise.all(promises).then(() => console.log("query completed, result: ", result));
-
-      // console.log("result:", result);
+      }
+      return true;
    }
 
    setSubject(uri) {
@@ -106,13 +62,14 @@ export default class Resource {
 
    async setInputPredicates(data) {
       for (var predicateName in this.props) {
-         if (this.props.hasOwnProperty(predicateName)) {
+         if (this.props.hasOwnProperty(predicateName) && predicateName != "type") {
             await this.setPredicate(predicateName, data[predicateName]);
          }
       }
    }
 
    async setPredicate(predicateName, value) {
+      console.log(predicateName, value);
       if (value == undefined) {
          if (this.props[predicateName].required) {
             throw `Attribute '${predicateName}' is required`;
@@ -131,16 +88,30 @@ export default class Resource {
          }
          await this._setProperty(predicateName, value);
       } else {
+         console.log("setting array property");
          await this._setArrayProperty(predicateName, value);
       }
    }
 
-   setPredicateToDelete(predicateName, value) {
+   async setPredicateToDelete(predicateName, value) {
       if (!this.props.hasOwnProperty(predicateName) || !this.props[predicateName].value) {
          return;
       }
+
+      // autorizacia uprav
+      const changeRules = this.props[predicateName].change;
+      for (var rule of changeRules) {
+         const res = await this._resolveAuthRule(rule);
+         if (!res) {
+            throw `You can't change value of attribute '${predicateName}'`;
+         }
+      }
+
       if (!this.props[predicateName].multiple) {
          // delete single predicate value
+         if (this.props[predicateName].required) {
+            throw `You can't delete attribute '${predicateName}'`;
+         }
          this.props[predicateName].value.setOperation(Triple.REMOVE);
          return;
       }
@@ -166,11 +137,10 @@ export default class Resource {
       }
    }
 
-   async _prepareTriplesToStore(userURI) {
+   async _prepareTriplesToStore() {
       this.subject = await getNewNode(classPrefix(this.resource.type));
-
       this.props.type.value = new Triple(this.subject, "rdf:type", className(this.resource.type, true));
-      this.props.createdBy.value = new Triple(this.subject, "courses:createdBy", new Node(userURI));
+      this.props.createdBy.value = new Triple(this.subject, "courses:createdBy", new Node(this.user.userURI));
 
       for (var predicateName in this.props) {
          if (this.props.hasOwnProperty(predicateName)) {
@@ -184,7 +154,7 @@ export default class Resource {
                      t.subj = this.subject;
                      this.triples.toAdd.push(t);
                   } else {
-                     await t._prepareTriplesToStore(userURI);
+                     await t._prepareTriplesToStore();
                      this.triples.toAdd = this.triples.toAdd.concat(t.triples.toAdd);
                      this.triples.toAdd.push(new Triple(this.subject, `courses:${predicateName}`, t.subject));
                   }
@@ -196,7 +166,7 @@ export default class Resource {
                val.subj = this.subject;
                this.triples.toAdd.push(val);
             } else {
-               await val._prepareTriplesToStore(userURI);
+               await val._prepareTriplesToStore();
                this.triples.toAdd = this.triples.toAdd.concat(val.triples.toAdd);
                this.triples.toAdd.push(new Triple(this.subject, `courses:${predicateName}`, val.subject));
             }
@@ -204,30 +174,85 @@ export default class Resource {
       }
    }
 
-   _prepareTriplesToUpdate() {
-      Object.keys(this.props).forEach(key => {
-         const val = this.props[key].value;
-         if (!val) {
-            return;
+   async _prepareTriplesToUpdate() {
+      for (var key in this.props) {
+         if (this.props.hasOwnProperty(key)) {
+            const val = this.props[key].value;
+            if (!val) {
+               continue;
+            }
+            if (Array.isArray(val)) {
+               for (var t of val) this._arrangeTriple(t);
+               continue;
+            }
+            this._arrangeTriple(val);
          }
-         if (Array.isArray(val)) {
-            for (var t of val) this._arrangeTriple(t);
-            return;
+      }
+   }
+
+   async _resolveAuthRule(rule) {
+      console.log(rule);
+      if (rule == "admin") {
+         return this.user.admin;
+      }
+
+      if (rule == "superAdmin") {
+         return this.user.superAdmin;
+      }
+
+      var subject = null;
+      var predicate = null;
+      var object = null;
+      if (rule == "owner") {
+         subject = `<${this.user.userURI}>`;
+         predicate = `courses:createdBy`;
+         object = `<${this.subject.iri}>`;
+      } else {
+         const parts = rule.split(".");
+         if (parts[0] == "[this]") {
+            if (this.subject) {
+               subject = `<${this.subject.iri}>`;
+            }
+         } else if (parts[0] == "{userURI}") {
+            subject = `<${this.user.userURI}>`;
          }
-         this._arrangeTriple(val);
-      });
+
+         const regex = /([a-zA-Z]+)/gm;
+         predicate = parts[1].replace(regex, "courses:$1");
+
+         if (!subject) {
+            subject = this.props[parts[1].split("/")[0]].value.iri;
+         }
+
+         if (parts[2][0] == "?") {
+            object = parts[2];
+         } else {
+            object = `<${this.user.userURI}>`;
+         }
+      }
+      this.db.setQueryGraph(Constants.graphURI);
+      this.db.setQueryFormat("application/json");
+      try {
+         const data = await this.db.query(`SELECT ${subject} WHERE {${subject} ${predicate} ${object}}`, true);
+         return data.results.bindings.length > 0;
+      } catch (err) {
+         return false;
+      }
    }
 
    _arrangeTriple(triple) {
       if (triple.getOperation() == Triple.ADD) {
+         // pri metode PUT, pridanie novej hodnoty k viachodnotovemu atributu
          this.triples.toAdd.push(triple);
          return;
       }
       if (triple.getOperation() == Triple.UPDATE) {
+         // upravenie objektu trojice
          this.triples.toUpdate.push(triple);
          return;
       }
       if (triple.getOperation() == Triple.REMOVE) {
+         // pri operacii PATCH, odstranenie vsetkych hodnot viachodnotoveho atributu
          this.triples.toRemove.push(triple);
          return;
       }
@@ -268,16 +293,28 @@ export default class Resource {
       const objectValueType = typeof objectValue;
 
       if (objectValueType == "string" || objectValueType == "number" || objectValueType == "boolean") {
-         console.log("here", predicate);
          const object = getTripleObjectType(this.props[predicate].dataType, objectValue);
 
+         if (this.props[predicate].value) {
+            // autorizacia uprav
+            const changeRules = this.props[predicate].change;
+            for (var rule of changeRules) {
+               const res = await this._resolveAuthRule(rule);
+               if (!res) {
+                  throw `You can't change value of attribute '${predicate}'`;
+               }
+            }
+         }
+
          if (this.props[predicate].dataType === "node") {
+            // kontrola existencie
             const objectClass = this.props[predicate].objectClass;
             const data = await this._resourceExists(objectValue, objectClass);
             if (data.results.bindings.length == 0) {
                throw `Resource with URI ${objectValue} does not exists`;
             }
          }
+
          if (!this.props[predicate].value) {
             this.props[predicate].value = new Triple(this.subject, `courses:${predicate}`, object);
          } else {
@@ -286,11 +323,12 @@ export default class Resource {
          }
       } else {
          // objectValue je objekt
-         console.log("here");
-         const r = new Resource(Resources[objectValue.type]);
+         const r = new Resource(Resources[objectValue.type], this.user);
+         await r.isAbleToCreate();
          delete objectValue["type"];
          r.setInputPredicates(objectValue);
          this.props[predicate].value = r;
+         console.log(this.props[predicate].value);
       }
    }
 
@@ -307,12 +345,25 @@ export default class Resource {
       if (this.props[predicate].dataType === "node") {
          const objectClass = this.props[predicate].objectClass;
          for (var value of objectValue) {
-            const data = await this._resourceExists(value, objectClass);
-            if (data.results.bindings.length == 0) {
-               throw `Resource with URI ${objectValue} does not exists`;
+            if (typeof value == "number" || typeof value == "boolean") {
+               throw `Invalid value for attribute '${predicate}'`;
             }
-            const object = getTripleObjectType(this.props[predicate].dataType, value);
-            this.props[predicate].value.push(new Triple(this.subject, `courses:${predicate}`, object));
+
+            if (typeof value == "string") {
+               const data = await this._resourceExists(value, objectClass);
+               if (data.results.bindings.length == 0) {
+                  throw `Resource with URI ${value} does't exist`;
+               }
+               const object = getTripleObjectType(this.props[predicate].dataType, value);
+               this.props[predicate].value.push(new Triple(this.subject, `courses:${predicate}`, object));
+            } else {
+               // value je objekt
+               const r = new Resource(Resources[value.type], this.user);
+               await r.isAbleToCreate();
+               delete value["type"];
+               r.setInputPredicates(value);
+               this.props[predicate].value = r;
+            }
          }
       } else {
          for (var value of objectValue) {
@@ -356,16 +407,15 @@ export default class Resource {
       }
    }
 
-   async store(userURI) {
-      try {
-         await this._prepareTriplesToStore(userURI);
-         console.log(this.triples.toAdd);
-         this.db.getLocalStore().empty();
-         this.db.getLocalStore().bulk(this.triples.toAdd);
-         return this.db.store(true);
-      } catch (err) {
-         console.log(err);
-      }
+   async store() {
+      // try {
+      await this._prepareTriplesToStore();
+      this.db.getLocalStore().empty();
+      this.db.getLocalStore().bulk(this.triples.toAdd);
+      return this.db.store(true);
+      // } catch (err) {
+      //    console.log(err);
+      // }
    }
 
    delete() {
@@ -385,8 +435,8 @@ export default class Resource {
       });
    }
 
-   update() {
-      this._prepareTriplesToUpdate();
+   async update() {
+      await this._prepareTriplesToUpdate();
       return this._storeTriples();
    }
 
@@ -424,6 +474,9 @@ export default class Resource {
    fill(data) {
       data = this._prepareData(data);
       Object.keys(this.props).forEach(predicateName => {
+         if (predicateName == "type" || predicateName == "createdBy" || predicateName == "createdAt") {
+            return;
+         }
          if (data.hasOwnProperty(predicateName)) {
             if (this.props[predicateName].multiple) {
                if (!Array.isArray(data[predicateName])) {
