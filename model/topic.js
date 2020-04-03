@@ -22,6 +22,12 @@ export const topic = {
          multiple: false,
          dataType: "node",
          objectClass: "topic"
+      },
+      hasQuestionAssignment: {
+         required: false,
+         multiple: true,
+         dataType: "node",
+         objectClass: "questionAssignment"
       }
    },
    create: ["{userURI}.instructorOf.?courseInstance"]

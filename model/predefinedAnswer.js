@@ -14,7 +14,7 @@ export const predefinedAnswer = {
       correct: {
          required: true,
          multiple: false,
-         dataType: "integer"
+         dataType: "boolean"
       }
    }
 };

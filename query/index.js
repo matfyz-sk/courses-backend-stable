@@ -56,7 +56,7 @@ function generateQuery(resource, filters, user) {
          query["@graph"][predicateName] = { "@id": objectVar };
 
          if (joins.includes(predicateName)) {
-            generatQueryPart(resource, query, predicateName);
+            generateQueryPart(resource, query, predicateName);
          }
          if (filters.hasOwnProperty(predicateName)) {
             query.$where.push(`${resource.uri} courses:${predicateName} ${objectVar}`);
@@ -94,7 +94,7 @@ function generateQuery(resource, filters, user) {
    return query;
 }
 
-function generatQueryPart(resource, query, predicateName) {
+function generateQueryPart(resource, query, predicateName) {
    const queryPartResource = Resources[resource.props[predicateName].objectClass];
    const resourceProps = getAllProps(queryPartResource);
    const queryPart = query["@graph"][predicateName];

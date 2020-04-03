@@ -44,7 +44,6 @@ export default class Resource {
       const createRules = this._getResourceCreateRules();
       for (var rule of createRules) {
          const res = await this._resolveAuthRule(rule);
-         console.log(res);
          if (!res) {
             throw `You can't create resource '${this.resource.type}'`;
          }
@@ -191,7 +190,6 @@ export default class Resource {
    }
 
    async _resolveAuthRule(rule) {
-      console.log(rule);
       if (rule == "admin") {
          return this.user.admin;
       }
@@ -408,14 +406,10 @@ export default class Resource {
    }
 
    async store() {
-      // try {
       await this._prepareTriplesToStore();
       this.db.getLocalStore().empty();
       this.db.getLocalStore().bulk(this.triples.toAdd);
       return this.db.store(true);
-      // } catch (err) {
-      //    console.log(err);
-      // }
    }
 
    delete() {
