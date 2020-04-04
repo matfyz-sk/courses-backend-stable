@@ -1,45 +1,50 @@
 import { getResourceObject, prepareClassName } from "../helpers";
+import { modifyResource, getResource } from "../middleware";
 import express from "express";
-const dataRouter = express.Router();
 import Resource from "../resource";
-import { DataController } from "../controllers";
+import RequestError from "../helpers/RequestError";
+
+const dataRouter = express.Router();
 
 dataRouter.use("/:className", (req, res, next) => {
    const resource = getResourceObject(prepareClassName(req.params.className));
    if (!resource) {
-      return res.status(400).send({ status: false, msg: `Resource with class name ${req.params.className} is not supported` });
+      return next(
+         new RequestError(`Resource with class name ${req.params.className} is not supported`, 400)
+      );
    }
    res.locals.resource = new Resource(resource, req.user);
    next();
 });
 
-dataRouter.use("/:className/:id", (req, res, next) => {
+dataRouter.use("/:className/:id", async (req, res, next) => {
+   if (req.method == "GET") {
+      return next();
+   }
+
    res.locals.resource.setSubject(req.params.id);
-   res.locals.resource
-      .fetch()
-      .then(data => {
-         if (data.results.bindings.length == 0) {
-            return res.status(404).send({
-               status: false,
-               msg: `Resource with ID ${req.params.id} and class name ${req.params.className} does not exist`
-            });
-         }
-         res.locals.resource.fill(data);
-         next();
-      })
-      .catch(err => {
-         res.status(500).send({ status: false, msg: err });
-      });
+   const data = await res.locals.resource.fetch();
+
+   if (data.length == 0) {
+      return next(
+         new RequestError(
+            `Resource with ID ${req.params.id} and class name ${req.params.className} does not exist`,
+            404
+         )
+      );
+   }
+   res.locals.resource.fill(data);
+   next();
 });
 
-dataRouter.post("/:className", DataController.createResource);
+dataRouter.post("/:className", modifyResource);
 
-dataRouter.get("/:className/:id?", DataController.getResource);
+dataRouter.get("/:className/:id?", getResource);
 
-dataRouter.put("/:className/:id", DataController.updateResource);
+dataRouter.put("/:className/:id", modifyResource);
 
-dataRouter.patch("/:className/:id", DataController.updateResource);
+dataRouter.patch("/:className/:id", modifyResource);
 
-dataRouter.delete("/:className/:id/:attributeName?", DataController.deleteResource);
+dataRouter.delete("/:className/:id/:attributeName?", modifyResource);
 
 export default dataRouter;

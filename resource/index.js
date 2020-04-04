@@ -2,6 +2,7 @@ import { Client, Triple, Node } from "virtuoso-sparql-client";
 import { getNewNode, getAllProps, getTripleObjectType, classPrefix, className } from "../helpers";
 import * as Resources from "../model";
 import * as Constants from "../constants";
+import RequestError from "../helpers/RequestError";
 
 export default class Resource {
    constructor(resource, user) {
@@ -19,7 +20,7 @@ export default class Resource {
 
    _setupVirtuosoClient() {
       this.db.addPrefixes({
-         courses: Constants.ontologyURI
+         courses: Constants.ontologyURI,
       });
       this.db.setQueryFormat("application/json");
       this.db.setQueryGraph(Constants.graphURI);
@@ -45,7 +46,7 @@ export default class Resource {
       for (var rule of createRules) {
          const res = await this._resolveAuthRule(rule);
          if (!res) {
-            throw `You can't create resource '${this.resource.type}'`;
+            throw new RequestError(`You can't create resource '${this.resource.type}'`, 401);
          }
       }
       return true;
@@ -68,23 +69,28 @@ export default class Resource {
    }
 
    async setPredicate(predicateName, value) {
-      console.log(predicateName, value);
       if (value == undefined) {
          if (this.props[predicateName].required) {
-            throw `Attribute '${predicateName}' is required`;
+            throw new RequestError(`Attribute '${predicateName}' is required`, 422);
          }
          return;
       }
+
       if (!this.props.hasOwnProperty(predicateName)) {
-         throw `Attribute '${predicateName}' is not acceptable for resource '${this.resource.type}'`;
+         throw new RequestError(
+            `Attribute '${predicateName}' is not acceptable for resource '${this.resource.type}'`,
+            422
+         );
       }
+
       if (!this.props[predicateName].multiple) {
          if (Array.isArray(value)) {
             if (value.length > 1) {
-               throw `Attribute '${predicateName}' accepts only one value`;
+               throw new RequestError(`Attribute '${predicateName}' accepts only one value`, 422);
             }
             value = value[0];
          }
+
          await this._setProperty(predicateName, value);
       } else {
          console.log("setting array property");
@@ -102,14 +108,14 @@ export default class Resource {
       for (var rule of changeRules) {
          const res = await this._resolveAuthRule(rule);
          if (!res) {
-            throw `You can't change value of attribute '${predicateName}'`;
+            throw new RequestError(`You can't change value of attribute '${predicateName}'`, 403);
          }
       }
 
       if (!this.props[predicateName].multiple) {
          // delete single predicate value
          if (this.props[predicateName].required) {
-            throw `You can't delete attribute '${predicateName}'`;
+            throw new RequestError(`You can't delete attribute '${predicateName}'`, 422);
          }
          this.props[predicateName].value.setOperation(Triple.REMOVE);
          return;
@@ -138,8 +144,16 @@ export default class Resource {
 
    async _prepareTriplesToStore() {
       this.subject = await getNewNode(classPrefix(this.resource.type));
-      this.props.type.value = new Triple(this.subject, "rdf:type", className(this.resource.type, true));
-      this.props.createdBy.value = new Triple(this.subject, "courses:createdBy", new Node(this.user.userURI));
+      this.props.type.value = new Triple(
+         this.subject,
+         "rdf:type",
+         className(this.resource.type, true)
+      );
+      this.props.createdBy.value = new Triple(
+         this.subject,
+         "courses:createdBy",
+         new Node(this.user.userURI)
+      );
 
       for (var predicateName in this.props) {
          if (this.props.hasOwnProperty(predicateName)) {
@@ -155,7 +169,9 @@ export default class Resource {
                   } else {
                      await t._prepareTriplesToStore();
                      this.triples.toAdd = this.triples.toAdd.concat(t.triples.toAdd);
-                     this.triples.toAdd.push(new Triple(this.subject, `courses:${predicateName}`, t.subject));
+                     this.triples.toAdd.push(
+                        new Triple(this.subject, `courses:${predicateName}`, t.subject)
+                     );
                   }
                }
                continue;
@@ -167,7 +183,9 @@ export default class Resource {
             } else {
                await val._prepareTriplesToStore();
                this.triples.toAdd = this.triples.toAdd.concat(val.triples.toAdd);
-               this.triples.toAdd.push(new Triple(this.subject, `courses:${predicateName}`, val.subject));
+               this.triples.toAdd.push(
+                  new Triple(this.subject, `courses:${predicateName}`, val.subject)
+               );
             }
          }
       }
@@ -231,7 +249,10 @@ export default class Resource {
       this.db.setQueryGraph(Constants.graphURI);
       this.db.setQueryFormat("application/json");
       try {
-         const data = await this.db.query(`SELECT ${subject} WHERE {${subject} ${predicate} ${object}}`, true);
+         const data = await this.db.query(
+            `SELECT ${subject} WHERE {${subject} ${predicate} ${object}}`,
+            true
+         );
          return data.results.bindings.length > 0;
       } catch (err) {
          return false;
@@ -257,7 +278,7 @@ export default class Resource {
    }
 
    _prepareTriplesToDelete() {
-      Object.keys(this.props).forEach(key => {
+      Object.keys(this.props).forEach((key) => {
          const val = this.props[key].value;
          if (!val) {
             return;
@@ -280,44 +301,60 @@ export default class Resource {
       this.db.setQueryFormat("application/json");
       this.db.setQueryGraph(Constants.graphURI);
       return this.db.query(
-         `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ?type . ?type rdfs:subClassOf* ${className(resourceClass, true)}}`,
+         `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ?type . ?type rdfs:subClassOf* ${className(
+            resourceClass,
+            true
+         )}}`,
          true
       );
    }
 
-   async _setProperty(predicate, objectValue) {
+   async _setProperty(predicateName, objectValue) {
       // objectValue moze byt: STRING alebo OBJEKT
 
       const objectValueType = typeof objectValue;
 
-      if (objectValueType == "string" || objectValueType == "number" || objectValueType == "boolean") {
-         const object = getTripleObjectType(this.props[predicate].dataType, objectValue);
+      if (
+         objectValueType == "string" ||
+         objectValueType == "number" ||
+         objectValueType == "boolean"
+      ) {
+         const object = getTripleObjectType(this.props[predicateName].dataType, objectValue);
 
-         if (this.props[predicate].value) {
+         if (this.props[predicateName].value) {
             // autorizacia uprav
-            const changeRules = this.props[predicate].change;
-            for (var rule of changeRules) {
-               const res = await this._resolveAuthRule(rule);
-               if (!res) {
-                  throw `You can't change value of attribute '${predicate}'`;
+            const changeRules = this.props[predicateName].change;
+            if (Array.isArray(changeRules)) {
+               for (var rule of changeRules) {
+                  const res = await this._resolveAuthRule(rule);
+                  if (!res) {
+                     throw new RequestError(
+                        `You can't change value of attribute '${predicateName}'`,
+                        403
+                     );
+                  }
                }
             }
          }
 
-         if (this.props[predicate].dataType === "node") {
+         if (this.props[predicateName].dataType === "node") {
             // kontrola existencie
-            const objectClass = this.props[predicate].objectClass;
+            const objectClass = this.props[predicateName].objectClass;
             const data = await this._resourceExists(objectValue, objectClass);
             if (data.results.bindings.length == 0) {
-               throw `Resource with URI ${objectValue} does not exists`;
+               throw new RequestError(`Resource with URI ${objectValue} doesn't exist`, 400);
             }
          }
 
-         if (!this.props[predicate].value) {
-            this.props[predicate].value = new Triple(this.subject, `courses:${predicate}`, object);
+         if (!this.props[predicateName].value) {
+            this.props[predicateName].value = new Triple(
+               this.subject,
+               `courses:${predicateName}`,
+               object
+            );
          } else {
-            this.props[predicate].value.setOperation(Triple.ADD);
-            this.props[predicate].value.updateObject(object);
+            this.props[predicateName].value.setOperation(Triple.ADD);
+            this.props[predicateName].value.updateObject(object);
          }
       } else {
          // objectValue je objekt
@@ -325,8 +362,8 @@ export default class Resource {
          await r.isAbleToCreate();
          delete objectValue["type"];
          r.setInputPredicates(objectValue);
-         this.props[predicate].value = r;
-         console.log(this.props[predicate].value);
+         this.props[predicateName].value = r;
+         console.log(this.props[predicateName].value);
       }
    }
 
@@ -344,16 +381,18 @@ export default class Resource {
          const objectClass = this.props[predicate].objectClass;
          for (var value of objectValue) {
             if (typeof value == "number" || typeof value == "boolean") {
-               throw `Invalid value for attribute '${predicate}'`;
+               throw new RequestError(`Invalid value for attribute '${predicate}'`, 400);
             }
 
             if (typeof value == "string") {
                const data = await this._resourceExists(value, objectClass);
                if (data.results.bindings.length == 0) {
-                  throw `Resource with URI ${value} does't exist`;
+                  throw new RequestError(`Resource with URI ${value} doesn't exist`, 400);
                }
                const object = getTripleObjectType(this.props[predicate].dataType, value);
-               this.props[predicate].value.push(new Triple(this.subject, `courses:${predicate}`, object));
+               this.props[predicate].value.push(
+                  new Triple(this.subject, `courses:${predicate}`, object)
+               );
             } else {
                // value je objekt
                const r = new Resource(Resources[value.type], this.user);
@@ -366,14 +405,21 @@ export default class Resource {
       } else {
          for (var value of objectValue) {
             const object = getTripleObjectType(this.props[predicate].dataType, value);
-            this.props[predicate].value.push(new Triple(this.subject, `courses:${predicate}`, object));
+            this.props[predicate].value.push(
+               new Triple(this.subject, `courses:${predicate}`, object)
+            );
          }
       }
    }
 
    _setNewProperty(predicate, objectValue) {
       const object = getTripleObjectType(this.props[predicate].dataType, objectValue);
-      this.props[predicate].value = new Triple(this.subject, `courses:${predicate}`, object, "nothing");
+      this.props[predicate].value = new Triple(
+         this.subject,
+         `courses:${predicate}`,
+         object,
+         "nothing"
+      );
    }
 
    _setNewArrayProperty(predicate, objectValue) {
@@ -381,7 +427,9 @@ export default class Resource {
       if (!objectValue) return;
       for (var value of objectValue) {
          const object = getTripleObjectType(this.props[predicate].dataType, value);
-         this.props[predicate].value.push(new Triple(this.subject, `courses:${predicate}`, object, "nothing"));
+         this.props[predicate].value.push(
+            new Triple(this.subject, `courses:${predicate}`, object, "nothing")
+         );
       }
    }
 
@@ -434,15 +482,19 @@ export default class Resource {
       return this._storeTriples();
    }
 
-   fetch() {
+   async fetch() {
       this.db.setQueryFormat("application/json");
       this.db.setQueryGraph(Constants.graphURI);
-      return this.db.query(`SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this.subject.iri}>}`, true);
+      const data = await this.db.query(
+         `SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this.subject.iri}>}`,
+         true
+      );
+      return data.results.bindings;
    }
 
    _prepareData(data) {
       var actualData = {};
-      for (var row of data.results.bindings) {
+      for (var row of data) {
          var predicate = row.p.value;
          const object = row.o.value;
          const lastSharpIndex = predicate.lastIndexOf("#");
@@ -467,8 +519,12 @@ export default class Resource {
 
    fill(data) {
       data = this._prepareData(data);
-      Object.keys(this.props).forEach(predicateName => {
-         if (predicateName == "type" || predicateName == "createdBy" || predicateName == "createdAt") {
+      Object.keys(this.props).forEach((predicateName) => {
+         if (
+            predicateName == "type" ||
+            predicateName == "createdBy" ||
+            predicateName == "createdAt"
+         ) {
             return;
          }
          if (data.hasOwnProperty(predicateName)) {
