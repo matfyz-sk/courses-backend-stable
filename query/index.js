@@ -7,12 +7,12 @@ import * as Constants from "../constants";
 const sparqlOptions = {
    context: ontologyURI,
    endpoint: virtuosoEndpoint,
-   debug: false
+   debug: false,
 };
 
 const sparqlPrefixes = {
    courses: ontologyURI,
-   dc: dcTermsURI
+   dc: dcTermsURI,
 };
 
 function generateQuery(resource, filters, user) {
@@ -20,7 +20,7 @@ function generateQuery(resource, filters, user) {
       "@graph": {},
       $where: [],
       $filter: [],
-      $prefixes: sparqlPrefixes
+      $prefixes: sparqlPrefixes,
    };
 
    query["@graph"]["@id"] = resource.uri;
@@ -40,16 +40,19 @@ function generateQuery(resource, filters, user) {
    }
 
    query["@graph"]["createdBy"] = "?createdBy";
-   query["@graph"]["createAt"] = "?createdAt";
+   query["@graph"]["createdAt"] = "?createdAt";
    query.$where.push(`OPTIONAL {${resource.uri} courses:createdBy ?createdBy}`);
    query.$where.push(`OPTIONAL {${resource.uri} dc:created ?createdAt}`);
 
    setOffset(filters._offset);
    setLimit(filters._limit);
 
-   const joins = filters.hasOwnProperty("_join") && typeof filters._join == "string" ? filters._join.split(",").map(e => e.trim()) : [];
+   const joins =
+      filters.hasOwnProperty("_join") && typeof filters._join == "string"
+         ? filters._join.split(",").map((e) => e.trim())
+         : [];
 
-   Object.keys(resource.props).forEach(predicateName => {
+   Object.keys(resource.props).forEach((predicateName) => {
       var objectVar = `?${predicateName}`;
       if (resource.props[predicateName].dataType === "node") {
          objectVar += "URI";
@@ -61,7 +64,9 @@ function generateQuery(resource, filters, user) {
          if (filters.hasOwnProperty(predicateName)) {
             query.$where.push(`${resource.uri} courses:${predicateName} ${objectVar}`);
             const objectClass = Resources[resource.props[predicateName].objectClass].type;
-            query.$filter.push(`${objectVar}=<${classPrefix(objectClass) + filters[predicateName]}>`);
+            query.$filter.push(
+               `${objectVar}=<${classPrefix(objectClass) + filters[predicateName]}>`
+            );
          } else {
             query.$where.push(`OPTIONAL {${resource.uri} courses:${predicateName} ${objectVar}}`);
          }
@@ -79,7 +84,7 @@ function generateQuery(resource, filters, user) {
          query.$where.push(`OPTIONAL {${resource.uri} courses:${predicateName} ${objectVar}}`);
       }
    });
-   Object.keys(filters).forEach(predicateName => {
+   Object.keys(filters).forEach((predicateName) => {
       if (
          predicateName === "id" ||
          predicateName === "_offset" ||
@@ -111,7 +116,7 @@ function generateQueryPart(resource, query, predicateName) {
       true
    )} . OPTIONAL {${partURI} courses:createdBy ${partURI}createdBy} . OPTIONAL {${partURI} dc:created ${partURI}createdAt} . `;
 
-   Object.keys(resourceProps).forEach(p => {
+   Object.keys(resourceProps).forEach((p) => {
       // if (resourceProps[p].dataType === "node") {
       //     const objectVar = partURI + p + "URI";
       //     queryPart[p] = { "@id": objectVar };
@@ -147,7 +152,7 @@ export default function runQuery(_resource, filters) {
    const resource = {
       obj: _resource,
       props: getAllProps(_resource),
-      uri: "?resourceURI"
+      uri: "?resourceURI",
    };
    const query = generateQuery(resource, filters);
    return run(query);
