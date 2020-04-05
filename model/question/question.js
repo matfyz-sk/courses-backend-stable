@@ -6,53 +6,47 @@ export const question = {
          required: true,
          multiple: false,
          dataType: "string",
-         change: ["owner"]
+         change: ["owner"],
       },
       text: {
          required: true,
          multiple: false,
          dataType: "string",
-         change: ["owner"]
+         change: ["owner"],
       },
       visibilityIsRestricted: {
          required: false,
          multiple: false,
          dataType: "boolean",
-         change: ["owner"]
+         change: ["owner"],
       },
       hasQuestionState: {
          required: false,
          multiple: false,
          dataType: "string",
-         change: ["owner"]
+         change: ["owner"],
       },
       ofTopic: {
          required: true,
          multiple: false,
          dataType: "node",
          objectClass: "topic",
-         change: ["owner"]
+         change: ["owner"],
       },
-      // hasComment: {
-      //    required: false,
-      //    multiple: true,
-      //    dataType: "node",
-      //    objectClass: "questionComment"
-      // },
       approver: {
          required: false,
          multiple: false,
          dataType: "node",
          objectClass: "user",
-         change: ["[this].ofTopic.^covers/courseInstance/^instructorOf.{userURI}"]
+         change: ["[this].ofTopic.^covers/courseInstance/^instructorOf.{userURI}"],
       },
       hasChangeEvent: {
          required: false,
          multiple: false,
          dataType: "node",
          objectClass: "changeEvent",
-         change: ["owner"]
-      }
+         change: ["owner"],
+      },
    },
-   create: ["[this].ofTopic/^covers/assignedTo.{userURI}"]
+   create: ["[this].ofTopic/^covers/assignedTo.{userURI}"],
 };

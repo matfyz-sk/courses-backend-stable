@@ -93,7 +93,6 @@ export default class Resource {
 
          await this._setProperty(predicateName, value);
       } else {
-         console.log("setting array property");
          await this._setArrayProperty(predicateName, value);
       }
    }
@@ -297,16 +296,17 @@ export default class Resource {
       return val.prefix.name + ":" + val.value;
    }
 
-   _resourceExists(resourceURI, resourceClass) {
+   async _resourceExists(resourceURI, resourceClass) {
       this.db.setQueryFormat("application/json");
       this.db.setQueryGraph(Constants.graphURI);
-      return this.db.query(
+      const data = await this.db.query(
          `SELECT <${resourceURI}> WHERE {<${resourceURI}> rdf:type ?type . ?type rdfs:subClassOf* ${className(
             resourceClass,
             true
          )}}`,
          true
       );
+      return data.results.bindings.length > 0;
    }
 
    async _setProperty(predicateName, objectValue) {
@@ -340,8 +340,8 @@ export default class Resource {
          if (this.props[predicateName].dataType === "node") {
             // kontrola existencie
             const objectClass = this.props[predicateName].objectClass;
-            const data = await this._resourceExists(objectValue, objectClass);
-            if (data.results.bindings.length == 0) {
+            // const data = await this._resourceExists(objectValue, objectClass);
+            if (!(await this._resourceExists(objectValue, objectClass))) {
                throw new RequestError(`Resource with URI ${objectValue} doesn't exist`, 400);
             }
          }
@@ -363,7 +363,6 @@ export default class Resource {
          delete objectValue["type"];
          r.setInputPredicates(objectValue);
          this.props[predicateName].value = r;
-         console.log(this.props[predicateName].value);
       }
    }
 
@@ -385,8 +384,8 @@ export default class Resource {
             }
 
             if (typeof value == "string") {
-               const data = await this._resourceExists(value, objectClass);
-               if (data.results.bindings.length == 0) {
+               // const data = await this._resourceExists(value, objectClass);
+               if (!(await this._resourceExists(objectValue, objectClass))) {
                   throw new RequestError(`Resource with URI ${value} doesn't exist`, 400);
                }
                const object = getTripleObjectType(this.props[predicate].dataType, value);

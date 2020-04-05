@@ -2,7 +2,7 @@ import runQuery from "../query";
 
 export async function createResource(resource, data) {
    await resource.setInputPredicates(data);
-   await resource.isAbleToCreate();
+   // await resource.isAbleToCreate();
    await resource.store();
 }
 
