@@ -26,11 +26,17 @@ import { codeReview } from "./CodeReview";
 import { course } from "./course";
 import { field } from "./field";
 import { fieldType } from "./fieldType";
-import { generatedQuizAssignment } from "./task/quizAssignment/generatedQuizAssignment";
-import { manualQuizAssignment } from "./task/quizAssignment/manualQuizAssignment";
+
 import { material } from "./material";
-import { questionAssignment } from "./task/questionAssignment";
-import { quizAssignment } from "./task/quizAssignment/quizAssignment";
+// import { questionAssignment } from "./task/questionAssignment";
+import { questionAssignment } from "./event/taskEvent/questionAssignment";
+// import { quizAssignment } from "./task/quizAssignment/quizAssignment";
+import { quizAssignment } from "./event/taskEvent/quizAssignment/quizAssignment";
+// import { generatedQuizAssignment } from "./task/quizAssignment/generatedQuizAssignment";
+// import { manualQuizAssignment } from "./task/quizAssignment/manualQuizAssignment";
+import { generatedQuizAssignment } from "./event/taskEvent/quizAssignment/generatedQuizAssignment";
+import { manualQuizAssignment } from "./event/taskEvent/quizAssignment/manualQuizAssignment";
+
 import { review } from "./review";
 import { studentReview } from "./StudentReview";
 import { submission } from "./submission";
@@ -87,5 +93,5 @@ module.exports = {
    task,
    taskEvent,
    assignmentPeriod,
-   comment
+   comment,
 };
