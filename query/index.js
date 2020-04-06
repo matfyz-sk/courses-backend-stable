@@ -144,8 +144,25 @@ function setOrderBy(orderBy) {
    if (orderBy) query["$orderBy"] = orderBy;
 }
 
-function run(query) {
-   return lib.default(query, sparqlOptions);
+function _nodesToArray(obj) {
+   for (var predicateName in obj) {
+      if (obj.hasOwnProperty(predicateName)) {
+         if (obj[predicateName].constructor.name == "Object") {
+            if (Object.keys(obj[predicateName]).length == 0) {
+               obj[predicateName] = [];
+            } else {
+               _nodesToArray(obj[predicateName]);
+               obj[predicateName] = [obj[predicateName]];
+            }
+         }
+      }
+   }
+}
+
+async function run(query) {
+   const data = await lib.default(query, sparqlOptions);
+   _nodesToArray(data["@graph"]);
+   return data;
 }
 
 export default function runQuery(_resource, filters) {
