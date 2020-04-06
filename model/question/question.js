@@ -3,13 +3,13 @@ export const question = {
    subclasses: ["essayQuestion", "openQuestion", "questionWithPredefinedAnswer"],
    props: {
       name: {
-         required: true,
+         required: false,
          multiple: false,
          dataType: "string",
          change: ["owner"],
       },
       text: {
-         required: true,
+         required: false,
          multiple: false,
          dataType: "string",
          change: ["owner"],
