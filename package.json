@@ -4,7 +4,7 @@
    "description": "Backend of web application",
    "repository": {
       "type": "git",
-      "url": "https://github.com/mcifra/courses-backend"
+      "url": "https://github.com/matfyz-sk/courses-backend"
    },
    "main": "server.js",
    "scripts": {
