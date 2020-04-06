@@ -145,15 +145,22 @@ function setOrderBy(orderBy) {
 }
 
 function _nodesToArray(obj) {
+   if (obj.constructor.name == "Array") {
+      for (var val of obj) {
+         _nodesToArray(val);
+      }
+      return;
+   }
    for (var predicateName in obj) {
       if (obj.hasOwnProperty(predicateName)) {
-         if (obj[predicateName].constructor.name == "Object") {
-            if (Object.keys(obj[predicateName]).length == 0) {
-               obj[predicateName] = [];
-            } else {
-               _nodesToArray(obj[predicateName]);
-               obj[predicateName] = [obj[predicateName]];
-            }
+         if (obj[predicateName].constructor.name != "Object") {
+            continue;
+         }
+         if (Object.keys(obj[predicateName]).length == 0) {
+            obj[predicateName] = [];
+         } else {
+            _nodesToArray(obj[predicateName]);
+            obj[predicateName] = [obj[predicateName]];
          }
       }
    }
