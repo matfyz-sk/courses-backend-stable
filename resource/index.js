@@ -75,14 +75,12 @@ export default class Resource {
          }
          return;
       }
-
       if (!this.props.hasOwnProperty(predicateName)) {
          throw new RequestError(
             `Attribute '${predicateName}' is not acceptable for resource '${this.resource.type}'`,
             422
          );
       }
-
       if (!this.props[predicateName].multiple) {
          if (Array.isArray(value)) {
             if (value.length > 1) {
@@ -90,7 +88,6 @@ export default class Resource {
             }
             value = value[0];
          }
-
          await this._setProperty(predicateName, value);
       } else {
          await this._setArrayProperty(predicateName, value);
@@ -310,102 +307,88 @@ export default class Resource {
    }
 
    async _setProperty(predicateName, objectValue) {
-      // objectValue moze byt: STRING alebo OBJEKT
+      const valConstruct = objectValue.constructor.name;
 
-      const objectValueType = typeof objectValue;
-
-      if (
-         objectValueType == "string" ||
-         objectValueType == "number" ||
-         objectValueType == "boolean"
-      ) {
-         const object = getTripleObjectType(this.props[predicateName].dataType, objectValue);
-
-         if (this.props[predicateName].value) {
-            // autorizacia uprav
-            const changeRules = this.props[predicateName].change;
-            if (Array.isArray(changeRules)) {
-               for (var rule of changeRules) {
-                  const res = await this._resolveAuthRule(rule);
-                  if (!res) {
-                     throw new RequestError(
-                        `You can't change value of attribute '${predicateName}'`,
-                        403
-                     );
-                  }
-               }
-            }
-         }
-
-         if (this.props[predicateName].dataType === "node") {
-            // kontrola existencie
-            const objectClass = this.props[predicateName].objectClass;
-            // const data = await this._resourceExists(objectValue, objectClass);
-            if (!(await this._resourceExists(objectValue, objectClass))) {
-               throw new RequestError(`Resource with URI ${objectValue} doesn't exist`, 400);
-            }
-         }
-
-         if (!this.props[predicateName].value) {
-            this.props[predicateName].value = new Triple(
-               this.subject,
-               `courses:${predicateName}`,
-               object
-            );
-         } else {
-            this.props[predicateName].value.setOperation(Triple.ADD);
-            this.props[predicateName].value.updateObject(object);
-         }
-      } else {
-         // objectValue je objekt
+      if (valConstruct == "Object") {
          const r = new Resource(Resources[objectValue.type], this.user);
          await r.isAbleToCreate();
          delete objectValue["type"];
          r.setInputPredicates(objectValue);
          this.props[predicateName].value = r;
+         return;
+      }
+
+      const object = getTripleObjectType(this.props[predicateName].dataType, objectValue);
+
+      if (this.props[predicateName].dataType === "node") {
+         if (!(await this._resourceExists(objectValue, this.props[predicateName].objectClass))) {
+            throw new RequestError(`Resource with URI ${objectValue} doesn't exist`, 400);
+         }
+      }
+
+      if (!this.props[predicateName].value) {
+         this.props[predicateName].value = new Triple(
+            this.subject,
+            `courses:${predicateName}`,
+            object
+         );
+      } else {
+         // autorizacia uprav
+         const changeRules = this.props[predicateName].change;
+         if (Array.isArray(changeRules)) {
+            for (var rule of changeRules) {
+               const res = await this._resolveAuthRule(rule);
+               if (!res) {
+                  throw new RequestError(
+                     `You can't change value of attribute '${predicateName}'`,
+                     403
+                  );
+               }
+            }
+         }
+         this.props[predicateName].value.setOperation(Triple.ADD);
+         this.props[predicateName].value.updateObject(object);
       }
    }
 
-   async _setArrayProperty(predicate, objectValue) {
-      if (this.props[predicate].value && this.removeOld) {
-         for (var triple of this.props[predicate].value) {
+   async _setArrayProperty(predicateName, objectValue) {
+      if (this.props[predicateName].value && this.removeOld) {
+         for (var triple of this.props[predicateName].value) {
             triple.setOperation(Triple.REMOVE);
          }
       }
-      if (!this.props[predicate].hasOwnProperty("value")) {
-         this.props[predicate].value = [];
+      if (!this.props[predicateName].hasOwnProperty("value")) {
+         this.props[predicateName].value = [];
       }
 
-      if (this.props[predicate].dataType === "node") {
-         const objectClass = this.props[predicate].objectClass;
+      if (this.props[predicateName].dataType != "node") {
          for (var value of objectValue) {
-            if (typeof value == "number" || typeof value == "boolean") {
-               throw new RequestError(`Invalid value for attribute '${predicate}'`, 400);
-            }
-
-            if (typeof value == "string") {
-               // const data = await this._resourceExists(value, objectClass);
-               if (!(await this._resourceExists(objectValue, objectClass))) {
-                  throw new RequestError(`Resource with URI ${value} doesn't exist`, 400);
-               }
-               const object = getTripleObjectType(this.props[predicate].dataType, value);
-               this.props[predicate].value.push(
-                  new Triple(this.subject, `courses:${predicate}`, object)
-               );
-            } else {
-               // value je objekt
-               const r = new Resource(Resources[value.type], this.user);
-               await r.isAbleToCreate();
-               delete value["type"];
-               r.setInputPredicates(value);
-               this.props[predicate].value = r;
-            }
+            const object = getTripleObjectType(this.props[predicateName].dataType, value);
+            this.props[predicateName].value.push(
+               new Triple(this.subject, `courses:${predicateName}`, object)
+            );
          }
-      } else {
-         for (var value of objectValue) {
-            const object = getTripleObjectType(this.props[predicate].dataType, value);
-            this.props[predicate].value.push(
-               new Triple(this.subject, `courses:${predicate}`, object)
+         return;
+      }
+
+      for (var value of objectValue) {
+         if (value.constructor.name == "Number" || value.constructor.name == "Boolean") {
+            throw new RequestError(`Invalid value for attribute '${predicateName}'`, 400);
+         }
+
+         if (value.constructor.name == "Object") {
+            const r = new Resource(Resources[value.type], this.user);
+            await r.isAbleToCreate();
+            delete value["type"];
+            r.setInputPredicates(value);
+            this.props[predicateName].value.push(r);
+         } else {
+            if (!(await this._resourceExists(value, this.props[predicateName].objectClass))) {
+               throw new RequestError(`Resource with URI ${value} doesn't exist`, 400);
+            }
+            const object = getTripleObjectType(this.props[predicateName].dataType, value);
+            this.props[predicateName].value.push(
+               new Triple(this.subject, `courses:${predicateName}`, object)
             );
          }
       }
