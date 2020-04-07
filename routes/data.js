@@ -1,4 +1,4 @@
-import { getResourceObject, prepareClassName } from "../helpers";
+import { getResourceObject } from "../helpers";
 import { modifyResource, getResource } from "../middleware";
 import express from "express";
 import Resource from "../resource";
@@ -6,25 +6,20 @@ import RequestError from "../helpers/RequestError";
 
 const dataRouter = express.Router();
 
-dataRouter.use("/:className", (req, res, next) => {
-   const resource = getResourceObject(prepareClassName(req.params.className));
-   if (!resource) {
+dataRouter.use("/:className/:id?", async (req, res, next) => {
+   const resourceObject = getResourceObject(req.params.className);
+   if (!resourceObject) {
       return next(
          new RequestError(`Resource with class name ${req.params.className} is not supported`, 400)
       );
    }
-   res.locals.resource = new Resource(resource, req.user);
-   next();
-});
-
-dataRouter.use("/:className/:id", async (req, res, next) => {
-   if (req.method == "GET") {
+   const resource = new Resource(resourceObject, req.user);
+   res.locals.resource = resource;
+   if (req.method == "GET" || req.params.id == undefined) {
       return next();
    }
-
-   res.locals.resource.setSubject(req.params.id);
-   const data = await res.locals.resource.fetch();
-
+   resource.setSubject(req.params.id);
+   const data = await resource.fetch();
    if (data.length == 0) {
       return next(
          new RequestError(
@@ -33,18 +28,14 @@ dataRouter.use("/:className/:id", async (req, res, next) => {
          )
       );
    }
-   res.locals.resource.fill(data);
+   resource.fill(data);
    next();
 });
 
 dataRouter.post("/:className", modifyResource);
-
-dataRouter.get("/:className/:id?", getResource);
-
 dataRouter.put("/:className/:id", modifyResource);
-
 dataRouter.patch("/:className/:id", modifyResource);
-
 dataRouter.delete("/:className/:id/:attributeName?", modifyResource);
+dataRouter.get("/:className/:id?", getResource);
 
 export default dataRouter;

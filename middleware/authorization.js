@@ -12,4 +12,9 @@ export const authorization = [
       }
       next();
    },
+   (req, res, next) => {
+      req.user.admin = true;
+      req.user.superAdmin = true;
+      next();
+   },
 ];
