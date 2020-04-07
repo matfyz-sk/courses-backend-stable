@@ -23,25 +23,25 @@ export function getTripleObjectType(objectTypeName, objectValue) {
 }
 
 export function getResourceObject(resourceName) {
-   if (!Resources[resourceName]) return undefined;
+   resourceName = resourceName.charAt(0).toLowerCase() + resourceName.slice(1);
    return Resources[resourceName];
-}
-
-export function prepareClassName(className) {
-   return className.charAt(0).toLowerCase() + className.slice(1);
 }
 
 export function getAllProps(resource, includeSubclasses = true) {
    var props = {};
    var r = resource;
    while (r) {
-      Object.keys(r.props).forEach(key => {
+      Object.keys(r.props).forEach((key) => {
          props[key] = { ...r.props[key] };
       });
       r = r.subclassOf;
    }
 
-   if (!resource.hasOwnProperty("subclasses") || !Array.isArray(resource.subclasses) || !includeSubclasses) {
+   if (
+      !resource.hasOwnProperty("subclasses") ||
+      !Array.isArray(resource.subclasses) ||
+      !includeSubclasses
+   ) {
       return props;
    }
 
@@ -50,7 +50,7 @@ export function getAllProps(resource, includeSubclasses = true) {
       const className = subclasses.shift();
       r = Resources[className];
       if (r) {
-         Object.keys(r.props).forEach(key => {
+         Object.keys(r.props).forEach((key) => {
             props[key] = { ...r.props[key] };
          });
          subclasses.concat(r.subclasses);
@@ -64,11 +64,11 @@ export async function getNewNode(resourceURI) {
    ID.cfg({
       endpoint: Constants.virtuosoEndpoint,
       graph: Constants.graphURI,
-      prefix: resourceURI
+      prefix: resourceURI,
    });
    let newNode;
    await ID.create()
-      .then(commentIdTmp => {
+      .then((commentIdTmp) => {
          newNode = new Node(commentIdTmp);
       })
       .catch(console.log);
