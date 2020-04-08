@@ -23,7 +23,7 @@ dataRouter.use("/:className/:id?", async (req, res, next) => {
    if (data.length == 0) {
       return next(
          new RequestError(
-            `Resource with ID ${req.params.id} and class name ${req.params.className} does not exist`,
+            `Resource with ID ${req.params.id} and class name ${req.params.className} doesn't exist`,
             404
          )
       );

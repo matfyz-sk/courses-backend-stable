@@ -2,6 +2,7 @@ import * as Constants from "../constants";
 import { Node, Data, Text } from "virtuoso-sparql-client";
 import * as ID from "../lib/virtuoso-uid";
 import * as Resources from "../model";
+import moment from "moment-timezone";
 
 export function getTripleObjectType(objectTypeName, objectValue) {
    switch (objectTypeName) {
@@ -83,4 +84,14 @@ export function classPrefix(className) {
 export function className(className, includePrefix = false) {
    const upperCaseClassName = className.charAt(0).toUpperCase() + className.slice(1);
    return includePrefix ? "courses:" + upperCaseClassName : upperCaseClassName;
+}
+
+export function isIsoDate(str) {
+   if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(str)) return false;
+   var d = new Date(str);
+   return d.toISOString() === str;
+}
+
+export function dateTime() {
+   return moment().tz("Europe/Bratislava").format("DD-MM-YYYY HH:mm:ss");
 }
