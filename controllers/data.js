@@ -27,3 +27,9 @@ export async function deleteResource(resource, attributeName, attributeValue) {
 export async function getResource(resource, filters) {
    return await runQuery(resource, filters);
 }
+
+export function getResourceSubclasses(resource) {
+   return resource.subclasses == undefined
+      ? []
+      : resource.subclasses.map((e) => e.charAt(0).toUpperCase() + e.slice(1));
+}

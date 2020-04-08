@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 app.use((req, res, next) => {
-   console.log(chalk.green(`[${dateTime()}]`), chalk.yellow(req.method), req.path);
+   console.log(chalk.green(`[${dateTime()}]`), chalk.yellow(req.method), req.originalUrl);
    console.log(chalk.black.bgWhite("Request headers:"));
    console.log(JSON.stringify(req.headers, null, 2));
    console.log(chalk.black.bgWhite("Request body:"));
