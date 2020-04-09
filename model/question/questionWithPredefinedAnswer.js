@@ -6,7 +6,7 @@ export const questionWithPredefinedAnswer = {
    props: {
       hasAnswer: {
          required: true,
-         multiple: false,
+         multiple: true,
          dataType: "node",
          objectClass: "predefinedAnswer",
       },
