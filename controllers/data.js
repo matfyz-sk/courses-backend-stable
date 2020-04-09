@@ -1,4 +1,5 @@
 import runQuery from "../query";
+import { ontologyURI } from "../constants";
 
 export async function createResource(resource, data) {
    await resource.setInputPredicates(data);
@@ -31,5 +32,5 @@ export async function getResource(resource, filters) {
 export function getResourceSubclasses(resource) {
    return resource.subclasses == undefined
       ? []
-      : resource.subclasses.map((e) => e.charAt(0).toUpperCase() + e.slice(1));
+      : resource.subclasses.map((e) => ontologyURI + e.charAt(0).toUpperCase() + e.slice(1));
 }
