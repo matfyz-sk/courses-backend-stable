@@ -8,18 +8,16 @@ export async function createResource(resource, data) {
 }
 
 export async function updateResource(resource, data) {
-   for (var predicateName in data) {
-      if (data.hasOwnProperty(predicateName)) {
-         await resource.setPredicate(predicateName, data[predicateName]);
-      }
+   for (let predicateName of Object.keys(data)) {
+      await resource.setPredicate(predicateName, data[predicateName]);
    }
-   await resource.store(false);
+   await resource.store();
 }
 
 export async function deleteResource(resource, attributeName, attributeValue) {
    if (attributeName != undefined) {
       await resource.setPredicateToDelete(attributeName, attributeValue);
-      await resource.store(false);
+      await resource.store();
    } else {
       await resource.completeDelete();
    }

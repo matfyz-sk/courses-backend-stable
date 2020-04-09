@@ -7,9 +7,8 @@ const dataRouter = express.Router();
 
 dataRouter.use("/:className/:id?", async (req, res, next) => {
    try {
-      const resourceObject = getResourceObject(req.params.className);
       const resource = new Resource({
-         resource: resourceObject,
+         resource: getResourceObject(req.params.className),
          user: req.user,
          id: req.params.id,
       });

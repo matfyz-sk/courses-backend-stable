@@ -59,8 +59,8 @@ export default class Resource {
    }
 
    async setInputPredicates(data) {
-      for (var predicateName in this.props) {
-         if (this.props.hasOwnProperty(predicateName) && predicateName != "type") {
+      for (let predicateName of Object.keys(this.props)) {
+         if (predicateName != "type" || predicateName != "createdBy") {
             await this.setPredicate(predicateName, data[predicateName]);
          }
       }
@@ -131,8 +131,8 @@ export default class Resource {
       }
    }
 
-   async _prepareProperties(post = true) {
-      if (post) {
+   async _prepareProperties() {
+      if (this.subject == undefined) {
          this.subject = await getNewNode(classPrefix(this.resource.type));
          this.props.type.value = new Triple(
             this.subject,
@@ -146,23 +146,21 @@ export default class Resource {
          );
       }
 
-      for (var predicateName in this.props) {
-         if (this.props.hasOwnProperty(predicateName)) {
-            const value = this.props[predicateName].value;
-            if (!value) {
-               if (this.props[predicateName].required) {
-                  throw new RequestError(`Attribute '${predicateName}' is required`, 422);
-               }
-               continue;
+      for (let predicateName of Object.keys(this.props)) {
+         const value = this.props[predicateName].value;
+         if (!value) {
+            if (this.props[predicateName].required) {
+               throw new RequestError(`Attribute '${predicateName}' is required`, 422);
             }
-            if (Array.isArray(value)) {
-               for (let val of value) {
-                  await this._arrangeTriple(predicateName, val);
-               }
-               continue;
-            }
-            await this._arrangeTriple(predicateName, value);
+            continue;
          }
+         if (Array.isArray(value)) {
+            for (let val of value) {
+               await this._arrangeTriple(predicateName, val);
+            }
+            continue;
+         }
+         await this._arrangeTriple(predicateName, value);
       }
    }
 
@@ -312,7 +310,7 @@ export default class Resource {
       }
 
       if (this.props[predicateName].dataType != "node") {
-         for (var value of objectValue) {
+         for (let value of objectValue) {
             const object = getTripleObjectType(this.props[predicateName].dataType, value);
             this.props[predicateName].value.push(
                new Triple(this.subject, `courses:${predicateName}`, object)
@@ -321,7 +319,7 @@ export default class Resource {
          return;
       }
 
-      for (var value of objectValue) {
+      for (let value of objectValue) {
          if (value.constructor.name == "Number" || value.constructor.name == "Boolean") {
             throw new RequestError(`Invalid value for attribute '${predicateName}'`, 400);
          }
@@ -356,7 +354,7 @@ export default class Resource {
    _setNewArrayProperty(predicate, objectValue) {
       this.props[predicate].value = [];
       if (!objectValue) return;
-      for (var value of objectValue) {
+      for (let value of objectValue) {
          const object = getTripleObjectType(this.props[predicate].dataType, value);
          this.props[predicate].value.push(
             new Triple(this.subject, `courses:${predicate}`, object, "nothing")
