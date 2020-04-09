@@ -3,6 +3,7 @@ import { Client, Node, Data, Text } from "virtuoso-sparql-client";
 import * as ID from "../lib/virtuoso-uid";
 import * as Resources from "../model";
 import moment from "moment-timezone";
+import RequestError from "./RequestError";
 
 export function getTripleObjectType(objectTypeName, objectValue) {
    switch (objectTypeName) {
@@ -19,12 +20,15 @@ export function getTripleObjectType(objectTypeName, objectValue) {
       case "string":
          return new Text(objectValue);
       default:
-         return null;
+         throw new RequestError(`Invalid object type '${objectTypeName}'`, 500);
    }
 }
 
 export function getResourceObject(resourceName) {
    resourceName = resourceName.charAt(0).toLowerCase() + resourceName.slice(1);
+   if (!Resources[resourceName]) {
+      throw new RequestError(`Resource with class name '${resourceName}' is not supported`, 400);
+   }
    return Resources[resourceName];
 }
 

@@ -2,33 +2,25 @@ import { getResourceObject } from "../helpers";
 import { modifyResource, getResource } from "../middleware";
 import express from "express";
 import Resource from "../resource";
-import RequestError from "../helpers/RequestError";
 
 const dataRouter = express.Router();
 
 dataRouter.use("/:className/:id?", async (req, res, next) => {
-   const resourceObject = getResourceObject(req.params.className);
-   if (!resourceObject) {
-      return next(
-         new RequestError(`Resource with class name ${req.params.className} is not supported`, 400)
-      );
+   try {
+      const resourceObject = getResourceObject(req.params.className);
+      const resource = new Resource({
+         resource: resourceObject,
+         user: req.user,
+         id: req.params.id,
+      });
+      res.locals.resource = resource;
+      if (req.method == "GET" || req.params.id == undefined) {
+         return next();
+      }
+      await resource.fetch();
+   } catch (err) {
+      return next(err);
    }
-   const resource = new Resource(resourceObject, req.user);
-   res.locals.resource = resource;
-   if (req.method == "GET" || req.params.id == undefined) {
-      return next();
-   }
-   resource.setSubject(req.params.id);
-   const data = await resource.fetch();
-   if (data.length == 0) {
-      return next(
-         new RequestError(
-            `Resource with ID ${req.params.id} and class name ${req.params.className} doesn't exist`,
-            404
-         )
-      );
-   }
-   resource.fill(data);
    next();
 });
 

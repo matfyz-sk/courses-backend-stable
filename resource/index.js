@@ -12,14 +12,15 @@ import * as Constants from "../constants";
 import RequestError from "../helpers/RequestError";
 
 export default class Resource {
-   constructor(resource, user) {
-      this.resource = resource;
-      this.user = user;
+   constructor(cfg) {
+      this.resource = cfg.resource;
+      this.user = cfg.user;
+      this.id = cfg.id;
+      this._setSubject();
       this.triples = { toAdd: [], toUpdate: [], toRemove: [] };
       this.db = client();
       this.removeOld = true;
-      this.subject = undefined;
-      this.props = getAllProps(resource, false);
+      this.props = getAllProps(cfg.resource, false);
       this.props.type = {};
       this.props.createdBy = {};
    }
@@ -49,11 +50,11 @@ export default class Resource {
       return true;
    }
 
-   setSubject(uri) {
-      if (uri.startsWith("http://")) {
-         this.subject = new Node(uri);
+   _setSubject() {
+      if (this.id != undefined) {
+         this.subject = new Node(classPrefix(this.resource.type) + this.id);
       } else {
-         this.subject = new Node(classPrefix(this.resource.type) + uri);
+         this.subject = undefined;
       }
    }
 
@@ -242,10 +243,6 @@ export default class Resource {
       }
    }
 
-   _build(val) {
-      return val.prefix.name + ":" + val.value;
-   }
-
    async _resourceExists(resourceURI, resourceClass) {
       this.db.setQueryFormat("application/json");
       this.db.setQueryGraph(Constants.graphURI);
@@ -405,7 +402,10 @@ export default class Resource {
          `SELECT ?s ?p ?o WHERE {?s ?p ?o} VALUES ?s {<${this.subject.iri}>}`,
          true
       );
-      return data.results.bindings;
+      if (data.results.bindings.length == 0) {
+         throw new RequestError(`Resource with URI ${this.subject.iri} doesn't exist`, 404);
+      }
+      this._fill(data.results.bindings);
    }
 
    _prepareData(data) {
@@ -433,7 +433,7 @@ export default class Resource {
       return actualData;
    }
 
-   fill(data) {
+   _fill(data) {
       data = this._prepareData(data);
       Object.keys(this.props).forEach((predicateName) => {
          if (
