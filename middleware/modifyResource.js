@@ -9,14 +9,14 @@ export async function modifyResource(req, res, next) {
             break;
          case "PUT":
             resource.removeOld = false;
-            DataController.updateResource(resource, req.body);
+            await DataController.updateResource(resource, req.body);
             break;
          case "PATCH":
             resource.removeOld = true;
-            DataController.updateResource(resource, req.body);
+            await DataController.updateResource(resource, req.body);
             break;
          case "DELETE":
-            DataController.deleteResource(resource, req.params.attributeName, req.body.value);
+            await DataController.deleteResource(resource, req.params.attributeName, req.body.value);
             break;
          default:
             break;

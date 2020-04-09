@@ -13,13 +13,13 @@ export async function updateResource(resource, data) {
          await resource.setPredicate(predicateName, data[predicateName]);
       }
    }
-   await resource.update();
+   await resource.store(false);
 }
 
 export async function deleteResource(resource, attributeName, attributeValue) {
    if (attributeName != undefined) {
       await resource.setPredicateToDelete(attributeName, attributeValue);
-      await resource.delete();
+      await resource.store(false);
    } else {
       await resource.completeDelete();
    }

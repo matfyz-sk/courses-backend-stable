@@ -1,5 +1,5 @@
 import * as Constants from "../constants";
-import { Node, Data, Text } from "virtuoso-sparql-client";
+import { Client, Node, Data, Text } from "virtuoso-sparql-client";
 import * as ID from "../lib/virtuoso-uid";
 import * as Resources from "../model";
 import moment from "moment-timezone";
@@ -59,6 +59,17 @@ export function getAllProps(resource, includeSubclasses = true) {
    }
 
    return props;
+}
+
+export function client() {
+   const client = new Client(Constants.virtuosoEndpoint);
+   client.addPrefixes({
+      courses: Constants.ontologyURI,
+   });
+   client.setQueryFormat("application/json");
+   client.setQueryGraph(Constants.graphURI);
+   client.setDefaultGraph(Constants.graphURI);
+   return client;
 }
 
 export async function getNewNode(resourceURI) {

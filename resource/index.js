@@ -1,5 +1,12 @@
-import { Client, Triple, Node } from "virtuoso-sparql-client";
-import { getNewNode, getAllProps, getTripleObjectType, classPrefix, className } from "../helpers";
+import { Triple, Node } from "virtuoso-sparql-client";
+import {
+   getNewNode,
+   getAllProps,
+   getTripleObjectType,
+   classPrefix,
+   className,
+   client,
+} from "../helpers";
 import * as Resources from "../model";
 import * as Constants from "../constants";
 import RequestError from "../helpers/RequestError";
@@ -8,23 +15,13 @@ export default class Resource {
    constructor(resource, user) {
       this.resource = resource;
       this.user = user;
-      this.props = getAllProps(resource, false);
       this.triples = { toAdd: [], toUpdate: [], toRemove: [] };
-      this.db = new Client(Constants.virtuosoEndpoint);
-      this._setupVirtuosoClient();
+      this.db = client();
       this.removeOld = true;
       this.subject = undefined;
+      this.props = getAllProps(resource, false);
       this.props.type = {};
       this.props.createdBy = {};
-   }
-
-   _setupVirtuosoClient() {
-      this.db.addPrefixes({
-         courses: Constants.ontologyURI,
-      });
-      this.db.setQueryFormat("application/json");
-      this.db.setQueryGraph(Constants.graphURI);
-      this.db.setDefaultGraph(Constants.graphURI);
    }
 
    _getResourceCreateRules() {
@@ -70,9 +67,6 @@ export default class Resource {
 
    async setPredicate(predicateName, value) {
       if (value == undefined) {
-         if (this.props[predicateName].required) {
-            throw new RequestError(`Attribute '${predicateName}' is required`, 422);
-         }
          return;
       }
       if (!this.props.hasOwnProperty(predicateName)) {
@@ -98,16 +92,14 @@ export default class Resource {
       if (!this.props.hasOwnProperty(predicateName) || !this.props[predicateName].value) {
          return;
       }
-
       // autorizacia uprav
-      const changeRules = this.props[predicateName].change;
-      for (var rule of changeRules) {
-         const res = await this._resolveAuthRule(rule);
-         if (!res) {
-            throw new RequestError(`You can't change value of attribute '${predicateName}'`, 403);
-         }
-      }
-
+      // const changeRules = this.props[predicateName].change;
+      // for (var rule of changeRules) {
+      //    const res = await this._resolveAuthRule(rule);
+      //    if (!res) {
+      //       throw new RequestError(`You can't change value of attribute '${predicateName}'`, 403);
+      //    }
+      // }
       if (!this.props[predicateName].multiple) {
          // delete single predicate value
          if (this.props[predicateName].required) {
@@ -138,68 +130,63 @@ export default class Resource {
       }
    }
 
-   async _prepareTriplesToStore() {
-      this.subject = await getNewNode(classPrefix(this.resource.type));
-      this.props.type.value = new Triple(
-         this.subject,
-         "rdf:type",
-         className(this.resource.type, true)
-      );
-      this.props.createdBy.value = new Triple(
-         this.subject,
-         "courses:createdBy",
-         new Node(this.user.userURI)
-      );
+   async _prepareProperties(post = true) {
+      if (post) {
+         this.subject = await getNewNode(classPrefix(this.resource.type));
+         this.props.type.value = new Triple(
+            this.subject,
+            "rdf:type",
+            className(this.resource.type, true)
+         );
+         this.props.createdBy.value = new Triple(
+            this.subject,
+            "courses:createdBy",
+            new Node(this.user.userURI)
+         );
+      }
 
       for (var predicateName in this.props) {
          if (this.props.hasOwnProperty(predicateName)) {
-            const val = this.props[predicateName].value;
-            if (!val) {
-               continue;
-            }
-            if (Array.isArray(val)) {
-               for (var t of val) {
-                  if (t instanceof Triple) {
-                     t.subj = this.subject;
-                     this.triples.toAdd.push(t);
-                  } else {
-                     await t._prepareTriplesToStore();
-                     this.triples.toAdd = this.triples.toAdd.concat(t.triples.toAdd);
-                     this.triples.toAdd.push(
-                        new Triple(this.subject, `courses:${predicateName}`, t.subject)
-                     );
-                  }
+            const value = this.props[predicateName].value;
+            if (!value) {
+               if (this.props[predicateName].required) {
+                  throw new RequestError(`Attribute '${predicateName}' is required`, 422);
                }
                continue;
             }
-
-            if (val instanceof Triple) {
-               val.subj = this.subject;
-               this.triples.toAdd.push(val);
-            } else {
-               await val._prepareTriplesToStore();
-               this.triples.toAdd = this.triples.toAdd.concat(val.triples.toAdd);
-               this.triples.toAdd.push(
-                  new Triple(this.subject, `courses:${predicateName}`, val.subject)
-               );
+            if (Array.isArray(value)) {
+               for (let val of value) {
+                  await this._arrangeTriple(predicateName, val);
+               }
+               continue;
             }
+            await this._arrangeTriple(predicateName, value);
          }
       }
    }
 
-   async _prepareTriplesToUpdate() {
-      for (var key in this.props) {
-         if (this.props.hasOwnProperty(key)) {
-            const val = this.props[key].value;
-            if (!val) {
-               continue;
-            }
-            if (Array.isArray(val)) {
-               for (var t of val) this._arrangeTriple(t);
-               continue;
-            }
-            this._arrangeTriple(val);
-         }
+   async _arrangeTriple(predicateName, triple) {
+      if (triple instanceof Resource) {
+         await triple._prepareProperties();
+         this.triples.toAdd = this.triples.toAdd.concat(triple.triples.toAdd);
+         this.triples.toAdd.push(
+            new Triple(this.subject, `courses:${predicateName}`, triple.subject)
+         );
+         return;
+      }
+
+      if (triple.getOperation() == Triple.ADD) {
+         triple.subj = this.subject;
+         this.triples.toAdd.push(triple);
+         return;
+      }
+      if (triple.getOperation() == Triple.UPDATE) {
+         this.triples.toUpdate.push(triple);
+         return;
+      }
+      if (triple.getOperation() == Triple.REMOVE) {
+         this.triples.toRemove.push(triple);
+         return;
       }
    }
 
@@ -255,40 +242,6 @@ export default class Resource {
       }
    }
 
-   _arrangeTriple(triple) {
-      if (triple.getOperation() == Triple.ADD) {
-         // pri metode PUT, pridanie novej hodnoty k viachodnotovemu atributu
-         this.triples.toAdd.push(triple);
-         return;
-      }
-      if (triple.getOperation() == Triple.UPDATE) {
-         // upravenie objektu trojice
-         this.triples.toUpdate.push(triple);
-         return;
-      }
-      if (triple.getOperation() == Triple.REMOVE) {
-         // pri operacii PATCH, odstranenie vsetkych hodnot viachodnotoveho atributu
-         this.triples.toRemove.push(triple);
-         return;
-      }
-   }
-
-   _prepareTriplesToDelete() {
-      Object.keys(this.props).forEach((key) => {
-         const val = this.props[key].value;
-         if (!val) {
-            return;
-         }
-         if (Array.isArray(val)) {
-            for (var t of val) {
-               if (t.getOperation() == Triple.REMOVE) this.triples.toRemove.push(t);
-            }
-            return;
-         }
-         if (val.getOperation() == Triple.REMOVE) this.triples.toRemove.push(val);
-      });
-   }
-
    _build(val) {
       return val.prefix.name + ":" + val.value;
    }
@@ -311,8 +264,7 @@ export default class Resource {
 
       if (valConstruct == "Object") {
          const r = new Resource(Resources[objectValue.type], this.user);
-         await r.isAbleToCreate();
-         delete objectValue["type"];
+         // await r.isAbleToCreate();
          r.setInputPredicates(objectValue);
          this.props[predicateName].value = r;
          return;
@@ -320,10 +272,11 @@ export default class Resource {
 
       const object = getTripleObjectType(this.props[predicateName].dataType, objectValue);
 
-      if (this.props[predicateName].dataType === "node") {
-         if (!(await this._resourceExists(objectValue, this.props[predicateName].objectClass))) {
-            throw new RequestError(`Resource with URI ${objectValue} doesn't exist`, 400);
-         }
+      if (
+         this.props[predicateName].dataType === "node" &&
+         !(await this._resourceExists(objectValue, this.props[predicateName].objectClass))
+      ) {
+         throw new RequestError(`Resource with URI ${objectValue} doesn't exist`, 400);
       }
 
       if (!this.props[predicateName].value) {
@@ -334,18 +287,18 @@ export default class Resource {
          );
       } else {
          // autorizacia uprav
-         const changeRules = this.props[predicateName].change;
-         if (Array.isArray(changeRules)) {
-            for (var rule of changeRules) {
-               const res = await this._resolveAuthRule(rule);
-               if (!res) {
-                  throw new RequestError(
-                     `You can't change value of attribute '${predicateName}'`,
-                     403
-                  );
-               }
-            }
-         }
+         // const changeRules = this.props[predicateName].change;
+         // if (Array.isArray(changeRules)) {
+         //    for (var rule of changeRules) {
+         //       const res = await this._resolveAuthRule(rule);
+         //       if (!res) {
+         //          throw new RequestError(
+         //             `You can't change value of attribute '${predicateName}'`,
+         //             403
+         //          );
+         //       }
+         //    }
+         // }
          this.props[predicateName].value.setOperation(Triple.ADD);
          this.props[predicateName].value.updateObject(object);
       }
@@ -378,8 +331,7 @@ export default class Resource {
 
          if (value.constructor.name == "Object") {
             const r = new Resource(Resources[value.type], this.user);
-            await r.isAbleToCreate();
-            delete value["type"];
+            // await r.isAbleToCreate();
             r.setInputPredicates(value);
             this.props[predicateName].value.push(r);
          } else {
@@ -415,7 +367,9 @@ export default class Resource {
       }
    }
 
-   async _storeTriples() {
+   async store(post = true) {
+      await this._prepareProperties(post);
+
       if (this.triples.toRemove.length > 0) {
          this.db.getLocalStore().empty();
          this.db.getLocalStore().bulk(this.triples.toRemove);
@@ -435,33 +389,13 @@ export default class Resource {
       }
    }
 
-   async store() {
-      await this._prepareTriplesToStore();
-      this.db.getLocalStore().empty();
-      this.db.getLocalStore().bulk(this.triples.toAdd);
-      return this.db.store(true);
-   }
-
-   delete() {
-      this._prepareTriplesToDelete();
-      this.db.getLocalStore().empty();
-      if (this.triples.toRemove.length > 0) this.db.getLocalStore().bulk(this.triples.toRemove);
-      return this.db.store(true);
-   }
-
-   completeDelete() {
+   async completeDelete() {
       this.db.setQueryFormat("application/json");
       this.db.setQueryGraph(Constants.graphURI);
-      return this.db.query(`DELETE WHERE {<${this.subject.iri}> ?p ?o}`, true).then(() => {
-         this.db.setQueryFormat("application/json");
-         this.db.setQueryGraph(Constants.graphURI);
-         return this.db.query(`DELETE WHERE {?s ?p <${this.subject.iri}>}`, true);
-      });
-   }
-
-   async update() {
-      await this._prepareTriplesToUpdate();
-      return this._storeTriples();
+      await this.db.query(`DELETE WHERE {<${this.subject.iri}> ?p ?o}`, true);
+      this.db.setQueryFormat("application/json");
+      this.db.setQueryGraph(Constants.graphURI);
+      await this.db.query(`DELETE WHERE {?s ?p <${this.subject.iri}>}`, true);
    }
 
    async fetch() {
