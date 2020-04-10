@@ -15,6 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(logger);
+app.use("/", (req, res) => res.send("Running!"));
 app.use("/data", authorization, dataRouter);
 app.use("/auth", authRouter);
 app.use(errorHandler);
