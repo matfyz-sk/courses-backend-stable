@@ -3,25 +3,25 @@ import { event } from "../event";
 export const taskEvent = {
    type: "taskEvent",
    subclassOf: event,
-   subclasses: ["assignmentPeriod", "examinationEvent"],
+   subclasses: ["assignmentPeriod", "examinationEvent", "questionAssignment", "quizAssignment"],
    props: {
       extraTime: {
          required: false,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
       },
       task: {
          required: false,
          multiple: false,
          dataType: "node",
-         objectClass: "task"
+         objectClass: "task",
       },
       courseInstance: {
          required: true,
          multiple: false,
          dataType: "node",
-         objectClass: "courseInstance"
-      }
+         objectClass: "courseInstance",
+      },
    },
-   create: ["[this].courseInstance/^instructorOf.{userURI}"]
+   create: ["[this].courseInstance/^instructorOf.{userURI}"],
 };

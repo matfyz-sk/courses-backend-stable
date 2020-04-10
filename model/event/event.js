@@ -3,60 +3,60 @@ export const event = {
    subclasses: ["courseInstance", "block", "session", "taskEvent"],
    props: {
       name: {
-         required: true,
+         required: false,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
       },
       location: {
          required: false,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
       },
       description: {
          required: false,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
       },
       startDate: {
          required: true,
          multiple: false,
-         dataType: "dateTime"
+         dataType: "dateTime",
       },
       endDate: {
          required: true,
          multiple: false,
-         dataType: "dateTime"
+         dataType: "dateTime",
       },
       uses: {
          required: false,
          multiple: true,
          dataType: "node",
-         objectClass: "material"
+         objectClass: "material",
       },
       recommends: {
          required: false,
          multiple: true,
          dataType: "node",
-         objectClass: "material"
+         objectClass: "material",
       },
       covers: {
          required: false,
          multiple: true,
          dataType: "node",
-         objectClass: "topic"
+         objectClass: "topic",
       },
       mentions: {
          required: false,
          multiple: true,
          dataType: "node",
-         objectClass: "topic"
+         objectClass: "topic",
       },
       requires: {
          required: false,
          multiple: true,
          dataType: "node",
-         objectClass: "topic"
-      }
+         objectClass: "topic",
+      },
    },
-   create: ["admin"]
+   create: ["admin"],
 };

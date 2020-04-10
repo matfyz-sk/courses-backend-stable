@@ -6,41 +6,41 @@ export const course = {
          multiple: false,
          dataType: "string",
          change: ["superAdmin"],
-         get: ["admin"]
+         get: ["admin"],
       },
       description: {
          required: false,
          multiple: false,
          dataType: "string",
-         change: ["superAdmin"]
+         change: ["superAdmin"],
       },
       abbreviation: {
          required: false,
          multiple: false,
          dataType: "string",
-         change: ["superAdmin"]
+         change: ["superAdmin"],
       },
       hasPrerequisite: {
          required: false,
-         multiple: false,
+         multiple: true,
          dataType: "node",
          objectClass: "course",
-         change: ["superAdmin"]
+         change: ["superAdmin"],
       },
       mentions: {
          required: false,
          multiple: true,
          dataType: "node",
          objectClass: "topic",
-         change: ["superAdmin"]
+         change: ["superAdmin"],
       },
       covers: {
          required: false,
          multiple: true,
          dataType: "node",
          objectClass: "topic",
-         change: ["superAdmin"]
-      }
+         change: ["superAdmin"],
+      },
    },
-   create: ["superAdmin"]
+   create: ["superAdmin"],
 };
