@@ -2,14 +2,17 @@
    "name": "courses-backend",
    "version": "1.0.0",
    "description": "Backend of web application",
+   "type": "module",
    "repository": {
       "type": "git",
       "url": "https://github.com/matfyz-sk/courses-backend"
    },
    "main": "server.js",
    "scripts": {
-      "start": "nodemon --exec babel-node server.js",
-      "debug": "nodemon --inspect --exec babel-node  server.js"
+      "build": "rm -rf dist/ && babel src -d dist",
+      "prod": "node dist/server.js",
+      "dev": "nodemon --exec babel-node src/server.js",
+      "debug": "nodemon --inspect --exec babel-node  src/server.js"
    },
    "author": "Milan Cifra",
    "license": "ISC",
@@ -29,8 +32,10 @@
       "virtuoso-sparql-client": "^0.2.2"
    },
    "devDependencies": {
+      "@babel/cli": "^7.8.4",
       "@babel/core": "^7.9.0",
       "@babel/node": "^7.8.7",
+      "@babel/polyfill": "^7.8.7",
       "@babel/preset-env": "^7.9.5",
       "nodemon": "^1.19.4"
    }
