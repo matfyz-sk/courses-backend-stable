@@ -6,8 +6,8 @@ import {
    classPrefix,
    className,
    client,
+   getResourceObject,
 } from "../helpers";
-import * as Resources from "../model";
 import * as Constants from "../constants";
 import RequestError from "../helpers/RequestError";
 
