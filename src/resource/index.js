@@ -258,7 +258,7 @@ export default class Resource {
       const valConstruct = objectValue.constructor.name;
 
       if (valConstruct == "Object") {
-         const r = new Resource(Resources[objectValue.type], this.user);
+         const r = new Resource({ resource: getResourceObject(objectValue.type), user: this.user });
          // await r.isAbleToCreate();
          r.setInputPredicates(objectValue);
          this.props[predicateName].value = r;
@@ -325,7 +325,7 @@ export default class Resource {
          }
 
          if (value.constructor.name == "Object") {
-            const r = new Resource(Resources[value.type], this.user);
+            const r = new Resource({ resource: getResourceObject(value.type), user: this.user });
             // await r.isAbleToCreate();
             r.setInputPredicates(value);
             this.props[predicateName].value.push(r);
