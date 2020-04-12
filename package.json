@@ -9,7 +9,7 @@
    "main": "src/server.js",
    "scripts": {
       "build": "rm -rf dist/ && babel src -d dist",
-      "prod": "node dist/server.js",
+      "prod": "npm run build && node dist/server.js",
       "dev": "nodemon --exec babel-node src/server.js",
       "debug": "nodemon --inspect --exec babel-node  src/server.js"
    },
@@ -36,5 +36,17 @@
       "@babel/node": "^7.8.7",
       "@babel/preset-env": "^7.9.5",
       "nodemon": "^1.19.4"
+   },
+   "babel": {
+      "presets": [
+         [
+            "@babel/preset-env",
+            {
+               "targets": {
+                  "node": "current"
+               }
+            }
+         ]
+      ]
    }
 }
