@@ -1,12 +1,12 @@
 import { DataController } from "../controllers";
+import { prepareResource } from "./prepareResource";
+import { fetchResource } from "./fetchResource";
+import { responseHandler } from "./responseHandler";
 
-export async function modifyResource(req, res, next) {
+async function _modifyResource(req, res, next) {
    const resource = res.locals.resource;
    try {
       switch (req.method) {
-         case "POST":
-            await DataController.createResource(resource, req.body);
-            break;
          case "PUT":
             resource.removeOld = false;
             await DataController.updateResource(resource, req.body);
@@ -21,8 +21,10 @@ export async function modifyResource(req, res, next) {
          default:
             break;
       }
-      res.status(200).send({ status: true, resource: resource.subject });
+      next();
    } catch (err) {
       next(err);
    }
 }
+
+export const modifyResource = [prepareResource, fetchResource, _modifyResource, responseHandler];

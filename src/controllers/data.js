@@ -1,7 +1,18 @@
 import runQuery from "../query";
 import { ontologyURI } from "../constants";
+import RequestError from "../helpers/RequestError";
+import { getResourceObject } from "../helpers";
 
 export async function createResource(resource, data) {
+   if (resource.resource.subclasses != undefined) {
+      if (!data.hasOwnProperty("_type")) {
+         throw new RequestError(
+            "You cannot create resource containing subclasses. Specify attribute _type or send request to subclass",
+            400
+         );
+      }
+      resource.setResourceObject(getResourceObject(data._type));
+   }
    await resource.setInputPredicates(data);
    // await resource.isAbleToCreate();
    await resource.store();

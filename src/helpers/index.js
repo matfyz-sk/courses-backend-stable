@@ -4,6 +4,7 @@ import * as ID from "../lib/virtuoso-uid";
 import * as Resources from "../model";
 import moment from "moment-timezone";
 import RequestError from "./RequestError";
+import jwt from "jsonwebtoken";
 
 export function getTripleObjectType(objectTypeName, objectValue) {
    switch (objectTypeName) {
@@ -91,6 +92,13 @@ export async function getNewNode(resourceURI) {
    return newNode;
 }
 
+export function generateToken({ userURI, email }) {
+   let token = jwt.sign({ userURI, email }, Constants.authSecret, {
+      algorithm: "HS256",
+   });
+   return token;
+}
+
 export function classPrefix(className) {
    const lowerCaseClassName = className.charAt(0).toLowerCase() + className.slice(1);
    return Constants.graphURI + "/" + lowerCaseClassName + "/";
@@ -99,6 +107,14 @@ export function classPrefix(className) {
 export function className(className, includePrefix = false) {
    const upperCaseClassName = className.charAt(0).toUpperCase() + className.slice(1);
    return includePrefix ? "courses:" + upperCaseClassName : upperCaseClassName;
+}
+
+export function uri2className(uri) {
+   return className(uri.substring(Constants.ontologyURI.length));
+}
+
+export function uri2id(uri) {
+   return uri.substring(uri.lastIndexOf("/") + 1);
 }
 
 export function isIsoDate(str) {

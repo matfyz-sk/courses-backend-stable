@@ -16,11 +16,19 @@ export default class Resource {
       this.resource = cfg.resource;
       this.user = cfg.user;
       this.id = cfg.id;
+      this.setCreator = cfg.setCreator == undefined || cfg.setCreator == true ? true : false;
       this._setSubject();
       this.triples = { toAdd: [], toUpdate: [], toRemove: [] };
       this.db = client();
       this.removeOld = true;
       this.props = getAllProps(cfg.resource, false);
+      this.props.type = {};
+      this.props.createdBy = {};
+   }
+
+   setResourceObject(_res) {
+      this.resource = _res;
+      this.props = getAllProps(_res, false);
       this.props.type = {};
       this.props.createdBy = {};
    }
@@ -139,11 +147,13 @@ export default class Resource {
             "rdf:type",
             className(this.resource.type, true)
          );
-         this.props.createdBy.value = new Triple(
-            this.subject,
-            "courses:createdBy",
-            new Node(this.user.userURI)
-         );
+         if (this.setCreator) {
+            this.props.createdBy.value = new Triple(
+               this.subject,
+               "courses:createdBy",
+               new Node(this.user.userURI)
+            );
+         }
       }
 
       for (let predicateName of Object.keys(this.props)) {
