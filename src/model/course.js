@@ -41,6 +41,13 @@ export const course = {
          objectClass: "topic",
          change: ["superAdmin"],
       },
+      hasAdmin: {
+         required: false,
+         multiple: false,
+         dataType: "node",
+         objectClass: "user",
+         change: ["superAdmin"],
+      },
    },
    create: ["superAdmin"],
 };

@@ -59,6 +59,11 @@ export const user = {
          multiple: false,
          dataType: "boolean",
       },
+      isSuperAdmin: {
+         required: false,
+         multiple: false,
+         dataType: "boolean",
+      },
       memberOf: {
          required: false,
          multiple: true,
