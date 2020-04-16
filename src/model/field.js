@@ -4,20 +4,24 @@ export const field = {
       name: {
          required: true,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
       },
       description: {
          required: false,
          multiple: false,
-         dataType: "string"
+         dataType: "string",
       },
-      ofType: {
+      label: {
          required: true,
          multiple: false,
-         dataType: "node",
-         objectClass: "fieldType"
-      }
+         dataType: "string",
+      },
+      fieldType: {
+         required: true,
+         multiple: false,
+         dataType: "string",
+      },
    },
    create: "admin",
-   completeDelete: "superAdmin"
+   completeDelete: "superAdmin",
 };

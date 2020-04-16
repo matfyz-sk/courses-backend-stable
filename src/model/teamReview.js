@@ -1,45 +1,38 @@
 export const teamReview = {
    type: "teamReview",
    props: {
-      // reviewedBy: {
-      //    required: true,
-      //    multiple: false,
-      //    type: "node",
-      //    objectClass: "user",
-      //    change: "{isAdmin}"
-      // },
       percentage: {
          required: true,
          multiple: false,
          dataType: "float",
-         change: "[this].ofSubmission/ofAssignment/courseInstance/^instructorOf.{userURI}"
+         change: "[this].ofSubmission/ofAssignment/courseInstance/^instructorOf.{userURI}",
       },
       reviewedStudent: {
          required: true,
          multiple: false,
          type: "node",
          objectClass: "user",
-         change: "admin"
+         change: "admin",
       },
       studentComment: {
          required: false,
          multiple: false,
          type: "string",
-         change: "[this].ofSubmission/ofAssignment/courseInstance/^instructorOf.{userURI}"
+         change: "[this].ofSubmission/ofAssignment/courseInstance/^instructorOf.{userURI}",
       },
       privateComment: {
          required: false,
          multiple: false,
          type: "string",
-         change: "[this].ofSubmission/ofAssignment/courseInstance/^instructorOf.{userURI}"
+         change: "[this].ofSubmission/ofAssignment/courseInstance/^instructorOf.{userURI}",
       },
       ofSubmission: {
          required: true,
          multiple: false,
          dataType: "node",
          objectClass: "submission",
-         change: "admin"
-      }
+         change: "admin",
+      },
    },
-   create: []
+   create: [],
 };
