@@ -47,6 +47,12 @@ export const question = {
          objectClass: "changeEvent",
          change: ["owner"],
       },
+      comment: {
+         required: false,
+         multiple: true,
+         dataType: "node",
+         objectClass: "comment",
+      },
    },
    create: ["[this].ofTopic/^covers/assignedTo.{userURI}"],
 };

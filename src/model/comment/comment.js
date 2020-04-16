@@ -6,28 +6,21 @@ export const comment = {
          required: true,
          multiple: false,
          dataType: "string",
-         change: ["owner"]
+         change: ["owner"],
       },
       ofSubmission: {
          required: false,
          multiple: false,
          dataType: "node",
          objectClass: "submission",
-         change: ["superAdmin"]
-      },
-      ofQuestion: {
-         required: false,
-         multiple: false,
-         dataType: "node",
-         objectClass: "question",
-         change: ["superAdmin"]
+         change: ["superAdmin"],
       },
       ofComment: {
          required: false,
          multiple: false,
          dataType: "node",
          objectClass: "comment",
-         change: ["superAdmin"]
-      }
-   }
+         change: ["superAdmin"],
+      },
+   },
 };
