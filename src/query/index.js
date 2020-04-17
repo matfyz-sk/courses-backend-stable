@@ -63,7 +63,7 @@ function generateQuery(resource, filters, user) {
          }
          if (filters.hasOwnProperty(predicateName)) {
             query.$where.push(`${resource.uri} courses:${predicateName} ${objectVar}`);
-            const objectClass = Resources[resource.props[predicateName].objectClass].type;
+            const objectClass = resource.props[predicateName].objectClass;
             query.$filter.push(
                `${objectVar}=<${classPrefix(objectClass) + filters[predicateName]}>`
             );
@@ -94,7 +94,8 @@ function generateQuery(resource, filters, user) {
       ) {
          return;
       }
-      query.$where.push(`<${filters[predicateName]}> courses:${predicateName} ${resource.uri}`);
+      query.$where.push(`${resource.uri} ^courses:${predicateName} ?${predicateName}URI`);
+      query.$filter.push(`regex (?${predicateName}URI, "${filters[predicateName]}$")`);
    });
    return query;
 }
