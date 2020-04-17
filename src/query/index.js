@@ -3,6 +3,7 @@ import { ontologyURI, virtuosoEndpoint, dcTermsURI } from "../constants";
 import { getAllProps, classPrefix, className } from "../helpers";
 import * as Resources from "../model";
 import * as Constants from "../constants";
+import RequestError from "../helpers/RequestError";
 
 const sparqlOptions = {
    context: ontologyURI,
@@ -90,6 +91,7 @@ function generateQuery(resource, filters, user) {
          predicateName === "_offset" ||
          predicateName === "_limit" ||
          predicateName === "_join" ||
+         predicateName === "_chain" ||
          resource.props.hasOwnProperty(predicateName)
       ) {
          return;
@@ -173,12 +175,46 @@ async function run(query) {
    return data;
 }
 
+async function dataChain(query, propName) {
+   var res = await run({ ...query });
+
+   // console.log("query: ", query);
+   // console.log("data:", res);
+   // console.log(res["@graph"].length);
+
+   if (res["@graph"].length != 1) {
+      throw new RequestError("Bad length");
+   }
+
+   var inst = res["@graph"][0];
+
+   while (inst[propName] != undefined && inst[propName].length == 1) {
+      const nextURI = inst[propName][0]["@id"];
+      query["@graph"]["@id"] = `${nextURI}`;
+      query["$where"].forEach((item, index, arr) => {
+         arr[index] = item.replace(`<${inst["@id"]}>`, `<${nextURI}>`);
+      });
+      // console.log("modified query:", query);
+
+      var data = await run({ ...query });
+
+      res["@graph"].push(data["@graph"][0]);
+      inst = data["@graph"][0];
+   }
+   return res;
+}
+
 export default function runQuery(_resource, filters) {
-   const resource = {
-      obj: _resource,
-      props: getAllProps(_resource),
-      uri: "?resourceURI",
-   };
-   const query = generateQuery(resource, filters);
-   return run(query);
+   const query = generateQuery(
+      {
+         obj: _resource,
+         props: getAllProps(_resource),
+         uri: "?resourceURI",
+      },
+      filters
+   );
+   if (filters._chain == undefined) {
+      return run(query);
+   }
+   return dataChain(query, filters._chain);
 }

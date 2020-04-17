@@ -64,9 +64,9 @@ export default class Resource {
 
    async setInputPredicates(data) {
       for (let predicateName of Object.keys(this.props)) {
-            await this.setPredicate(predicateName, data[predicateName]);
-         }
+         await this.setPredicate(predicateName, data[predicateName]);
       }
+   }
 
    async setPredicate(predicateName, value) {
       if (value == undefined) {
@@ -254,32 +254,42 @@ export default class Resource {
       return data.results.bindings.length > 0;
    }
 
-   async _setProperty(predicateName, objectValue) {
-      const valConstruct = objectValue.constructor.name;
+   async _setNestedProperty(propName, nestedValue) {
+      let resource = getResourceObject(this.props[propName].objectClass);
+      if (resource.subclasses != undefined) {
+         if (!nestedValue.hasOwnProperty("_type")) {
+            throw new RequestError("You must specify attribute _type in nested object", 400);
+         }
+         resource = getResourceObject(nestedValue._type);
+      }
+      const r = new Resource({ resource, user: this.user });
+      // await r.isAbleToCreate();
+      await r.setInputPredicates(nestedValue);
+      if (Array.isArray(this.props[propName].value)) {
+         this.props[propName].push(r);
+      } else {
+         this.props[propName].value = r;
+      }
+   }
 
-      if (valConstruct == "Object") {
-         const r = new Resource({ resource: getResourceObject(objectValue.type), user: this.user });
-         // await r.isAbleToCreate();
-         r.setInputPredicates(objectValue);
-         this.props[predicateName].value = r;
-         return;
+   async _setProperty(propName, propValue) {
+      if (this.props[propName].dataType === "node") {
+         if (propValue.constructor.name == "Object") {
+            await this._setNestedProperty(propName, propValue);
+            return;
+         }
+         if (propValue.constructor.name != "String") {
+            throw new RequestError(`Invalid value for attribute '${propName}'`, 400);
+         }
+         if (!(await this._resourceExists(propValue, this.props[propName].objectClass))) {
+            throw new RequestError(`Resource with URI ${propValue} doesn't exist`, 400);
+         }
       }
 
-      const object = getTripleObjectType(this.props[predicateName].dataType, objectValue);
+      const object = getTripleObjectType(this.props[propName].dataType, propValue);
 
-      if (
-         this.props[predicateName].dataType === "node" &&
-         !(await this._resourceExists(objectValue, this.props[predicateName].objectClass))
-      ) {
-         throw new RequestError(`Resource with URI ${objectValue} doesn't exist`, 400);
-      }
-
-      if (!this.props[predicateName].value) {
-         this.props[predicateName].value = new Triple(
-            this.subject,
-            `courses:${predicateName}`,
-            object
-         );
+      if (!this.props[propName].value) {
+         this.props[propName].value = new Triple(this.subject, `courses:${propName}`, object);
       } else {
          // autorizacia uprav
          // const changeRules = this.props[predicateName].change;
@@ -294,50 +304,42 @@ export default class Resource {
          //       }
          //    }
          // }
-         this.props[predicateName].value.setOperation(Triple.ADD);
-         this.props[predicateName].value.updateObject(object);
+         this.props[propName].value.setOperation(Triple.ADD);
+         this.props[propName].value.updateObject(object);
       }
    }
 
-   async _setArrayProperty(predicateName, objectValue) {
-      if (this.props[predicateName].value && this.removeOld) {
-         for (var triple of this.props[predicateName].value) {
+   async _setArrayProperty(propName, propValue) {
+      if (this.props[propName].value && this.removeOld) {
+         for (let triple of this.props[propName].value) {
             triple.setOperation(Triple.REMOVE);
          }
       }
-      if (!this.props[predicateName].hasOwnProperty("value")) {
-         this.props[predicateName].value = [];
+      if (!this.props[propName].hasOwnProperty("value")) {
+         this.props[propName].value = [];
       }
 
-      if (this.props[predicateName].dataType != "node") {
-         for (let value of objectValue) {
-            const object = getTripleObjectType(this.props[predicateName].dataType, value);
-            this.props[predicateName].value.push(
-               new Triple(this.subject, `courses:${predicateName}`, object)
-            );
-         }
-         return;
-      }
-
-      for (let value of objectValue) {
-         if (value.constructor.name == "Number" || value.constructor.name == "Boolean") {
-            throw new RequestError(`Invalid value for attribute '${predicateName}'`, 400);
-         }
-
-         if (value.constructor.name == "Object") {
-            const r = new Resource({ resource: getResourceObject(value.type), user: this.user });
-            // await r.isAbleToCreate();
-            r.setInputPredicates(value);
-            this.props[predicateName].value.push(r);
-         } else {
-            if (!(await this._resourceExists(value, this.props[predicateName].objectClass))) {
+      const propDataType = this.props[propName].dataType;
+      for (let value of propValue) {
+         if (propDataType === "node") {
+            if (value.constructor.name == "Object") {
+               await this._setNestedProperty(propName, value);
+               continue;
+            }
+            if (value.constructor.name != "String") {
+               throw new RequestError(`Invalid value for attribute '${propName}'`, 400);
+            }
+            if (!(await this._resourceExists(value, this.props[propName].objectClass))) {
                throw new RequestError(`Resource with URI ${value} doesn't exist`, 400);
             }
-            const object = getTripleObjectType(this.props[predicateName].dataType, value);
-            this.props[predicateName].value.push(
-               new Triple(this.subject, `courses:${predicateName}`, object)
-            );
          }
+         this.props[propName].value.push(
+            new Triple(
+               this.subject,
+               `courses:${propName}`,
+               getTripleObjectType(propDataType, value)
+            )
+         );
       }
    }
 
