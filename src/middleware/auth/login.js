@@ -25,16 +25,22 @@ function _login(req, res) {
          }
          res.send({
             status: true,
+            _token: generateToken({ userURI: userData["@id"], email: userData.email }),
             user: {
                id: uri2id(userData["@id"]),
                fullURI: userData["@id"],
-               name: userData.useNickName
-                  ? userData.nickname
-                  : userData.firstName + " " + userData.lastName,
-               type: "student",
-               avatar: null,
+               firstName: userData.firstName,
+               lastName: userData.lastName,
+               description: userData.description,
+               nickname: userData.nickname,
+               useNickName: userData.useNickName,
+               email: userData.email,
+               avatar: userData.avatar ? userData.avatar : null,
+               isSuperAdmin: userData.isSuperAdmin,
+               studentOf: userData.studentOf,
+               instructorOf: userData.instructorOf,
+               requests: userData.requests,
             },
-            _token: generateToken({ userURI: userData["@id"], email: userData.email }),
          });
       })
       .catch((err) => {

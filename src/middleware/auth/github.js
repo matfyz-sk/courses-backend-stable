@@ -38,14 +38,22 @@ export function githubLogin(req, res) {
          const userData = data["@graph"][0];
          res.send({
             status: true,
+            _token: generateToken({ userURI: userData["@id"], email: userData.email }),
             user: {
-               name: userData.useNickName
-                  ? userData.nickname
-                  : userData.firstName + " " + userData.lastName,
-               type: "student",
-               avatar: null,
+               id: uri2id(userData["@id"]),
+               fullURI: userData["@id"],
+               firstName: userData.firstName,
+               lastName: userData.lastName,
+               description: userData.description,
+               nickname: userData.nickname,
+               useNickName: userData.useNickName,
+               email: userData.email,
+               avatar: userData.avatar ? userData.avatar : null,
+               isSuperAdmin: userData.isSuperAdmin,
+               studentOf: userData.studentOf,
+               instructorOf: userData.instructorOf,
+               requests: userData.requests,
             },
-            _token: generateToken(userData),
          });
       })
       .catch((err) => {

@@ -2,7 +2,7 @@ import Resource from "../../resource";
 import { body } from "express-validator";
 import bcrypt from "bcrypt";
 import runQuery from "../../query";
-import { user } from "../../model/agent/user";
+import { user as userObj } from "../../model/agent/user";
 import { generateToken, uri2id } from "../../helpers";
 import { checkValidation } from "./checkValidation";
 
@@ -25,7 +25,7 @@ const bodyValidation = [
 ];
 
 export function emailIsFree(req, res, next) {
-   runQuery(user, { email: req.body.user.email })
+   runQuery(userObj, { email: req.body.user.email })
       .then((data) => {
          if (data["@graph"].length != 0) {
             return res
@@ -40,20 +40,22 @@ export function emailIsFree(req, res, next) {
 }
 
 async function _register(req, res, next) {
-   const u = new Resource({ resource: user, setCreator: false });
-   const hash = bcrypt.hashSync(req.body.user.password, 10);
+   const { user, privacy } = req.body;
+   const u = new Resource({ resource: userObj, setCreator: false });
+   const hash = bcrypt.hashSync(user.password, 10);
    try {
-      await u.setPredicate("firstName", req.body.user.first_name);
-      await u.setPredicate("lastName", req.body.user.last_name);
-      await u.setPredicate("email", req.body.user.email);
+      await u.setPredicate("firstName", user.first_name);
+      await u.setPredicate("lastName", user.last_name);
+      await u.setPredicate("email", user.email);
       await u.setPredicate("password", hash);
-      await u.setPredicate("useNickName", req.body.privacy.use_nickname);
-      await u.setPredicate("publicProfile", req.body.privacy.public_profile);
-      await u.setPredicate("showCourses", req.body.privacy.show_courses);
-      await u.setPredicate("showBadges", req.body.privacy.show_badges);
-      await u.setPredicate("allowContact", req.body.privacy.allow_contact);
-      await u.setPredicate("description", req.body.user.description);
-      await u.setPredicate("nickname", req.body.privacy.nickname);
+      await u.setPredicate("description", user.description ? user.description : "");
+      await u.setPredicate("nickname", privacy.nickname ? privacy.nickname : "");
+      await u.setPredicate("useNickName", privacy.use_nickname);
+      await u.setPredicate("publicProfile", privacy.public_profile);
+      await u.setPredicate("showCourses", privacy.show_courses);
+      await u.setPredicate("showBadges", privacy.show_badges);
+      await u.setPredicate("allowContact", privacy.allow_contact);
+      await u.setPredicate("isSuperAdmin", false);
    } catch (err) {
       console.log(err);
       return res.status(200).send({ status: false, msg: err, user: null });
@@ -61,24 +63,29 @@ async function _register(req, res, next) {
 
    u.store()
       .then((data) => {
-         let token = generateToken({ userURI: u.subject.iri, email: req.body.user.email });
+         let token = generateToken({ userURI: u.subject.iri, email: user.email });
          res.send({
             status: true,
+            _token: token,
             user: {
                id: uri2id(u.subject.iri),
                fullURI: u.subject.iri,
-               name: req.body.privacy.use_nickname
-                  ? req.body.privacy.nickname
-                  : req.body.user.first_name + " " + req.body.user.last_name,
-               type: "student",
-               avatar: null,
+               firstName: user.first_name,
+               lastName: user.last_name,
+               nickname: privacy.nickname ? privacy.nickname : null,
+               useNickName: privacy.use_nickname,
+               email: user.email,
+               avatar: user.avatar ? user.avatar : null,
+               isSuperAdmin: false,
+               studentOf: [],
+               instructorOf: [],
+               requests: [],
             },
-            _token: token,
          });
       })
       .catch((err) => {
          console.log(err);
-         return res.status(500).send({ status: false });
+         return res.status(500).send({ status: false, message: err.message });
       });
 }
 
