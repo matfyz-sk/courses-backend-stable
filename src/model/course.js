@@ -43,7 +43,7 @@ export const course = {
       },
       hasAdmin: {
          required: false,
-         multiple: false,
+         multiple: true,
          dataType: "node",
          objectClass: "user",
          change: ["superAdmin"],

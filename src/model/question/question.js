@@ -53,6 +53,12 @@ export const question = {
          dataType: "node",
          objectClass: "comment",
       },
+      previous: {
+         required: false,
+         multiple: false,
+         dataType: "node",
+         objectClass: "question",
+      },
    },
    create: ["[this].ofTopic/^covers/assignedTo.{userURI}"],
 };

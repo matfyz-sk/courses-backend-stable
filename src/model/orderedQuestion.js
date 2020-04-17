@@ -6,28 +6,28 @@ export const orderedQuestion = {
          multiple: false,
          dataType: "node",
          objectClass: "question",
-         change: "[this].createdBy.{userURI}"
+         change: "[this].createdBy.{userURI}",
       },
       userAnswer: {
          required: true,
          multiple: false,
          dataType: "node",
          objectClass: "userAnswer",
-         change: "[this].createdBy.{userURI}"
+         change: "[this].createdBy.{userURI}",
       },
       quizTake: {
          required: false,
          multiple: false,
          dataType: "node",
-         objectClass: "quizTake"
+         objectClass: "quizTake",
       },
-      next: {
+      previous: {
          required: false,
          multiple: false,
          dataType: "node",
          objectClass: "orderedQuestion",
-         change: "[this].createdBy.{userURI}"
-      }
+         change: "[this].createdBy.{userURI}",
+      },
    },
-   create: ""
+   create: "",
 };
