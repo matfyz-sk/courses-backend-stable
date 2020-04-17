@@ -22,15 +22,11 @@ export default class Resource {
       this.db = client();
       this.removeOld = true;
       this.props = getAllProps(cfg.resource, false);
-      this.props.type = {};
-      this.props.createdBy = {};
    }
 
    setResourceObject(_res) {
       this.resource = _res;
       this.props = getAllProps(_res, false);
-      this.props.type = {};
-      this.props.createdBy = {};
    }
 
    _getResourceCreateRules() {
@@ -68,11 +64,9 @@ export default class Resource {
 
    async setInputPredicates(data) {
       for (let predicateName of Object.keys(this.props)) {
-         if (predicateName != "type" || predicateName != "createdBy") {
             await this.setPredicate(predicateName, data[predicateName]);
          }
       }
-   }
 
    async setPredicate(predicateName, value) {
       if (value == undefined) {
@@ -142,17 +136,13 @@ export default class Resource {
    async _prepareProperties() {
       if (this.subject == undefined) {
          this.subject = await getNewNode(classPrefix(this.resource.type));
-         this.props.type.value = new Triple(
-            this.subject,
-            "rdf:type",
-            className(this.resource.type, true)
-         );
+         this.props.type = {
+            value: new Triple(this.subject, "rdf:type", className(this.resource.type, true)),
+         };
          if (this.setCreator) {
-            this.props.createdBy.value = new Triple(
-               this.subject,
-               "courses:createdBy",
-               new Node(this.user.userURI)
-            );
+            this.props.createdBy = {
+               value: new Triple(this.subject, "courses:createdBy", new Node(this.user.userURI)),
+            };
          }
       }
 
