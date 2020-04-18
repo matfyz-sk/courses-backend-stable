@@ -266,7 +266,7 @@ export default class Resource {
       // await r.isAbleToCreate();
       await r.setInputPredicates(nestedValue);
       if (Array.isArray(this.props[propName].value)) {
-         this.props[propName].push(r);
+         this.props[propName].value.push(r);
       } else {
          this.props[propName].value = r;
       }
