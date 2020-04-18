@@ -4,7 +4,7 @@ export const block = {
    type: "block",
    subclassOf: event,
    props: {
-      courseInsntace: {
+      courseInstance: {
          required: true,
          multiple: false,
          dataType: "node",
