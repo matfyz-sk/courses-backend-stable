@@ -1,6 +1,7 @@
 export const task = {
    type: "task",
    subclasses: ["assignment"],
+   create: ["{this}.courseInstance/^instructorOf.{userURI}"],
    props: {
       name: {
          required: true,
@@ -43,5 +44,4 @@ export const task = {
          change: ["owner,admin"],
       },
    },
-   create: ["[this].courseInstance/^instructorOf.{userURI}"],
 };

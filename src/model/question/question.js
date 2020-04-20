@@ -1,6 +1,7 @@
 export const question = {
    type: "question",
    subclasses: ["essayQuestion", "openQuestion", "questionWithPredefinedAnswer"],
+   create: ["{this}.ofTopic/hasQuestionAssignment/assignedTo.{userURI}"],
    props: {
       name: {
          required: false,
@@ -60,5 +61,4 @@ export const question = {
          objectClass: "question",
       },
    },
-   create: ["[this].ofTopic/^covers/assignedTo.{userURI}"],
 };

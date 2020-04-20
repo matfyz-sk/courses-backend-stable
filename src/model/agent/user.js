@@ -3,6 +3,7 @@ import { agent } from "./agent";
 export const user = {
    type: "user",
    subclassOf: agent,
+   create: ["register", "superAdmin"],
    props: {
       firstName: {
          required: true,
@@ -90,14 +91,14 @@ export const user = {
          multiple: true,
          dataType: "node",
          objectClass: "courseInstance",
-         change: ["admin"],
+         change: ["{this}.hasAdmin.{userURI}"],
       },
       understands: {
          required: false,
          multiple: true,
          dataType: "node",
          objectClass: "topic",
-         change: ["admin"],
+         change: ["{this}.hasAdmin.{userURI}"],
       },
    },
 };

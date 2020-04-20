@@ -58,5 +58,4 @@ export const event = {
          objectClass: "topic",
       },
    },
-   create: ["admin"],
 };

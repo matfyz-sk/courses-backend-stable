@@ -22,6 +22,4 @@ export const field = {
          dataType: "string",
       },
    },
-   create: "admin",
-   completeDelete: "superAdmin",
 };

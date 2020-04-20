@@ -1,5 +1,6 @@
 export const course = {
    type: "course",
+   create: ["superAdmin"],
    props: {
       name: {
          required: true,
@@ -49,5 +50,4 @@ export const course = {
          change: ["superAdmin"],
       },
    },
-   create: ["superAdmin"],
 };

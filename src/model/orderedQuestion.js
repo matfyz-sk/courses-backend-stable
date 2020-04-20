@@ -1,5 +1,6 @@
 export const orderedQuestion = {
    type: "orderedQuestion",
+   create: [""],
    props: {
       question: {
          required: true,
@@ -29,5 +30,4 @@ export const orderedQuestion = {
          change: "[this].createdBy.{userURI}",
       },
    },
-   create: "",
 };

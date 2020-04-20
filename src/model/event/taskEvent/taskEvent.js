@@ -4,6 +4,7 @@ export const taskEvent = {
    type: "taskEvent",
    subclassOf: event,
    subclasses: ["assignmentPeriod", "examinationEvent", "questionAssignment", "quizAssignment"],
+   create: ["{this}.courseInstance/^instructorOf.{userURI}"],
    props: {
       extraTime: {
          required: false,
@@ -23,5 +24,4 @@ export const taskEvent = {
          objectClass: "courseInstance",
       },
    },
-   create: ["[this].courseInstance/^instructorOf.{userURI}"],
 };

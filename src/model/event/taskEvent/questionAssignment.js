@@ -11,5 +11,4 @@ export const questionAssignment = {
          objectClass: "user",
       },
    },
-   create: ["[this].courseInstance/^instructorOf.{userURI}"],
 };
